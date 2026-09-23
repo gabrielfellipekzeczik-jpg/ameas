@@ -4,7 +4,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import {
   Activity,
   ArrowRight,
-  Building2,
   CalendarHeart,
   CheckCircle2,
   ChevronDown,
@@ -18,7 +17,6 @@ import {
   MessageCircle,
   QrCode,
   Repeat,
-  ShieldCheck,
   Sparkles,
   Star,
   Target,
@@ -189,13 +187,7 @@ const values = [
   },
 ];
 
-const orgChart = [
-  { title: "Diretoria", icon: ShieldCheck, desc: "Governança, estratégia e transparência institucional." },
-  { title: "Coordenação Técnica", icon: Activity, desc: "Planejamento das modalidades e acompanhamento esportivo." },
-  { title: "Equipe Multidisciplinar", icon: Users, desc: "Olhar integrado para atletas, famílias e evolução individual." },
-  { title: "Voluntários", icon: HandHeart, desc: "Presença diária, acolhimento e apoio nas ações." },
-  { title: "Apoio", icon: Building2, desc: "Parceiros, patrocinadores e comunidade em movimento." },
-];
+
 
 const partners = [
   { slug: "rua-hum", name: "Rua Hum", logo: sponsorRuaHumAsset },
@@ -595,26 +587,61 @@ function AmeasHome() {
               Uma rede organizada para cuidar, orientar e apoiar.
             </h2>
           </div>
-          <div className="mt-10 grid gap-4 lg:grid-cols-5">
-            {orgChart.map((node, index) => {
-              const Icon = node.icon;
-              return (
-                <div key={node.title} className="relative">
-                  <Card className="h-full rounded-2xl border-primary/20 bg-card shadow-sm">
-                    <CardHeader className="pb-3">
-                      <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gold/25 text-brand-navy">
-                        <Icon aria-hidden="true" />
-                      </span>
-                      <CardTitle className="text-lg leading-tight text-brand-navy">{node.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-sm leading-6 text-muted-foreground">{node.desc}</CardContent>
-                  </Card>
-                  {index < orgChart.length - 1 ? (
-                    <ArrowRight className="absolute -right-5 top-1/2 hidden h-5 w-5 -translate-y-1/2 text-heart lg:block" aria-hidden="true" />
-                  ) : null}
-                </div>
-              );
-            })}
+
+          {/* Organograma em árvore hierárquica */}
+          <div className="mt-12 flex flex-col items-center gap-0">
+
+            {/* Nível 1 — Presidente */}
+            <div className="flex flex-col items-center">
+              <div className="w-72 rounded-2xl bg-brand-navy px-6 py-5 text-center text-primary-foreground shadow-lg">
+                <p className="text-xs font-bold uppercase tracking-widest text-primary-foreground/60">Presidente</p>
+                <p className="mt-1 text-lg font-black">Karina Meneguini</p>
+              </div>
+              {/* Conector vertical */}
+              <div className="h-8 w-px bg-border" aria-hidden="true" />
+            </div>
+
+            {/* Nível 2 — Vice-Presidente */}
+            <div className="flex flex-col items-center">
+              <div className="w-72 rounded-2xl border border-border bg-card px-6 py-5 text-center shadow-md">
+                <p className="text-xs font-bold uppercase tracking-widest text-heart">Vice-Presidente</p>
+                <p className="mt-1 text-lg font-black text-brand-navy">Diretoria Executiva</p>
+              </div>
+              {/* Conector em T */}
+              <div className="h-8 w-px bg-border" aria-hidden="true" />
+            </div>
+
+            {/* Linha horizontal conectora */}
+            <div className="relative flex w-full max-w-4xl items-start justify-center" aria-hidden="true">
+              <div className="absolute top-0 left-1/6 right-1/6 h-px bg-border" />
+            </div>
+
+            {/* Nível 3 — 3 colunas */}
+            <div className="mt-0 grid w-full max-w-4xl grid-cols-1 gap-6 sm:grid-cols-3">
+              {/* Secretaria */}
+              <div className="flex flex-col items-center gap-3">
+                <div className="h-8 w-px bg-border" aria-hidden="true" />
+                <p className="text-xs font-bold uppercase tracking-widest text-heart">Secretaria</p>
+                <OrgCard cargo="Primeiro Secretário" nome="Secretário(a) Geral" />
+                <OrgCard cargo="Segundo Secretário" nome="Secretário(a) Adjunto(a)" />
+              </div>
+
+              {/* Tesouraria */}
+              <div className="flex flex-col items-center gap-3">
+                <div className="h-8 w-px bg-border" aria-hidden="true" />
+                <p className="text-xs font-bold uppercase tracking-widest text-heart">Tesouraria</p>
+                <OrgCard cargo="Primeiro Tesoureiro" nome="Tesoureiro(a) Geral" />
+                <OrgCard cargo="Segundo Tesoureiro" nome="Tesoureiro(a) Adjunto(a)" />
+              </div>
+
+              {/* Fiscalização */}
+              <div className="flex flex-col items-center gap-3">
+                <div className="h-8 w-px bg-border" aria-hidden="true" />
+                <p className="text-xs font-bold uppercase tracking-widest text-heart">Fiscalização</p>
+                <OrgCard cargo="Primeiro Fiscal" nome="Fiscal Geral" />
+                <OrgCard cargo="Segundo Fiscal" nome="Fiscal Adjunto(a)" />
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -755,31 +782,6 @@ function AmeasHome() {
             </Card>
           </div>
 
-          <div className="mt-10 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-            <Card className="rounded-3xl border-heart/25 bg-card shadow-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-2xl text-brand-navy">
-                  <QrCode className="text-heart" aria-hidden="true" /> PIX
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="grid gap-5 sm:grid-cols-[0.9fr_1.1fr] sm:items-center">
-                <DemoQr />
-                <div className="space-y-4">
-                  <div className="rounded-2xl bg-secondary p-4">
-                    <p className="text-xs font-bold uppercase text-muted-foreground">Chave CNPJ</p>
-                    <p className="mt-1 break-words text-xl font-black text-brand-navy">{pixKey}</p>
-                  </div>
-                  <Button
-                    onClick={copyPix}
-                    className="w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
-                  >
-                    <Copy aria-hidden="true" /> {copied ? "Chave copiada" : "Copiar chave PIX"}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-          </div>
         </div>
       </section>
 
@@ -958,6 +960,15 @@ function AmeasHome() {
         </DialogContent>
       </Dialog>
     </main>
+  );
+}
+
+function OrgCard({ cargo, nome }: { cargo: string; nome: string }) {
+  return (
+    <div className="w-full rounded-2xl border border-border bg-card px-5 py-4 text-center shadow-sm">
+      <p className="text-xs font-bold uppercase tracking-wide text-heart">{cargo}</p>
+      <p className="mt-1 text-sm font-black text-brand-navy">{nome}</p>
+    </div>
   );
 }
 

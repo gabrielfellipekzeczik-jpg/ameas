@@ -1,0 +1,28 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme {
+  --color-background: #fffaf4;
+  --color-foreground: #24344d;
+  --color-card: #ffffff;
+  --color-border: #e8dfd5;
+  --color-secondary: #f2ebe2;
+  --color-muted-foreground: #6d7580;
+  --color-primary: #167c80;
+  --color-primary-foreground: #ffffff;
+  --color-brand-navy: #17324d;
+  --color-heart: #d94f65;
+  --color-heart-foreground: #ffffff;
+  --color-gold: #e4b94f;
+}
+
+:root { font-family: Inter, ui-sans-serif, system-ui, sans-serif; color: #24344d; background: #fffaf4; }
+html { scroll-behavior: smooth; }
+body { margin: 0; min-width: 320px; }
+button, a { transition: transform 160ms ease-out, opacity 160ms ease-out, background-color 160ms ease-out, color 160ms ease-out; }
+button:active, a:active { transform: scale(.98); }
+.bg-hero-pattern { background: radial-gradient(circle at 10% 10%, rgba(228,185,79,.18), transparent 30%), linear-gradient(135deg, #fffaf4 0%, #f7efe5 100%); }
+.section-kicker { display: inline-flex; border-radius: 999px; background: rgba(22,124,128,.1); padding: .35rem .75rem; color: #167c80; font-size: .75rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.donation-pulse { animation: donation-pulse 2.8s infinite; }
+@keyframes donation-pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(217,79,101,.25); } 50% { box-shadow: 0 0 0 10px rgba(217,79,101,0); } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }

@@ -324,7 +324,7 @@ function AmeasHome() {
       </section>
 
       {/* ══ FUNDADORA ══ */}
-      <section id="fundadora" className="py-20 sm:py-24" style={{background:"linear-gradient(135deg, var(--color-background) 0%, #0d1b2e 50%, var(--color-background) 100%)"}}>
+      <section id="fundadora" className="py-20 sm:py-24 bg-secondary">
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:px-8">
           <figure className="relative mx-auto w-full max-w-sm">
             <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-[#1B4B8A]/30 to-[#E8392A]/20 blur-2xl" aria-hidden="true" />

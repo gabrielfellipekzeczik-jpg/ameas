@@ -104,6 +104,12 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="pt-BR">
       <head>
         <HeadContent />
+        {/* Aplica o tema salvo ANTES de renderizar — evita flash */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{if(localStorage.getItem('ameas-theme')==='light'){document.documentElement.classList.add('light-mode');}}catch(e){}})();`,
+          }}
+        />
       </head>
       <body>
         {children}

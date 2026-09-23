@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   CheckCircle2, Globe, ImagePlus, Instagram, LayoutDashboard,
-  Link2, LogOut, MessageCircle, Save, Settings, Upload, X,
+  Link2, LogOut, MessageCircle, Moon, Save, Settings, Sun, Upload, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,6 +42,24 @@ export default function AdminPage() {
   const [message, setMessage] = useState<{ text: string; ok: boolean } | null>(null);
   const [loginError, setLoginError] = useState("");
   const [activeTab, setActiveTab] = useState<Tab>("conteudo");
+
+  // ── Tema ──────────────────────────────────────────────────────
+  const [isLight, setIsLight] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("ameas-theme") === "light";
+  });
+
+  function toggleTheme() {
+    const next = !isLight;
+    setIsLight(next);
+    if (next) {
+      document.documentElement.classList.add("light-mode");
+      localStorage.setItem("ameas-theme", "light");
+    } else {
+      document.documentElement.classList.remove("light-mode");
+      localStorage.setItem("ameas-theme", "dark");
+    }
+  }
 
   useEffect(() => {
     if (!isLoggedIn || !supabase) return;
@@ -179,6 +197,11 @@ export default function AdminPage() {
             <Link to="/" className="hidden rounded-xl border border-border/40 px-3 py-1.5 text-xs font-semibold text-foreground/50 hover:text-primary sm:block transition-colors">
               <Globe className="inline h-3.5 w-3.5 mr-1" />Ver site
             </Link>
+            <button onClick={toggleTheme} title={isLight ? "Mudar para Dark" : "Mudar para Light"}
+              className="flex items-center gap-1.5 rounded-xl border border-border/40 px-3 py-1.5 text-xs font-semibold text-foreground/60 transition-all hover:border-primary/40 hover:text-primary">
+              {isLight ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
+              <span className="hidden sm:inline">{isLight ? "Dark" : "Light"}</span>
+            </button>
             <Button variant="ghost" size="sm" onClick={() => setIsLoggedIn(false)}
               className="rounded-xl border border-border/30 text-xs text-foreground/50 hover:text-red-400 hover:border-red-500/30">
               <LogOut className="mr-1.5 h-3.5 w-3.5" /> Sair

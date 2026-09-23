@@ -101,7 +101,11 @@ export async function getSiteContent(): Promise<SiteContent> {
   const { data, error } = await supabase.from("ameas_site_content").select("key,value");
   if (error || !data) return defaultSiteContent;
   return data.reduce<SiteContent>((content, row) => {
-    if (row.key in content) content[row.key as keyof SiteContent] = row.value;
+    if (row.key in content) {
+      // Se o valor do banco contém sequências corrompidas (ex: Ã§, Ã£), usa o default
+      const corrupted = /Ã[£§¡©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿À]|â€/.test(row.value);
+      if (!corrupted) content[row.key as keyof SiteContent] = row.value;
+    }
     return content;
   }, { ...defaultSiteContent });
 }

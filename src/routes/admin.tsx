@@ -318,11 +318,37 @@ export default function AdminPage() {
               <F label="Banco" value={content.pix_bank} onChange={(v) => set("pix_bank", v)} />
               <F label="Agência" value={content.pix_agency} onChange={(v) => set("pix_agency", v)} />
               <F label="Conta Corrente" value={content.pix_account} onChange={(v) => set("pix_account", v)} />
+              <div className="sm:col-span-2 border-t border-border/20 pt-5">
+                <div className="mb-1.5 flex items-center gap-2">
+                  <label className="text-xs font-black uppercase tracking-wide text-foreground/50">
+                    Código PIX Copia e Cola
+                  </label>
+                  <span className="rounded-full border border-[#E8392A]/30 bg-[#E8392A]/10 px-2 py-0.5 text-[10px] font-black text-[#E8392A]">
+                    Aparece no botão "Copiar Código PIX"
+                  </span>
+                </div>
+                <Textarea
+                  value={content.pix_copypaste}
+                  onChange={(e) => set("pix_copypaste", e.target.value)}
+                  rows={3}
+                  placeholder="Cole aqui o código longo gerado pelo seu banco (ex: 00020126...)"
+                  className="rounded-xl border-border/30 bg-white/5 text-foreground placeholder:text-foreground/30 resize-none font-mono text-xs"
+                />
+                <p className="mt-1.5 text-xs text-foreground/40">
+                  Gere o código no app do seu banco → PIX → Cobrar → copie o código completo e cole aqui.
+                  Quando preenchido, aparece o botão "Copiar Código PIX" no modal de doação.
+                </p>
+              </div>
             </div>
             <div className="mt-5 rounded-2xl border border-[#1B4B8A]/20 bg-[#1B4B8A]/5 p-4 text-sm text-foreground/60">
               <p className="font-bold text-[#7eb5f5] mb-1">Prévia no site:</p>
               <p>PIX CNPJ <strong className="text-foreground">{content.pix_key}</strong></p>
               <p>{content.pix_bank} · Ag. {content.pix_agency} · CC {content.pix_account}</p>
+              {content.pix_copypaste && (
+                <p className="mt-2 font-mono text-xs break-all text-foreground/50 border-t border-border/20 pt-2">
+                  Copia e cola: {content.pix_copypaste.slice(0, 60)}{content.pix_copypaste.length > 60 ? "…" : ""}
+                </p>
+              )}
             </div>
             <SaveBtn onClick={saveAll} busy={busy} />
           </AdminCard>

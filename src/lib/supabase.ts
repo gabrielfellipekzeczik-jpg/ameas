@@ -40,6 +40,7 @@ export type SiteContent = {
   pix_bank: string;
   pix_agency: string;
   pix_account: string;
+  pix_copypaste: string;
   /* Voluntário */
   volunteer_title: string;
   volunteer_desc: string;
@@ -73,6 +74,7 @@ export const defaultSiteContent: SiteContent = {
   pix_bank: "Banco do Brasil",
   pix_agency: "0523-1",
   pix_account: "48681-7",
+  pix_copypaste: "",
   volunteer_title: "Seja Volunt\u00e1rio(a)",
   volunteer_desc: "Venha fazer parte da AMEAS! Precisamos de volunt\u00e1rios para apoiar treinos, eventos, atividades administrativas e muito mais. Cada hora doada transforma vidas.",
   contact_whatsapp: "(11) 99943-3480",

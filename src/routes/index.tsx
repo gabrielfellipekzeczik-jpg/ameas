@@ -138,7 +138,9 @@ function AmeasHome() {
   const year = useMemo(() => new Date().getFullYear(), []);
 
   const copyPix = async () => {
-    if (typeof navigator !== "undefined" && navigator.clipboard) await navigator.clipboard.writeText(sc.pix_key);
+    // Se tiver código copia e cola, usa ele; senão usa a chave CNPJ
+    const textToCopy = sc.pix_copypaste || sc.pix_key;
+    if (typeof navigator !== "undefined" && navigator.clipboard) await navigator.clipboard.writeText(textToCopy);
     setCopied(true);
     setTimeout(() => setCopied(false), 1800);
   };
@@ -744,17 +746,37 @@ function DonationDialog({ open, onOpenChange, copied, onCopyPix, sc, whatsappUrl
         </DialogHeader>
         <div className="grid gap-5 sm:grid-cols-[0.9fr_1.1fr]">
           <DemoQr />
-          <div className="space-y-4">
+          <div className="space-y-3">
+            {/* Chave CNPJ */}
             <div className="rounded-2xl border border-[#1B4B8A]/20 bg-[#1B4B8A]/5 p-4">
               <p className="text-xs font-bold uppercase text-foreground/50">PIX CNPJ</p>
               <p className="mt-1 break-words text-lg font-black text-[#7eb5f5]">{sc.pix_key}</p>
             </div>
+
+            {/* Dados bancários */}
             <div className="rounded-2xl border border-border/20 bg-background/30 p-3 text-xs text-foreground/50">
               <p>{sc.pix_bank} · Ag. {sc.pix_agency} · CC {sc.pix_account}</p>
             </div>
+
+            {/* Código copia e cola — aparece só se preenchido */}
+            {sc.pix_copypaste && (
+              <div className="rounded-2xl border border-[#E8392A]/20 bg-[#E8392A]/5 p-3">
+                <p className="text-xs font-black uppercase text-[#E8392A]/80 mb-1.5">Código PIX Copia e Cola</p>
+                <p className="font-mono text-[10px] break-all text-foreground/60 leading-relaxed">
+                  {sc.pix_copypaste.slice(0, 80)}{sc.pix_copypaste.length > 80 ? "…" : ""}
+                </p>
+              </div>
+            )}
+
+            {/* Botão copiar — copia o código longo se existir, senão a chave CNPJ */}
             <Button onClick={onCopyPix} className="w-full rounded-2xl bg-[#1B4B8A] text-white hover:bg-[#1B4B8A]/90">
-              <Copy /> {copied ? "Chave copiada ✓" : "Copiar PIX"}
+              <Copy /> {copied
+                ? "Copiado ✓"
+                : sc.pix_copypaste
+                  ? "Copiar Código PIX"
+                  : "Copiar Chave PIX"}
             </Button>
+
             <Button asChild variant="outline" className="w-full rounded-2xl border-[#E8392A]/40 text-[#E8392A] hover:bg-[#E8392A]/10">
               <a href={whatsappUrl} target="_blank" rel="noreferrer"><MessageCircle /> Chamar no WhatsApp</a>
             </Button>

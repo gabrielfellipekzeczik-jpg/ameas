@@ -12,6 +12,7 @@ import {
   Gift,
   HandHeart,
   Heart,
+  LayoutDashboard,
   MapPin,
   Menu,
   MessageCircle,
@@ -272,70 +273,77 @@ function AmeasHome() {
   return (
     <main className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-40 border-b border-border bg-background/95 shadow-sm backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
-          <a href="#inicio" className="flex min-w-0 items-center gap-3" aria-label="Ir para o início">
-            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-border bg-card p-1 shadow-sm">
+        <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-2 sm:px-6 lg:px-8">
+          {/* Logo */}
+          <a href="#inicio" className="flex shrink-0 items-center gap-2" aria-label="Ir para o início">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card p-1 shadow-sm">
               <img src={logoAsset} alt="Logo AMEAS" className="h-full w-full object-contain" />
             </span>
-            <span className="hidden min-w-0 sm:block">
-              <span className="block text-base font-black uppercase leading-tight text-brand-navy">
-                AMEAS
-              </span>
-              <span className="block text-xs font-semibold text-muted-foreground">
-                Esporte Adaptado e Superação
-              </span>
-            </span>
+            <span className="text-sm font-black uppercase tracking-wide text-brand-navy">AMEAS</span>
           </a>
 
-          <nav className="hidden items-center gap-1 lg:flex" aria-label="Navegação principal">
+          {/* Nav central */}
+          <nav className="hidden flex-1 items-center justify-center gap-0.5 lg:flex" aria-label="Navegação principal">
             {navLinks.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
-                className="rounded-2xl px-3 py-2 text-sm font-semibold text-brand-navy transition-colors hover:bg-secondary hover:text-primary"
+                className="rounded-xl px-2.5 py-1.5 text-xs font-semibold text-brand-navy transition-colors hover:bg-secondary hover:text-primary"
               >
                 {link.label}
               </a>
             ))}
           </nav>
 
-          <div className="hidden items-center gap-2 lg:flex">
-            <Button asChild variant="outline" className="border-heart text-heart hover:bg-heart/10">
+          {/* Ações direita */}
+          <div className="ml-auto flex items-center gap-1.5">
+            <Button asChild size="sm" variant="ghost" className="hidden text-xs text-muted-foreground hover:text-brand-navy lg:inline-flex">
               <a href={whatsappUrl} target="_blank" rel="noreferrer">
-                <MessageCircle aria-hidden="true" /> WhatsApp
+                <MessageCircle className="h-3.5 w-3.5" aria-hidden="true" /> WhatsApp
               </a>
             </Button>
-            <Button onClick={() => setDonationOpen(true)} className="bg-heart text-heart-foreground hover:bg-heart/90">
-              <Heart aria-hidden="true" /> Doar Agora
+            <Button size="sm" onClick={() => setDonationOpen(true)} className="hidden bg-heart px-3 text-xs text-heart-foreground hover:bg-heart/90 lg:inline-flex">
+              <Heart className="h-3.5 w-3.5" aria-hidden="true" /> Doar
+            </Button>
+            <Button asChild size="sm" variant="ghost" className="hidden px-2 text-xs text-muted-foreground hover:text-brand-navy lg:inline-flex" title="Painel administrativo">
+              <a href="/admin" aria-label="Painel administrativo">
+                <LayoutDashboard className="h-4 w-4" aria-hidden="true" />
+              </a>
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 lg:hidden"
+              onClick={() => setMenuOpen((current) => !current)}
+              aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
+            >
+              {menuOpen ? <X className="h-4 w-4" aria-hidden="true" /> : <Menu className="h-4 w-4" aria-hidden="true" />}
             </Button>
           </div>
-
-          <Button
-            variant="outline"
-            size="icon"
-            className="lg:hidden"
-            onClick={() => setMenuOpen((current) => !current)}
-            aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
-          >
-            {menuOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
-          </Button>
         </div>
+
+        {/* Menu mobile */}
         {menuOpen ? (
-          <div className="border-t border-border bg-background px-4 py-4 shadow-md lg:hidden">
-            <nav className="mx-auto grid max-w-7xl gap-2" aria-label="Navegação mobile">
+          <div className="border-t border-border bg-background px-4 py-3 shadow-md lg:hidden">
+            <nav className="mx-auto grid max-w-7xl gap-1" aria-label="Navegação mobile">
               {navLinks.map((link) => (
                 <a
                   key={link.href}
                   href={link.href}
                   onClick={handleNavClick}
-                  className="rounded-2xl px-3 py-3 text-sm font-semibold text-brand-navy hover:bg-secondary"
+                  className="rounded-xl px-3 py-2.5 text-sm font-semibold text-brand-navy hover:bg-secondary"
                 >
                   {link.label}
                 </a>
               ))}
-              <Button onClick={() => setDonationOpen(true)} className="mt-2 bg-heart text-heart-foreground hover:bg-heart/90">
-                <Heart aria-hidden="true" /> Doar Agora
-              </Button>
+              <div className="mt-2 flex gap-2">
+                <Button onClick={() => setDonationOpen(true)} className="flex-1 bg-heart text-xs text-heart-foreground hover:bg-heart/90">
+                  <Heart className="h-3.5 w-3.5" aria-hidden="true" /> Doar Agora
+                </Button>
+                <Button asChild variant="outline" size="sm" className="text-xs text-muted-foreground">
+                  <a href="/admin"><LayoutDashboard className="h-4 w-4" /></a>
+                </Button>
+              </div>
             </nav>
           </div>
         ) : null}

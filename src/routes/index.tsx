@@ -595,6 +595,7 @@ function AmeasHome() {
             <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
               {galleryEvents.map((ev) => {
                 const cover = ev.images[0];
+                if (!cover) return null;
                 return (
                   <button key={ev.id} onClick={() => setSelectedEventId(ev.id)}
                     className="glass neon-border group overflow-hidden rounded-3xl border border-border/30 text-left transition-all hover:border-[#1B4B8A]/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7eb5f5]">

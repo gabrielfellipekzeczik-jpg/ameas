@@ -512,16 +512,37 @@ export default function AdminPage() {
 
         {/* â”€â”€ PIX â”€â”€ */}
         {tab === "pix" && (
-          <AdminCard title="PIX e Dados Bancarios" desc="Informacoes de doacao exibidas no site.">
+          <AdminCard title="PIX e Dados Bancarios" desc="Informacoes de doacao e codigos copia-e-cola por valor exibidos no site.">
             <div className="grid gap-5 sm:grid-cols-2">
               <div className="sm:col-span-2"><F label="Chave PIX (CNPJ)" value={content.pix_key} onChange={(v) => set("pix_key", v)} /></div>
               <F label="Banco" value={content.pix_bank} onChange={(v) => set("pix_bank", v)} />
               <F label="Agencia" value={content.pix_agency} onChange={(v) => set("pix_agency", v)} />
               <F label="Conta" value={content.pix_account} onChange={(v) => set("pix_account", v)} />
-              <div className="sm:col-span-2 border-t border-border/20 pt-5">
-                <Label className="text-xs font-black uppercase tracking-wide text-foreground/50">Codigo PIX Copia e Cola</Label>
-                <Textarea value={content.pix_copypaste} onChange={(e) => set("pix_copypaste", e.target.value)} rows={3}
-                  placeholder="00020126..." className="mt-1.5 rounded-xl border-border/30 bg-white/5 text-foreground placeholder:text-foreground/30 resize-none font-mono text-xs" />
+
+              {/* Separador — codigos por valor */}
+              <div className="sm:col-span-2 border-t border-border/20 pt-5 space-y-4">
+                <div>
+                  <p className="text-sm font-black text-foreground mb-0.5">Codigos PIX Copia e Cola por valor</p>
+                  <p className="text-xs text-foreground/40">
+                    Gere cada codigo no app do banco (PIX &rarr; Cobrar &rarr; informe o valor &rarr; copie o codigo completo).
+                    Quando preenchido, o botao no modal mostra o codigo correto para o valor selecionado pelo doador.
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-[#1B4B8A]/20 bg-[#1B4B8A]/5 p-4 space-y-4">
+                  <PixCodeField label="Apoiador Mensal — R$ 30/mes" value={content.pix_monthly} onChange={(v) => set("pix_monthly", v)} />
+                  <PixCodeField label="Doacao Unica — R$ 25" value={content.pix_25} onChange={(v) => set("pix_25", v)} />
+                  <PixCodeField label="Doacao Unica — R$ 50" value={content.pix_50} onChange={(v) => set("pix_50", v)} />
+                  <PixCodeField label="Doacao Unica — R$ 100" value={content.pix_100} onChange={(v) => set("pix_100", v)} />
+                  <PixCodeField label="Doacao Unica — R$ 200" value={content.pix_200} onChange={(v) => set("pix_200", v)} />
+                </div>
+
+                <div>
+                  <Label className="text-xs font-black uppercase tracking-wide text-foreground/50">Codigo PIX generico (fallback / valor livre)</Label>
+                  <Textarea value={content.pix_copypaste} onChange={(e) => set("pix_copypaste", e.target.value)} rows={3}
+                    placeholder="00020126..." className="mt-1.5 rounded-xl border-border/30 bg-white/5 text-foreground placeholder:text-foreground/30 resize-none font-mono text-xs" />
+                  <p className="mt-1 text-xs text-foreground/40">Usado para valor livre ou quando nao houver codigo especifico para o valor escolhido.</p>
+                </div>
               </div>
             </div>
             <SaveBtn onClick={saveAll} busy={busy} />
@@ -906,3 +927,31 @@ function F({ label, value, onChange, multi = false }: {
   );
 }
 
+
+/* ── PixCodeField ── */
+function PixCodeField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center justify-between gap-2">
+        <Label className="text-xs font-bold uppercase tracking-wide text-foreground/50">{label}</Label>
+        {value && (
+          <span className="rounded-full border border-emerald-500/30 bg-emerald-500/15 px-2 py-0.5 text-[10px] font-black text-emerald-400">
+            Preenchido
+          </span>
+        )}
+      </div>
+      <div className="relative">
+        <textarea
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          rows={show ? 3 : 1}
+          onFocus={() => setShow(true)}
+          onBlur={() => setShow(false)}
+          placeholder="00020126..."
+          className="w-full resize-none rounded-xl border border-border/30 bg-white/5 px-3 py-2 font-mono text-xs text-foreground placeholder:text-foreground/30 focus:outline-none focus:ring-1 focus:ring-[#1B4B8A]/60 transition-all"
+        />
+      </div>
+    </div>
+  );
+}

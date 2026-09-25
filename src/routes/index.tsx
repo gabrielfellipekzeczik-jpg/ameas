@@ -21,6 +21,7 @@ import karinaAsset from "@/assets/karina-meneguini-retrato.png";
 import crossfitGrupoAsset from "@/assets/ameas-crossfit-grupo.png";
 import acaoSolidariaAsset from "@/assets/ameas-acao-solidaria.png";
 import treinoAdaptadoAsset from "@/assets/ameas-treino-adaptado.png";
+import pixQrcodeAsset from "@/assets/pix-qrcode.png";
 import sponsorRuaHumAsset from "@/assets/sponsor-rua-hum.png";
 import sponsorEscolaAquarelaAsset from "@/assets/sponsor-escola-aquarela.png";
 import sponsorIbicolorAsset from "@/assets/sponsor-ibicolor.png";
@@ -131,18 +132,6 @@ const values = [
 
 const donationPresets = [25, 50, 100, 200];
 
-const qrCells = [
-  0,1,2,3,4,5,6,8,10,12,14,16,18,20,22,24,25,26,27,28,29,30,33,35,37,39,40,42,44,46,48,
-  50,51,52,53,54,55,56,60,61,63,65,67,69,72,75,76,78,80,82,84,86,87,88,91,93,95,96,98,100,
-  104,105,106,108,111,113,115,118,120,121,122,124,126,128,130,132,133,135,137,139,140,141,
-  144,147,149,151,153,155,157,160,162,164,166,168,170,172,174,176,177,178,180,184,186,188,
-  190,192,194,196,198,200,201,202,203,204,205,206,208,211,213,215,217,219,221,223,225,226,
-  228,230,232,234,236,238,240,242,244,245,246,247,248,249,250,252,254,256,258,260,262,264,
-  266,268,270,272,273,274,275,276,277,278,280,282,284,287,289,291,293,295,297,299,301,303,
-  304,305,306,307,308,309,310,314,316,318,320,322,324,326,329,331,333,335,337,339,341,342,
-  344,346,348,350,352,354,356,358,360,
-];
-
 /* ─── Componente principal ─── */
 function AmeasHome() {
   const [sc, setSc] = useState<SiteContent>(defaultSiteContent);
@@ -200,9 +189,17 @@ function AmeasHome() {
 
   const year = useMemo(() => new Date().getFullYear(), []);
 
-  const copyPix = async () => {
-    // Se tiver código copia e cola, usa ele; senão usa a chave CNPJ
-    const textToCopy = sc.pix_copypaste || sc.pix_key;
+  const copyPix = async (amount?: string) => {
+    // Escolhe o código copia-e-cola mais específico para o valor
+    const a = amount ?? donationAmount;
+    const code =
+      a === "30"  ? sc.pix_monthly :
+      a === "25"  ? sc.pix_25 :
+      a === "50"  ? sc.pix_50 :
+      a === "100" ? sc.pix_100 :
+      a === "200" ? sc.pix_200 :
+      sc.pix_copypaste || sc.pix_key;
+    const textToCopy = code || sc.pix_copypaste || sc.pix_key;
     if (typeof navigator !== "undefined" && navigator.clipboard) await navigator.clipboard.writeText(textToCopy);
     setCopied(true);
     setTimeout(() => setCopied(false), 1800);
@@ -751,7 +748,7 @@ function AmeasHome() {
       </Button>
 
       {/* ══ MODAL: DOAÇÃO ══ */}
-      <DonationDialog open={donationOpen} onOpenChange={setDonationOpen} copied={copied} onCopyPix={copyPix} sc={sc} whatsappUrl={whatsappUrl} />
+      <DonationDialog open={donationOpen} onOpenChange={setDonationOpen} copied={copied} onCopyPix={copyPix} sc={sc} whatsappUrl={whatsappUrl} donationAmount={donationAmount} />
 
       {/* ══ MODAL: VOLUNTÁRIO ══ */}
       <Dialog open={volunteerOpen} onOpenChange={setVolunteerOpen}>
@@ -825,35 +822,29 @@ function AmeasHome() {
 
 /* ─── Sub-componentes ─── */
 
-function DemoQr() {
-  const qrCells = [
-    0,1,2,3,4,5,6,8,10,12,14,16,18,20,22,24,25,26,27,28,29,30,33,35,37,39,40,42,44,46,48,
-    50,51,52,53,54,55,56,60,61,63,65,67,69,72,75,76,78,80,82,84,86,87,88,91,93,95,96,98,100,
-    104,105,106,108,111,113,115,118,120,121,122,124,126,128,130,132,133,135,137,139,140,141,
-    144,147,149,151,153,155,157,160,162,164,166,168,170,172,174,176,177,178,180,184,186,188,
-    190,192,194,196,198,200,201,202,203,204,205,206,208,211,213,215,217,219,221,223,225,226,
-    228,230,232,234,236,238,240,242,244,245,246,247,248,249,250,252,254,256,258,260,262,264,
-    266,268,270,272,273,274,275,276,277,278,280,282,284,287,289,291,293,295,297,299,301,303,
-    304,305,306,307,308,309,310,314,316,318,320,322,324,326,329,331,333,335,337,339,341,342,
-    344,346,348,350,352,354,356,358,360,
-  ];
-  return (
-    <div className="mx-auto w-full max-w-52 rounded-2xl border border-[#1B4B8A]/20 bg-background/80 p-3 backdrop-blur" aria-label="QR Code demonstrativo para PIX">
-      <div className="grid aspect-square grid-cols-[repeat(19,minmax(0,1fr))] gap-0.5">
-        {Array.from({ length: 361 }).map((_, i) => (
-          <span key={i} className={qrCells.includes(i) ? "rounded-[1px] bg-[#1B4B8A]" : "rounded-[1px] bg-background/40"} />
-        ))}
-      </div>
-      <p className="mt-2 text-center text-[0.65rem] font-bold uppercase text-foreground/40">QR Code demonstrativo</p>
-    </div>
-  );
-}
-
-function DonationDialog({ open, onOpenChange, copied, onCopyPix, sc, whatsappUrl }: {
+function DonationDialog({ open, onOpenChange, copied, onCopyPix, sc, whatsappUrl, donationAmount }: {
   open: boolean; onOpenChange: (o: boolean) => void;
-  copied: boolean; onCopyPix: () => void;
-  sc: SiteContent; whatsappUrl: string;
+  copied: boolean; onCopyPix: (amount?: string) => void;
+  sc: SiteContent; whatsappUrl: string; donationAmount: string;
 }) {
+  // Pick the most specific pix code for the current amount
+  const pixCode = (() => {
+    if (donationAmount === "30")  return sc.pix_monthly || sc.pix_copypaste || sc.pix_key;
+    if (donationAmount === "25")  return sc.pix_25  || sc.pix_copypaste || sc.pix_key;
+    if (donationAmount === "50")  return sc.pix_50  || sc.pix_copypaste || sc.pix_key;
+    if (donationAmount === "100") return sc.pix_100 || sc.pix_copypaste || sc.pix_key;
+    if (donationAmount === "200") return sc.pix_200 || sc.pix_copypaste || sc.pix_key;
+    return sc.pix_copypaste || sc.pix_key;
+  })();
+
+  const hasSpecificCode =
+    (donationAmount === "30"  && sc.pix_monthly) ||
+    (donationAmount === "25"  && sc.pix_25)  ||
+    (donationAmount === "50"  && sc.pix_50)  ||
+    (donationAmount === "100" && sc.pix_100) ||
+    (donationAmount === "200" && sc.pix_200) ||
+    sc.pix_copypaste;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-auto rounded-3xl border border-[#1B4B8A]/20 bg-card/95 backdrop-blur">
@@ -864,9 +855,16 @@ function DonationDialog({ open, onOpenChange, copied, onCopyPix, sc, whatsappUrl
           <DialogDescription className="text-foreground/50">Sua doação fortalece esporte adaptado, inclusão e acolhimento.</DialogDescription>
         </DialogHeader>
         <div className="grid gap-5 sm:grid-cols-[0.9fr_1.1fr]">
-          <DemoQr />
+          {/* QR Code real */}
+          <div className="mx-auto w-full max-w-52">
+            <div className="overflow-hidden rounded-2xl border border-[#1B4B8A]/20 bg-white p-2 shadow-lg">
+              <img src={pixQrcodeAsset} alt="QR Code PIX AMEAS" className="h-full w-full object-contain" />
+            </div>
+            <p className="mt-2 text-center text-[0.65rem] font-bold uppercase text-foreground/40">Escaneie para pagar</p>
+          </div>
+
           <div className="space-y-3">
-            {/* Chave CNPJ */}
+            {/* Chave PIX */}
             <div className="rounded-2xl border border-[#1B4B8A]/20 bg-[#1B4B8A]/5 p-4">
               <p className="text-xs font-bold uppercase text-foreground/50">PIX CNPJ</p>
               <p className="mt-1 break-words text-lg font-black text-[#7eb5f5]">{sc.pix_key}</p>
@@ -877,23 +875,21 @@ function DonationDialog({ open, onOpenChange, copied, onCopyPix, sc, whatsappUrl
               <p>{sc.pix_bank} · Ag. {sc.pix_agency} · CC {sc.pix_account}</p>
             </div>
 
-            {/* Código copia e cola — aparece só se preenchido */}
-            {sc.pix_copypaste && (
+            {/* Código copia e cola — mostra o trecho do código ativo */}
+            {hasSpecificCode && (
               <div className="rounded-2xl border border-[#E8392A]/20 bg-[#E8392A]/5 p-3">
-                <p className="text-xs font-black uppercase text-[#E8392A]/80 mb-1.5">Código PIX Copia e Cola</p>
+                <p className="text-xs font-black uppercase text-[#E8392A]/80 mb-1.5">
+                  Código PIX{donationAmount ? ` · R$ ${donationAmount}` : ""}
+                </p>
                 <p className="font-mono text-[10px] break-all text-foreground/60 leading-relaxed">
-                  {sc.pix_copypaste.slice(0, 80)}{sc.pix_copypaste.length > 80 ? "…" : ""}
+                  {pixCode.slice(0, 80)}{pixCode.length > 80 ? "…" : ""}
                 </p>
               </div>
             )}
 
-            {/* Botão copiar — copia o código longo se existir, senão a chave CNPJ */}
-            <Button onClick={onCopyPix} className="w-full rounded-2xl bg-[#1B4B8A] text-white hover:bg-[#1B4B8A]/90">
-              <Copy /> {copied
-                ? "Copiado ✓"
-                : sc.pix_copypaste
-                  ? "Copiar Código PIX"
-                  : "Copiar Chave PIX"}
+            {/* Copiar */}
+            <Button onClick={() => onCopyPix(donationAmount)} className="w-full rounded-2xl bg-[#1B4B8A] text-white hover:bg-[#1B4B8A]/90">
+              <Copy /> {copied ? "Copiado ✓" : hasSpecificCode ? "Copiar Código PIX" : "Copiar Chave PIX"}
             </Button>
 
             <Button asChild variant="outline" className="w-full rounded-2xl border-[#E8392A]/40 text-[#E8392A] hover:bg-[#E8392A]/10">

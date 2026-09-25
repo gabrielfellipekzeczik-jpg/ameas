@@ -41,6 +41,12 @@ export type SiteContent = {
   pix_agency: string;
   pix_account: string;
   pix_copypaste: string;
+  /* PIX por valor — copia e cola gerado pelo banco para cada preset */
+  pix_monthly: string;   // Apoiador Mensal R$30
+  pix_25: string;
+  pix_50: string;
+  pix_100: string;
+  pix_200: string;
   /* Voluntário */
   volunteer_title: string;
   volunteer_desc: string;
@@ -75,6 +81,11 @@ export const defaultSiteContent: SiteContent = {
   pix_agency: "0523-1",
   pix_account: "48681-7",
   pix_copypaste: "",
+  pix_monthly: "",
+  pix_25: "",
+  pix_50: "",
+  pix_100: "",
+  pix_200: "",
   volunteer_title: "Seja Volunt\u00e1rio(a)",
   volunteer_desc: "Venha fazer parte da AMEAS! Precisamos de volunt\u00e1rios para apoiar treinos, eventos, atividades administrativas e muito mais. Cada hora doada transforma vidas.",
   contact_whatsapp: "(11) 99943-3480",

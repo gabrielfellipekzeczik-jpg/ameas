@@ -3,15 +3,18 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   CheckCircle2, Globe, HandHeart, ImagePlus, LayoutDashboard,
   Link2, LogOut, Moon, QrCode, Save, Settings, Sun, Upload, Users, X,
-  Image as ImageIcon, Tag, Trash2,
+  Image as ImageIcon, Tag, Trash2, Plus, Pencil,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { defaultSiteContent, supabase, type PartnerLink, type SiteContent } from "@/lib/supabase";
+import {
+  defaultSiteContent, supabase, defaultGalleryCategories,
+  type PartnerLink, type SiteContent, type GalleryCategory,
+} from "@/lib/supabase";
 
-// Static gallery asset imports — same as index.tsx
+// Static gallery asset imports â€” same as index.tsx
 import parceirosBannerAsset from "@/assets/ameas-parceiros-banner.png";
 import acolhimentoCafeAsset from "@/assets/ameas-acolhimento-cafe.png";
 import corridaAdaptadaAsset from "@/assets/ameas-corrida-adaptada.png";
@@ -30,31 +33,32 @@ const ADMIN_PASSWORD = "123456789";
 type UploadPreview = { file: File; url: string };
 type Tab = "hero" | "fundadora" | "depoimentos" | "pix" | "voluntario" | "parceiros" | "logos" | "galeria";
 
-/* ── Event categories ── */
-const EVENT_CATEGORIES = [
-  { id: "esporte-adaptado", label: "Esporte Adaptado",  color: "bg-[#1B4B8A] text-white" },
-  { id: "comunidade",       label: "Comunidade",         color: "bg-[#E8392A] text-white" },
-  { id: "acolhimento",      label: "Acolhimento",        color: "bg-[#059669] text-white" },
-  { id: "fundadora",        label: "Fundadora",          color: "bg-[#7c3aed] text-white" },
-] as const;
-type EventCategory = typeof EVENT_CATEGORIES[number]["id"];
-
-/* ── Static gallery items (mirroring index.tsx galleryEvents) ── */
-const STATIC_GALLERY: { src: string; alt: string; title: string; category: EventCategory }[] = [
-  { src: corridaAdaptadaAsset,    alt: "Atleta em triciclo adaptado", title: "Corrida adaptada",      category: "esporte-adaptado" },
-  { src: crossfitGrupoAsset,      alt: "Equipe AMEAS no CrossFit",    title: "Treino coletivo",        category: "esporte-adaptado" },
-  { src: treinoAdaptadoAsset,     alt: "Treino adaptado",             title: "Superacao em treino",   category: "esporte-adaptado" },
-  { src: encontroComunidadeAsset, alt: "Grupo AMEAS reunido",         title: "Encontro da comunidade",category: "comunidade" },
-  { src: acaoSolidariaAsset,      alt: "Acao solidaria",              title: "Acao solidaria",        category: "comunidade" },
-  { src: parceirosBannerAsset,    alt: "Banner parceiros",            title: "Parceiros AMEAS",       category: "comunidade" },
-  { src: acolhimentoCafeAsset,    alt: "Cafe de acolhimento",         title: "Cafe de acolhimento",   category: "acolhimento" },
-  { src: parceriaTiaLinaAsset,    alt: "Parceria Tia Lina",           title: "Parceria Tia Lina",     category: "acolhimento" },
-  { src: karinaAsset,             alt: "Karina Meneguini fundadora",  title: "Karina Meneguini",      category: "fundadora" },
+/* â”€â”€ Static gallery items (mirroring index.tsx galleryEvents) â”€â”€ */
+const STATIC_GALLERY: { src: string; alt: string; title: string; category: string }[] = [
+  { src: corridaAdaptadaAsset,    alt: "Atleta em triciclo adaptado", title: "Corrida adaptada",       category: "esporte-adaptado" },
+  { src: crossfitGrupoAsset,      alt: "Equipe AMEAS no CrossFit",    title: "Treino coletivo",         category: "esporte-adaptado" },
+  { src: treinoAdaptadoAsset,     alt: "Treino adaptado",             title: "Superacao em treino",    category: "esporte-adaptado" },
+  { src: encontroComunidadeAsset, alt: "Grupo AMEAS reunido",         title: "Encontro da comunidade", category: "comunidade" },
+  { src: acaoSolidariaAsset,      alt: "Acao solidaria",              title: "Acao solidaria",         category: "comunidade" },
+  { src: parceirosBannerAsset,    alt: "Banner parceiros",            title: "Parceiros AMEAS",        category: "comunidade" },
+  { src: acolhimentoCafeAsset,    alt: "Cafe de acolhimento",         title: "Cafe de acolhimento",    category: "acolhimento" },
+  { src: parceriaTiaLinaAsset,    alt: "Parceria Tia Lina",           title: "Parceria Tia Lina",      category: "acolhimento" },
+  { src: karinaAsset,             alt: "Karina Meneguini fundadora",  title: "Karina Meneguini",       category: "fundadora" },
 ];
 
-/* ── Image normalisation helpers (browser Canvas API) ── */
+/* â”€â”€ Available tag colours for new categories â”€â”€ */
+const COLOR_PALETTE = [
+  { label: "Azul",    value: "bg-[#1B4B8A] text-white" },
+  { label: "Vermelho",value: "bg-[#E8392A] text-white" },
+  { label: "Verde",   value: "bg-[#059669] text-white" },
+  { label: "Roxo",    value: "bg-[#7c3aed] text-white" },
+  { label: "Laranja", value: "bg-[#f59e0b] text-black" },
+  { label: "Rosa",    value: "bg-[#db2777] text-white" },
+  { label: "Ciano",   value: "bg-[#0891b2] text-white" },
+  { label: "Cinza",   value: "bg-[#475569] text-white" },
+];
 
-/** Logo: 400x300 canvas, white bg, logo centred with 24 px padding */
+/* â”€â”€ Image normalisation helpers (browser Canvas API) â”€â”€ */
 function normalizeLogo(file: File): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const img = new window.Image();
@@ -77,7 +81,6 @@ function normalizeLogo(file: File): Promise<Blob> {
   });
 }
 
-/** Gallery image: max 1200x900, keeps ratio, JPEG 88% */
 function normalizeGalleryImage(file: File): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const img = new window.Image();
@@ -97,7 +100,7 @@ function normalizeGalleryImage(file: File): Promise<Blob> {
   });
 }
 
-/* ── Partner defaults ── */
+/* â”€â”€ Partner defaults â”€â”€ */
 const defaultPartnerLinks: PartnerLink[] = [
   { slug: "rua-hum",            name: "Rua Hum",                          website_url: "https://www.instagram.com/ruahum",                sort_order: 1,  published: true },
   { slug: "escola-aquarela",    name: "Escola Aquarela",                  website_url: "https://www.instagram.com/escolaaquarelasr",       sort_order: 2,  published: true },
@@ -112,18 +115,12 @@ const defaultPartnerLinks: PartnerLink[] = [
 ];
 const PARTNER_SLUGS = defaultPartnerLinks.map((p) => ({ slug: p.slug, name: p.name }));
 
-/* ── DB gallery item type ── */
 type GalleryItem = {
-  id: string;
-  title: string;
-  alt: string;
-  image_url: string;
-  category: EventCategory | null;
-  sort_order: number;
-  published: boolean;
+  id: string; title: string; alt: string; image_url: string;
+  category: string | null; sort_order: number; published: boolean;
 };
 
-/* ══════════════════════════════ COMPONENT ══════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• COMPONENT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 export default function AdminPage() {
   const [loginInput, setLoginInput]   = useState("");
   const [password, setPassword]       = useState("");
@@ -131,19 +128,28 @@ export default function AdminPage() {
   const [content, setContent]         = useState<SiteContent>(defaultSiteContent);
   const [partnerLinks, setPartnerLinks] = useState<PartnerLink[]>(defaultPartnerLinks);
   const [uploads, setUploads]         = useState<UploadPreview[]>([]);
-  const [uploadCategory, setUploadCategory] = useState<EventCategory>("esporte-adaptado");
+  const [uploadCategory, setUploadCategory] = useState<string>("esporte-adaptado");
   const [busy, setBusy]               = useState(false);
   const [msg, setMsg]                 = useState<{ text: string; ok: boolean } | null>(null);
   const [loginError, setLoginError]   = useState("");
   const [tab, setTab]                 = useState<Tab>("hero");
   const [dbGallery, setDbGallery]     = useState<GalleryItem[]>([]);
   const [loadingGallery, setLoadingGallery] = useState(false);
+  const [categories, setCategories]   = useState<GalleryCategory[]>(defaultGalleryCategories);
+  const [loadingCats, setLoadingCats] = useState(false);
+
+  // New category form
+  const [newCatLabel, setNewCatLabel] = useState("");
+  const [newCatColor, setNewCatColor] = useState(COLOR_PALETTE[0]!.value);
+  // Edit category
+  const [editingCat, setEditingCat]   = useState<GalleryCategory | null>(null);
+
   const [logoUploads, setLogoUploads] = useState<{
     slug: string; name: string; file: File;
     preview: string; normalized: string | null; processing: boolean;
   }[]>([]);
 
-  /* ── Theme ── */
+  /* â”€â”€ Theme â”€â”€ */
   const [isLight, setIsLight] = useState(() =>
     typeof window !== "undefined" && localStorage.getItem("ameas-theme") === "light"
   );
@@ -154,7 +160,7 @@ export default function AdminPage() {
     localStorage.setItem("ameas-theme", next ? "light" : "dark");
   }
 
-  /* ── Load on login ── */
+  /* â”€â”€ Load on login â”€â”€ */
   useEffect(() => {
     if (!isLoggedIn || !supabase) return;
     supabase.from("ameas_partners").select("slug,name,website_url,sort_order,published").order("sort_order")
@@ -169,17 +175,17 @@ export default function AdminPage() {
       });
   }, [isLoggedIn]);
 
-  /* ── Load gallery when tab opens ── */
+  /* â”€â”€ Load gallery + categories when tab opens â”€â”€ */
   useEffect(() => {
     if (tab !== "galeria" || !isLoggedIn || !supabase) return;
     setLoadingGallery(true);
+    setLoadingCats(true);
     supabase.from("ameas_gallery_items")
-      .select("id,title,alt,image_url,category,sort_order,published")
-      .order("sort_order")
-      .then(({ data }) => {
-        setDbGallery((data ?? []) as GalleryItem[]);
-        setLoadingGallery(false);
-      });
+      .select("id,title,alt,image_url,category,sort_order,published").order("sort_order")
+      .then(({ data }) => { setDbGallery((data ?? []) as GalleryItem[]); setLoadingGallery(false); });
+    supabase.from("ameas_gallery_categories")
+      .select("id,label,color,sort_order").order("sort_order")
+      .then(({ data }) => { if (data?.length) setCategories(data as GalleryCategory[]); setLoadingCats(false); });
   }, [tab, isLoggedIn]);
 
   const uploadLabel = useMemo(() =>
@@ -191,13 +197,10 @@ export default function AdminPage() {
     } else setLoginError("Login ou senha incorretos.");
   }
   function onKey(e: React.KeyboardEvent) { if (e.key === "Enter") login(); }
-  function notify(text: string, ok = true) {
-    setMsg({ text, ok });
-    setTimeout(() => setMsg(null), 3500);
-  }
+  function notify(text: string, ok = true) { setMsg({ text, ok }); setTimeout(() => setMsg(null), 3500); }
   function set(k: keyof SiteContent, v: string) { setContent((c) => ({ ...c, [k]: v })); }
 
-  /* ── Save helpers ── */
+  /* â”€â”€ Save content â”€â”€ */
   async function saveAll() {
     if (!supabase) return notify("Supabase nao configurado.", false);
     setBusy(true);
@@ -215,7 +218,52 @@ export default function AdminPage() {
     notify(error ? error.message : "Parceiros salvos!", !error);
   }
 
-  /* ── Upload gallery images ── */
+  /* â”€â”€ Category CRUD â”€â”€ */
+  function slugify(label: string) {
+    return label.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  }
+
+  async function createCategory() {
+    if (!newCatLabel.trim()) return notify("Digite um nome para a categoria.", false);
+    if (!supabase) return notify("Supabase nao configurado.", false);
+    const id = slugify(newCatLabel);
+    if (categories.some((c) => c.id === id)) return notify("Ja existe uma categoria com esse nome.", false);
+    const newCat: GalleryCategory = { id, label: newCatLabel.trim(), color: newCatColor, sort_order: categories.length + 1 };
+    setBusy(true);
+    const { error } = await supabase.from("ameas_gallery_categories").insert(newCat);
+    setBusy(false);
+    if (error) return notify(error.message, false);
+    setCategories((prev) => [...prev, newCat]);
+    setNewCatLabel("");
+    notify("Categoria criada!");
+  }
+
+  async function saveEditCategory() {
+    if (!editingCat || !supabase) return;
+    setBusy(true);
+    const { error } = await supabase.from("ameas_gallery_categories")
+      .update({ label: editingCat.label, color: editingCat.color }).eq("id", editingCat.id);
+    setBusy(false);
+    if (error) return notify(error.message, false);
+    setCategories((prev) => prev.map((c) => c.id === editingCat.id ? editingCat : c));
+    setEditingCat(null);
+    notify("Categoria atualizada!");
+  }
+
+  async function deleteCategory(id: string) {
+    if (!supabase) return;
+    const count = dbGallery.filter((g) => g.category === id).length;
+    if (count > 0) return notify(`Nao e possivel excluir: ${count} foto(s) usam essa categoria.`, false);
+    setBusy(true);
+    const { error } = await supabase.from("ameas_gallery_categories").delete().eq("id", id);
+    setBusy(false);
+    if (error) return notify(error.message, false);
+    setCategories((prev) => prev.filter((c) => c.id !== id));
+    notify("Categoria removida.");
+  }
+
+  /* â”€â”€ Upload gallery images â”€â”€ */
   async function uploadImages() {
     if (!supabase || !uploads.length) return notify("Selecione pelo menos uma imagem.", false);
     setBusy(true);
@@ -240,13 +288,11 @@ export default function AdminPage() {
     setBusy(false);
     if (errors.length) notify(errors.join(" | "), false);
     else { notify(`${uploads.length} imagem(ns) publicada(s)!`); setUploads([]); }
-    // Refresh gallery list
-    supabase.from("ameas_gallery_items")
-      .select("id,title,alt,image_url,category,sort_order,published").order("sort_order")
+    supabase.from("ameas_gallery_items").select("id,title,alt,image_url,category,sort_order,published").order("sort_order")
       .then(({ data }) => setDbGallery((data ?? []) as GalleryItem[]));
   }
 
-  /* ── Toggle gallery item published ── */
+  /* â”€â”€ Gallery item actions â”€â”€ */
   async function toggleGalleryPublished(item: GalleryItem) {
     if (!supabase) return;
     const next = !item.published;
@@ -254,21 +300,19 @@ export default function AdminPage() {
     await supabase.from("ameas_gallery_items").update({ published: next }).eq("id", item.id);
   }
 
-  /* ── Update gallery item category ── */
-  async function updateGalleryCategory(item: GalleryItem, category: EventCategory) {
+  async function updateGalleryCategory(item: GalleryItem, category: string) {
     if (!supabase) return;
     setDbGallery((prev) => prev.map((g) => g.id === item.id ? { ...g, category } : g));
     await supabase.from("ameas_gallery_items").update({ category }).eq("id", item.id);
   }
 
-  /* ── Delete gallery item ── */
   async function deleteGalleryItem(item: GalleryItem) {
     if (!supabase) return;
     setDbGallery((prev) => prev.filter((g) => g.id !== item.id));
     await supabase.from("ameas_gallery_items").delete().eq("id", item.id);
   }
 
-  /* ── Logo upload helpers ── */
+  /* â”€â”€ Logo helpers â”€â”€ */
   async function addLogoFile(slug: string, name: string, file: File) {
     const preview = URL.createObjectURL(file);
     setLogoUploads((prev) => [...prev.filter((l) => l.slug !== slug),
@@ -297,16 +341,14 @@ export default function AdminPage() {
         if (up.error) { errors.push(`${item.name}: ${up.error.message}`); continue; }
         const { data: urlData } = supabase.storage.from("ameas-site-media").getPublicUrl(path);
         await supabase.from("ameas_partners").update({ logo_url: urlData.publicUrl }).eq("slug", item.slug);
-      } catch (e: unknown) {
-        errors.push(`${item.name}: ${e instanceof Error ? e.message : "erro"}`);
-      }
+      } catch (e: unknown) { errors.push(`${item.name}: ${e instanceof Error ? e.message : "erro"}`); }
     }
     setBusy(false);
     if (errors.length) notify(errors.join(" | "), false);
     else { notify(`${ready.length} logo(s) publicada(s)!`); setLogoUploads([]); }
   }
 
-  /* ══ LOGIN SCREEN ══ */
+  /* â•â• LOGIN â•â• */
   if (!isLoggedIn) {
     return (
       <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4">
@@ -346,7 +388,7 @@ export default function AdminPage() {
     );
   }
 
-  /* ══ PAINEL ══ */
+  /* â•â• PAINEL â•â• */
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: "hero",        label: "Hero / Sobre",  icon: <Settings className="h-4 w-4" /> },
     { id: "fundadora",   label: "Fundadora",     icon: <Users className="h-4 w-4" /> },
@@ -360,7 +402,7 @@ export default function AdminPage() {
 
   return (
     <main className="min-h-screen bg-background text-foreground">
-      {/* ── Header ── */}
+      {/* Header */}
       <header className="sticky top-0 z-40 border-b border-border/30 bg-background/85 backdrop-blur-2xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
           <div className="flex items-center gap-3">
@@ -376,7 +418,7 @@ export default function AdminPage() {
             <Link to="/" className="hidden rounded-xl border border-border/40 px-3 py-1.5 text-xs font-semibold text-foreground/50 hover:text-[#7eb5f5] sm:block transition-colors">
               <Globe className="inline h-3.5 w-3.5 mr-1" />Ver site
             </Link>
-            <button onClick={toggleTheme} title={isLight ? "Modo Escuro" : "Modo Claro"}
+            <button onClick={toggleTheme}
               className="flex items-center gap-1.5 rounded-xl border border-border/40 px-3 py-1.5 text-xs font-semibold text-foreground/60 transition-all hover:border-[#1B4B8A]/40 hover:text-[#7eb5f5]">
               {isLight ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
               <span className="hidden sm:inline">{isLight ? "Escuro" : "Claro"}</span>
@@ -389,7 +431,7 @@ export default function AdminPage() {
         </div>
       </header>
 
-      {/* ── Toast ── */}
+      {/* Toast */}
       {msg && (
         <div className={`fixed right-5 top-20 z-50 flex items-center gap-2 rounded-2xl border px-4 py-3 text-sm font-semibold shadow-xl backdrop-blur ${msg.ok ? "border-emerald-500/30 bg-emerald-500/15 text-emerald-400" : "border-red-500/30 bg-red-500/15 text-red-400"}`}>
           <CheckCircle2 className="h-4 w-4 shrink-0" /> {msg.text}
@@ -424,7 +466,7 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {/* ── Hero / Sobre ── */}
+        {/* â”€â”€ Hero â”€â”€ */}
         {tab === "hero" && (
           <AdminCard title="Hero e Sobre" desc="Textos principais da pagina inicial.">
             <div className="grid gap-5 sm:grid-cols-2">
@@ -438,19 +480,19 @@ export default function AdminPage() {
           </AdminCard>
         )}
 
-        {/* ── Fundadora ── */}
+        {/* â”€â”€ Fundadora â”€â”€ */}
         {tab === "fundadora" && (
           <AdminCard title="Secao Fundadora" desc="Nome e textos biograficos da fundadora.">
             <div className="grid gap-5">
               <F label="Nome da fundadora" value={content.founder_name} onChange={(v) => set("founder_name", v)} />
-              <F label="Biografia — paragrafo 1" value={content.founder_bio1} onChange={(v) => set("founder_bio1", v)} multi />
-              <F label="Biografia — paragrafo 2" value={content.founder_bio2} onChange={(v) => set("founder_bio2", v)} multi />
+              <F label="Biografia 1" value={content.founder_bio1} onChange={(v) => set("founder_bio1", v)} multi />
+              <F label="Biografia 2" value={content.founder_bio2} onChange={(v) => set("founder_bio2", v)} multi />
             </div>
             <SaveBtn onClick={saveAll} busy={busy} />
           </AdminCard>
         )}
 
-        {/* ── Depoimentos ── */}
+        {/* â”€â”€ Depoimentos â”€â”€ */}
         {tab === "depoimentos" && (
           <AdminCard title="Depoimentos" desc="Os tres depoimentos exibidos na secao de vozes.">
             <div className="space-y-6">
@@ -458,7 +500,7 @@ export default function AdminPage() {
                 <div key={n} className="rounded-2xl border border-border/20 bg-secondary/20 p-5">
                   <p className="mb-3 text-xs font-black uppercase tracking-widest text-foreground/40">Depoimento {n}</p>
                   <div className="grid gap-4">
-                    <F label="Texto da citacao" value={content[`test${n}_quote` as keyof SiteContent]} onChange={(v) => set(`test${n}_quote` as keyof SiteContent, v)} multi />
+                    <F label="Citacao" value={content[`test${n}_quote` as keyof SiteContent]} onChange={(v) => set(`test${n}_quote` as keyof SiteContent, v)} multi />
                     <F label="Autor" value={content[`test${n}_author` as keyof SiteContent]} onChange={(v) => set(`test${n}_author` as keyof SiteContent, v)} />
                   </div>
                 </div>
@@ -468,36 +510,27 @@ export default function AdminPage() {
           </AdminCard>
         )}
 
-        {/* ── PIX ── */}
+        {/* â”€â”€ PIX â”€â”€ */}
         {tab === "pix" && (
-          <AdminCard title="PIX e Dados Bancarios" desc="Informacoes de doacao exibidas no site e no modal de PIX.">
+          <AdminCard title="PIX e Dados Bancarios" desc="Informacoes de doacao exibidas no site.">
             <div className="grid gap-5 sm:grid-cols-2">
               <div className="sm:col-span-2"><F label="Chave PIX (CNPJ)" value={content.pix_key} onChange={(v) => set("pix_key", v)} /></div>
               <F label="Banco" value={content.pix_bank} onChange={(v) => set("pix_bank", v)} />
               <F label="Agencia" value={content.pix_agency} onChange={(v) => set("pix_agency", v)} />
-              <F label="Conta Corrente" value={content.pix_account} onChange={(v) => set("pix_account", v)} />
+              <F label="Conta" value={content.pix_account} onChange={(v) => set("pix_account", v)} />
               <div className="sm:col-span-2 border-t border-border/20 pt-5">
-                <div className="mb-1.5 flex items-center gap-2">
-                  <label className="text-xs font-black uppercase tracking-wide text-foreground/50">Codigo PIX Copia e Cola</label>
-                  <span className="rounded-full border border-[#E8392A]/30 bg-[#E8392A]/10 px-2 py-0.5 text-[10px] font-black text-[#E8392A]">Aparece no botao &ldquo;Copiar Codigo PIX&rdquo;</span>
-                </div>
+                <Label className="text-xs font-black uppercase tracking-wide text-foreground/50">Codigo PIX Copia e Cola</Label>
                 <Textarea value={content.pix_copypaste} onChange={(e) => set("pix_copypaste", e.target.value)} rows={3}
-                  placeholder="Cole aqui o codigo longo gerado pelo seu banco (ex: 00020126...)"
-                  className="rounded-xl border-border/30 bg-white/5 text-foreground placeholder:text-foreground/30 resize-none font-mono text-xs" />
+                  placeholder="00020126..." className="mt-1.5 rounded-xl border-border/30 bg-white/5 text-foreground placeholder:text-foreground/30 resize-none font-mono text-xs" />
               </div>
-            </div>
-            <div className="mt-5 rounded-2xl border border-[#1B4B8A]/20 bg-[#1B4B8A]/5 p-4 text-sm text-foreground/60">
-              <p className="font-bold text-[#7eb5f5] mb-1">Previa:</p>
-              <p>PIX CNPJ <strong className="text-foreground">{content.pix_key}</strong></p>
-              <p>{content.pix_bank} &middot; Ag. {content.pix_agency} &middot; CC {content.pix_account}</p>
             </div>
             <SaveBtn onClick={saveAll} busy={busy} />
           </AdminCard>
         )}
 
-        {/* ── Voluntario ── */}
+        {/* â”€â”€ Voluntario â”€â”€ */}
         {tab === "voluntario" && (
-          <AdminCard title="Secao Voluntario" desc="Titulo e descricao do card de voluntariado na secao Como Ajudar.">
+          <AdminCard title="Secao Voluntario" desc="Titulo e descricao do card de voluntariado.">
             <div className="grid gap-5">
               <F label="Titulo" value={content.volunteer_title} onChange={(v) => set("volunteer_title", v)} />
               <F label="Descricao" value={content.volunteer_desc} onChange={(v) => set("volunteer_desc", v)} multi />
@@ -506,7 +539,7 @@ export default function AdminPage() {
           </AdminCard>
         )}
 
-        {/* ── Parceiros ── */}
+        {/* â”€â”€ Parceiros â”€â”€ */}
         {tab === "parceiros" && (
           <AdminCard title="Links dos Parceiros" desc="O logo de cada parceiro ficara clicavel no site. Ative/desative a visibilidade.">
             <div className="space-y-3">
@@ -532,13 +565,9 @@ export default function AdminPage() {
           </AdminCard>
         )}
 
-        {/* ── Logos ── */}
+        {/* â”€â”€ Logos â”€â”€ */}
         {tab === "logos" && (
-          <AdminCard title="Logos dos Apoiadores" desc="Faca upload da nova logo. A imagem e normalizada automaticamente para 400x300 px, fundo branco, logo centralizada.">
-            <div className="mb-6 rounded-2xl border border-[#1B4B8A]/20 bg-[#1B4B8A]/5 p-4 text-sm text-foreground/60">
-              <p className="font-bold text-[#7eb5f5] mb-1">Como funciona</p>
-              <p>Clique em &ldquo;Escolher logo&rdquo;, selecione o arquivo (PNG, JPG ou SVG). O painel exibe a logo original e a versao normalizada para voce confirmar antes de publicar.</p>
-            </div>
+          <AdminCard title="Logos dos Apoiadores" desc="Faca upload da nova logo. Normalizada automaticamente para 400x300 px, fundo branco.">
             <div className="space-y-4">
               {PARTNER_SLUGS.map(({ slug, name }) => {
                 const item = logoUploads.find((l) => l.slug === slug);
@@ -558,16 +587,112 @@ export default function AdminPage() {
           </AdminCard>
         )}
 
-        {/* ── Galeria ── */}
+        {/* â”€â”€ Galeria â”€â”€ */}
         {tab === "galeria" && (
           <div className="space-y-8">
-            {/* Upload novas fotos */}
-            <AdminCard title="Adicionar Fotos" desc="Selecione imagens e escolha o evento antes de publicar. As imagens sao redimensionadas automaticamente (max 1200x900).">
-              {/* Categoria selector */}
+
+            {/* â”€ Gerenciar Categorias â”€ */}
+            <AdminCard title="Categorias de Eventos" desc="Crie, edite ou remova categorias. Cada categoria aparece como um evento na galeria do site.">
+              {loadingCats ? (
+                <p className="py-4 text-center text-sm text-foreground/40 animate-pulse">Carregando...</p>
+              ) : (
+                <div className="space-y-3">
+                  {categories.map((cat) => (
+                    <div key={cat.id} className="flex flex-wrap items-center gap-3 rounded-2xl border border-border/20 bg-secondary/20 p-3">
+                      {editingCat?.id === cat.id ? (
+                        /* â”€â”€ Edit mode â”€â”€ */
+                        <>
+                          <Input value={editingCat.label} onChange={(e) => setEditingCat({ ...editingCat, label: e.target.value })}
+                            className="h-8 flex-1 min-w-[140px] rounded-xl border-border/30 bg-white/5 text-sm text-foreground" />
+                          <div className="flex flex-wrap gap-1.5">
+                            {COLOR_PALETTE.map((cp) => (
+                              <button key={cp.value} onClick={() => setEditingCat({ ...editingCat, color: cp.value })}
+                                title={cp.label}
+                                className={`h-6 w-6 rounded-full border-2 transition-transform hover:scale-110 ${cp.value.replace("text-white", "").replace("text-black", "")} ${editingCat.color === cp.value ? "border-white scale-110" : "border-transparent"}`} />
+                            ))}
+                          </div>
+                          <div className="flex gap-2">
+                            <Button size="sm" onClick={saveEditCategory} disabled={busy}
+                              className="h-8 rounded-xl bg-[#1B4B8A] text-white hover:bg-[#1B4B8A]/90 text-xs px-3">
+                              <Save className="h-3 w-3 mr-1" />Salvar
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={() => setEditingCat(null)}
+                              className="h-8 rounded-xl text-xs text-foreground/50 hover:text-foreground px-3">
+                              Cancelar
+                            </Button>
+                          </div>
+                        </>
+                      ) : (
+                        /* â”€â”€ View mode â”€â”€ */
+                        <>
+                          <span className={`rounded-full px-3 py-1 text-xs font-black uppercase tracking-wide ${cat.color}`}>{cat.label}</span>
+                          <span className="text-[10px] text-foreground/40 font-mono">{cat.id}</span>
+                          <span className="text-[10px] text-foreground/30 ml-auto">
+                            {dbGallery.filter((g) => g.category === cat.id).length} foto(s) no banco
+                          </span>
+                          <div className="flex gap-1.5">
+                            <button onClick={() => setEditingCat(cat)}
+                              className="flex items-center gap-1 rounded-xl border border-border/30 px-2.5 py-1.5 text-[10px] font-bold text-foreground/50 hover:text-[#7eb5f5] hover:border-[#1B4B8A]/40 transition-all">
+                              <Pencil className="h-3 w-3" />Editar
+                            </button>
+                            <button onClick={() => deleteCategory(cat.id)}
+                              className="flex items-center gap-1 rounded-xl border border-red-500/20 bg-red-500/5 px-2.5 py-1.5 text-[10px] font-bold text-red-400 hover:bg-red-500/15 transition-all">
+                              <Trash2 className="h-3 w-3" />Excluir
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Create new category */}
+              <div className="mt-6 rounded-2xl border border-[#1B4B8A]/20 bg-[#1B4B8A]/5 p-5">
+                <p className="mb-4 text-sm font-black text-foreground flex items-center gap-2">
+                  <Plus className="h-4 w-4 text-[#7eb5f5]" />Nova categoria
+                </p>
+                <div className="flex flex-wrap items-end gap-3">
+                  <div className="flex-1 min-w-[160px]">
+                    <Label className="text-[10px] font-black uppercase tracking-wide text-foreground/50">Nome</Label>
+                    <Input value={newCatLabel} onChange={(e) => setNewCatLabel(e.target.value)}
+                      placeholder="Ex: Corrida de Rua"
+                      onKeyDown={(e) => e.key === "Enter" && createCategory()}
+                      className="mt-1 rounded-xl border-border/30 bg-white/5 text-foreground placeholder:text-foreground/30" />
+                  </div>
+                  <div>
+                    <Label className="text-[10px] font-black uppercase tracking-wide text-foreground/50">Cor da tag</Label>
+                    <div className="mt-1.5 flex flex-wrap gap-1.5">
+                      {COLOR_PALETTE.map((cp) => (
+                        <button key={cp.value} onClick={() => setNewCatColor(cp.value)} title={cp.label}
+                          className={`h-7 w-7 rounded-full border-2 transition-transform hover:scale-110 ${cp.value.replace("text-white", "").replace("text-black", "")} ${newCatColor === cp.value ? "border-white scale-110" : "border-transparent"}`} />
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-[10px] font-black uppercase tracking-wide text-foreground/50">Preview</Label>
+                    <div className="mt-1.5">
+                      <span className={`inline-block rounded-full px-3 py-1 text-xs font-black uppercase tracking-wide ${newCatColor}`}>
+                        {newCatLabel || "Nome do evento"}
+                      </span>
+                    </div>
+                  </div>
+                  <Button onClick={createCategory} disabled={busy || !newCatLabel.trim()}
+                    className="rounded-2xl bg-[#1B4B8A] text-white hover:bg-[#1B4B8A]/90">
+                    <Plus className="mr-1.5 h-4 w-4" />{busy ? "Criando..." : "Criar"}
+                  </Button>
+                </div>
+              </div>
+            </AdminCard>
+
+            {/* â”€ Upload de novas fotos â”€ */}
+            <AdminCard title="Adicionar Fotos" desc="Selecione imagens e escolha o evento. As imagens sao redimensionadas automaticamente (max 1200x900).">
               <div className="mb-5">
-                <p className="mb-2 text-xs font-black uppercase tracking-wide text-foreground/50 flex items-center gap-1.5"><Tag className="h-3.5 w-3.5" /> Categoria do evento</p>
+                <p className="mb-2 text-xs font-black uppercase tracking-wide text-foreground/50 flex items-center gap-1.5">
+                  <Tag className="h-3.5 w-3.5" /> Categoria do evento
+                </p>
                 <div className="flex flex-wrap gap-2">
-                  {EVENT_CATEGORIES.map((ev) => (
+                  {categories.map((ev) => (
                     <button key={ev.id} onClick={() => setUploadCategory(ev.id)}
                       className={`rounded-full px-4 py-1.5 text-xs font-black uppercase tracking-wide transition-all border ${uploadCategory === ev.id ? `${ev.color} border-transparent shadow` : "border-border/30 text-foreground/50 hover:text-foreground"}`}>
                       {ev.label}
@@ -599,8 +724,8 @@ export default function AdminPage() {
                   </div>
                   <div className="mt-4 flex items-center gap-3">
                     <span className="text-xs text-foreground/50">Publicar em:</span>
-                    <span className={`rounded-full px-3 py-1 text-xs font-black uppercase tracking-wide ${EVENT_CATEGORIES.find((e) => e.id === uploadCategory)?.color}`}>
-                      {EVENT_CATEGORIES.find((e) => e.id === uploadCategory)?.label}
+                    <span className={`rounded-full px-3 py-1 text-xs font-black uppercase tracking-wide ${categories.find((e) => e.id === uploadCategory)?.color ?? ""}`}>
+                      {categories.find((e) => e.id === uploadCategory)?.label ?? uploadCategory}
                     </span>
                   </div>
                   <Button onClick={uploadImages} disabled={busy} className="mt-4 rounded-2xl bg-[#1B4B8A] text-white hover:bg-[#1B4B8A]/90">
@@ -610,9 +735,9 @@ export default function AdminPage() {
               )}
             </AdminCard>
 
-            {/* Imagens estaticas */}
-            <AdminCard title="Fotos do Site (estaticas)" desc="Imagens que fazem parte do codigo-fonte do site, organizadas por evento.">
-              {EVENT_CATEGORIES.map((ev) => {
+            {/* â”€ Fotos estÃ¡ticas â”€ */}
+            <AdminCard title="Fotos do Site (estaticas)" desc="Imagens que fazem parte do codigo-fonte, organizadas por evento.">
+              {categories.map((ev) => {
                 const items = STATIC_GALLERY.filter((g) => g.category === ev.id);
                 if (!items.length) return null;
                 return (
@@ -636,17 +761,17 @@ export default function AdminPage() {
               })}
             </AdminCard>
 
-            {/* Fotos do Supabase */}
-            <AdminCard title="Fotos do Supabase" desc="Imagens enviadas pelo admin. Clique na categoria para alterar ou oculte/exclua.">
+            {/* â”€ Fotos do Supabase â”€ */}
+            <AdminCard title="Fotos do Supabase" desc="Imagens enviadas pelo admin. Altere a categoria, oculte ou exclua.">
               {loadingGallery ? (
                 <p className="py-8 text-center text-sm text-foreground/40 animate-pulse">Carregando...</p>
               ) : dbGallery.length === 0 ? (
                 <p className="py-8 text-center text-sm text-foreground/40">Nenhuma imagem publicada ainda.</p>
               ) : (
-                EVENT_CATEGORIES.map((ev) => {
+                categories.map((ev) => {
                   const items = dbGallery.filter((g) => g.category === ev.id);
-                  const uncategorised = ev.id === "esporte-adaptado" ? dbGallery.filter((g) => !g.category) : [];
-                  const all = ev.id === "esporte-adaptado" ? [...items, ...uncategorised] : items;
+                  const uncategorised = ev.id === categories[0]?.id ? dbGallery.filter((g) => !g.category) : [];
+                  const all = [...items, ...uncategorised];
                   if (!all.length) return null;
                   return (
                     <div key={ev.id} className="mb-6 last:mb-0">
@@ -656,18 +781,16 @@ export default function AdminPage() {
                       </p>
                       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
                         {all.map((item) => (
-                          <div key={item.id} className="group relative overflow-hidden rounded-xl border border-border/20 bg-secondary/20">
+                          <div key={item.id} className="overflow-hidden rounded-xl border border-border/20 bg-secondary/20">
                             <div className="aspect-[4/3] overflow-hidden">
                               <img src={item.image_url} alt={item.alt} className="h-full w-full object-cover" loading="lazy" />
                             </div>
                             <div className="p-2 space-y-1.5">
                               <p className="text-[10px] font-bold text-foreground/70 truncate">{item.title}</p>
-                              {/* Category selector */}
-                              <select
-                                value={item.category ?? ""}
-                                onChange={(e) => updateGalleryCategory(item, e.target.value as EventCategory)}
+                              <select value={item.category ?? ""}
+                                onChange={(e) => updateGalleryCategory(item, e.target.value)}
                                 className="w-full rounded-lg border border-border/30 bg-background/60 px-2 py-1 text-[10px] text-foreground/70 focus:outline-none">
-                                {EVENT_CATEGORIES.map((ec) => (
+                                {categories.map((ec) => (
                                   <option key={ec.id} value={ec.id}>{ec.label}</option>
                                 ))}
                               </select>
@@ -697,12 +820,11 @@ export default function AdminPage() {
   );
 }
 
-/* ── LogoUploadRow ── */
+/* â”€â”€ LogoUploadRow â”€â”€ */
 function LogoUploadRow({ slug, name, item, onFile, onRemove }: {
   slug: string; name: string;
   item: { file: File; preview: string; normalized: string | null; processing: boolean } | null;
-  onFile: (f: File) => void;
-  onRemove: () => void;
+  onFile: (f: File) => void; onRemove: () => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   return (
@@ -714,8 +836,7 @@ function LogoUploadRow({ slug, name, item, onFile, onRemove }: {
         </div>
         <div className="flex items-center gap-2">
           {item && (
-            <button onClick={onRemove}
-              className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-bold text-red-400 hover:bg-red-500/20 transition-all">
+            <button onClick={onRemove} className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-bold text-red-400 hover:bg-red-500/20 transition-all">
               <X className="inline h-3 w-3 mr-1" />Remover
             </button>
           )}
@@ -736,12 +857,10 @@ function LogoUploadRow({ slug, name, item, onFile, onRemove }: {
             </div>
           </div>
           <div>
-            <p className="mb-2 text-[10px] font-black uppercase tracking-wide text-foreground/40">Normalizada — 400x300, fundo branco</p>
+            <p className="mb-2 text-[10px] font-black uppercase tracking-wide text-foreground/40">Normalizada 400x300, fundo branco</p>
             <div className="flex h-28 items-center justify-center overflow-hidden rounded-xl border border-border/20 bg-white">
-              {item.processing
-                ? <span className="text-xs text-foreground/40 animate-pulse">Processando...</span>
-                : item.normalized
-                  ? <img src={item.normalized} alt="normalizada" className="max-h-full max-w-full object-contain" />
+              {item.processing ? <span className="text-xs text-foreground/40 animate-pulse">Processando...</span>
+                : item.normalized ? <img src={item.normalized} alt="normalizada" className="max-h-full max-w-full object-contain" />
                   : <span className="text-xs text-red-400">Erro ao processar</span>}
             </div>
           </div>
@@ -751,7 +870,7 @@ function LogoUploadRow({ slug, name, item, onFile, onRemove }: {
   );
 }
 
-/* ── Utility components ── */
+/* â”€â”€ Utils â”€â”€ */
 function AdminCard({ title, desc, children }: { title: string; desc: string; children: React.ReactNode }) {
   return (
     <div className="glass rounded-3xl border border-border/30 p-6 sm:p-8">
@@ -786,3 +905,4 @@ function F({ label, value, onChange, multi = false }: {
     </div>
   );
 }
+

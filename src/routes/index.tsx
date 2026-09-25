@@ -32,8 +32,8 @@ import sponsorFernandoAraujoAsset from "@/assets/sponsor-fernando-araujo.png";
 import sponsorQualiserAsset from "@/assets/sponsor-qualiser-contabilidade.png";
 import sponsorJornalEconomiaAsset from "@/assets/sponsor-jornal-da-economia.png";
 import {
-  defaultSiteContent, getPartnerLinks, getSiteContent,
-  type PartnerLink, type SiteContent,
+  defaultSiteContent, getPartnerLinks, getSiteContent, getGalleryCategories, getGalleryItems,
+  type PartnerLink, type SiteContent, type GalleryCategory,
 } from "@/lib/supabase";
 
 export const Route = createFileRoute("/")({
@@ -147,6 +147,8 @@ const qrCells = [
 function AmeasHome() {
   const [sc, setSc] = useState<SiteContent>(defaultSiteContent);
   const [partnerLinks, setPartnerLinks] = useState<PartnerLink[]>([]);
+  const [dynamicCategories, setDynamicCategories] = useState<GalleryCategory[]>([]);
+  const [dbGalleryItems, setDbGalleryItems] = useState<Array<{ id: string; title: string; alt: string; image_url: string; category: string | null; sort_order: number; published: boolean }>>([]);
   const [donationOpen, setDonationOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<{ src: string; alt: string; title: string } | null>(null);
@@ -160,6 +162,8 @@ function AmeasHome() {
   useEffect(() => {
     getSiteContent().then(setSc);
     getPartnerLinks().then(setPartnerLinks);
+    getGalleryCategories().then(setDynamicCategories);
+    getGalleryItems().then(setDbGalleryItems);
   }, []);
 
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Olá, AMEAS! Quero apoiar a Associação Movimento Esporte Adaptado e Superação.")}`;
@@ -171,6 +175,28 @@ function AmeasHome() {
       return { ...p, website_url: link?.website_url || p.website_url };
     })
     .filter((p) => !partnerLinks.length || partnerLinks.some((l) => l.slug === p.slug && l.published));
+
+  // Merge static gallery events with dynamic categories + DB images
+  const activeEvents = useMemo(() => {
+    // Start from dynamic categories if loaded, else fall back to static galleryEvents
+    const cats = dynamicCategories.length ? dynamicCategories : galleryEvents.map((e) => ({
+      id: e.id, label: e.label, color: e.color, sort_order: 0,
+    }));
+
+    return cats.map((cat) => {
+      // Static images for this category
+      const staticImgs = galleryEvents
+        .find((e) => e.id === cat.id)?.images
+        .map((img) => ({ src: img.src, alt: img.alt, title: img.title, isDb: false })) ?? [];
+
+      // DB images for this category
+      const dbImgs = dbGalleryItems
+        .filter((item) => item.category === cat.id)
+        .map((item) => ({ src: item.image_url, alt: item.alt, title: item.title, isDb: true }));
+
+      return { ...cat, images: [...staticImgs, ...dbImgs] };
+    }).filter((ev) => ev.images.length > 0);
+  }, [dynamicCategories, dbGalleryItems]);
 
   const year = useMemo(() => new Date().getFullYear(), []);
 
@@ -593,7 +619,7 @@ function AmeasHome() {
           {selectedEventId === null ? (
             /* ── Vista: grade de eventos ── */
             <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              {galleryEvents.map((ev) => {
+              {activeEvents.map((ev) => {
                 const cover = ev.images[0];
                 if (!cover) return null;
                 return (
@@ -602,11 +628,9 @@ function AmeasHome() {
                     <span className="relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden bg-background/30">
                       <img src={cover.src} alt={cover.alt}
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
-                      {/* Tag de evento */}
                       <span className={`absolute left-3 top-3 rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-wide shadow-lg ${ev.color}`}>
                         {ev.label}
                       </span>
-                      {/* Contagem de fotos */}
                       <span className="absolute right-3 bottom-3 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur">
                         {ev.images.length} foto{ev.images.length !== 1 ? "s" : ""}
                       </span>
@@ -622,10 +646,10 @@ function AmeasHome() {
           ) : (
             /* ── Vista: fotos do evento selecionado ── */
             (() => {
-              const ev = galleryEvents.find((e) => e.id === selectedEventId)!;
+              const ev = activeEvents.find((e) => e.id === selectedEventId)!;
+              if (!ev) return null;
               return (
                 <div className="mt-10">
-                  {/* Cabeçalho do evento */}
                   <div className="mb-8 flex flex-wrap items-center gap-4">
                     <button onClick={() => setSelectedEventId(null)}
                       className="flex items-center gap-2 rounded-2xl border border-border/40 px-4 py-2 text-sm font-bold text-foreground/60 transition-all hover:border-[#1B4B8A]/40 hover:text-[#7eb5f5]">
@@ -636,8 +660,6 @@ function AmeasHome() {
                     </span>
                     <span className="text-sm text-foreground/40">{ev.images.length} foto{ev.images.length !== 1 ? "s" : ""}</span>
                   </div>
-
-                  {/* Grade de fotos */}
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {ev.images.map((img) => (
                       <button key={img.src} onClick={() => setSelectedImage(img)}

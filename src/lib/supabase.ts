@@ -121,3 +121,41 @@ export async function getPartnerLinks(): Promise<PartnerLink[]> {
     .order("sort_order");
   return error || !data ? [] : data;
 }
+
+/* ─── Gallery Categories ─── */
+export type GalleryCategory = {
+  id: string;       // slug, e.g. "esporte-adaptado"
+  label: string;    // display name, e.g. "Esporte Adaptado"
+  color: string;    // tailwind bg+text classes, e.g. "bg-[#1B4B8A] text-white"
+  sort_order: number;
+};
+
+export const defaultGalleryCategories: GalleryCategory[] = [
+  { id: "esporte-adaptado", label: "Esporte Adaptado", color: "bg-[#1B4B8A] text-white", sort_order: 1 },
+  { id: "comunidade",       label: "Comunidade",        color: "bg-[#E8392A] text-white", sort_order: 2 },
+  { id: "acolhimento",      label: "Acolhimento",       color: "bg-[#059669] text-white", sort_order: 3 },
+  { id: "fundadora",        label: "Fundadora",         color: "bg-[#7c3aed] text-white", sort_order: 4 },
+];
+
+export async function getGalleryCategories(): Promise<GalleryCategory[]> {
+  if (!supabase) return defaultGalleryCategories;
+  const { data, error } = await supabase
+    .from("ameas_gallery_categories")
+    .select("id,label,color,sort_order")
+    .order("sort_order");
+  if (error || !data || !data.length) return defaultGalleryCategories;
+  return data as GalleryCategory[];
+}
+
+export async function getGalleryItems(): Promise<Array<{
+  id: string; title: string; alt: string; image_url: string;
+  category: string | null; sort_order: number; published: boolean;
+}>> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("ameas_gallery_items")
+    .select("id,title,alt,image_url,category,sort_order,published")
+    .eq("published", true)
+    .order("sort_order");
+  return error || !data ? [] : data;
+}

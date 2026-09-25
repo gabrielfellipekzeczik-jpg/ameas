@@ -54,14 +54,16 @@ const whatsappNumber = "5511999433480";
 const whatsappDisplay = "(11) 99943-3480";
 
 const navLinks = [
-  { href: "#sobre", label: "Sobre" },
-  { href: "#familias", label: "Famílias" },
-  { href: "#fundadora", label: "Fundadora" },
-  { href: "#missao", label: "Missão" },
-  { href: "#galeria", label: "Galeria" },
-  { href: "#ajudar", label: "Apoiar" },
-  { href: "#parceiros", label: "Parceiros" },
-  { href: "#contato", label: "Contato" },
+  { href: "#sobre",      label: "Sobre" },
+  { href: "#fundadora",  label: "Fundadora" },
+  { href: "#missao",     label: "Missão" },
+  { href: "#servicos",   label: "Serviços" },
+  { href: "#familias",   label: "Famílias" },
+  { href: "#voluntario", label: "Voluntário" },
+  { href: "#galeria",    label: "Galeria" },
+  { href: "#ajudar",     label: "Apoiar" },
+  { href: "#parceiros",  label: "Parceiros" },
+  { href: "#contato",    label: "Contato" },
 ];
 
 const galleryEvents = [
@@ -328,38 +330,6 @@ function AmeasHome() {
         </div>
       </section>
 
-      {/* ══ FAMÍLIAS ══ */}
-      <section id="familias" className="py-20 sm:py-24" style={{background:"radial-gradient(ellipse 80% 60% at 50% 0%, rgba(27,75,138,.12), transparent), var(--color-secondary)"}}>
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl">
-            <span className="section-kicker">Famílias atípicas</span>
-            <h2 className="mt-4 text-3xl font-black sm:text-4xl">
-              Cuidar de quem cuida também faz parte da <span className="gradient-text">nossa missão.</span>
-            </h2>
-            <p className="mt-5 text-lg leading-8 text-foreground/60">
-              Além do esporte adaptado, a AMEAS oferece uma rede de acolhimento e assistência social para as famílias atípicas da associação.
-            </p>
-          </div>
-          <div className="mt-12 grid gap-5 md:grid-cols-3">
-            {[
-              { icon: Heart,    label: "Suporte psicológico", border: "border-[#E8392A]/20 bg-[#E8392A]/5",  iconCls: "text-[#E8392A]", text: "Espaço de escuta e acolhimento emocional para mães, pais e responsáveis enfrentarem os desafios da rotina com mais apoio e segurança." },
-              { icon: Users,    label: "Assistência social",  border: "border-[#1B4B8A]/20 bg-[#1B4B8A]/5",  iconCls: "text-[#7eb5f5]", text: "Orientação e encaminhamentos para fortalecer o acesso das famílias a direitos, serviços e oportunidades na comunidade." },
-              { icon: Activity, label: "Pilates para as mães",border: "border-[#f59e0b]/20 bg-[#f59e0b]/5",  iconCls: "text-[#f59e0b]", text: "Aulas de Pilates conduzidas por voluntários, criando um momento de cuidado com o corpo, descanso e fortalecimento." },
-            ].map(({ icon: Icon, label, border, iconCls, text }) => (
-              <div key={label} className={`glass neon-border rounded-3xl border p-7 ${border}`}>
-                <span className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 ${iconCls}`}><Icon /></span>
-                <p className="mt-4 text-xl font-black text-foreground">{label}</p>
-                <p className="mt-3 text-sm leading-7 text-foreground/60">{text}</p>
-              </div>
-            ))}
-          </div>
-          <div className="mt-8 rounded-3xl border border-[#1B4B8A]/20 bg-[#1B4B8A]/10 p-8 backdrop-blur">
-            <p className="text-lg font-bold text-foreground">Na AMEAS, atletas e famílias caminham juntos: o esporte abre caminhos e a assistência social sustenta a rede de apoio.</p>
-            <p className="mt-3 text-sm leading-7 text-foreground/50">Todas essas ações são realizadas com a dedicação de voluntários e parceiros que doam tempo, conhecimento e cuidado para transformar vidas.</p>
-          </div>
-        </div>
-      </section>
-
       {/* ══ FUNDADORA ══ */}
       <section id="fundadora" className="py-20 sm:py-24 bg-secondary">
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:px-8">
@@ -406,6 +376,65 @@ function AmeasHome() {
                 </div>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* ══ SERVIÇOS ══ */}
+      <section id="servicos" className="py-20 sm:py-24" style={{background:"radial-gradient(ellipse 80% 60% at 50% 0%, rgba(232,57,42,.08), transparent), var(--color-secondary)"}}>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl">
+            <span className="section-kicker">O que fazemos</span>
+            <h2 className="mt-4 text-3xl font-black sm:text-4xl">Serviços e atividades que <span className="gradient-text">transformam cada dia.</span></h2>
+            <p className="mt-5 text-lg leading-8 text-foreground/60">Da prática esportiva ao apoio social, a AMEAS oferece um conjunto de ações que acolhem, desenvolvem e incluem.</p>
+          </div>
+          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              { icon: Activity,     color: "text-[#E8392A]",  border: "border-[#E8392A]/20 bg-[#E8392A]/5",   title: "Esporte Adaptado",        desc: "Treinos e atividades físicas adaptadas para pessoas com deficiência, promovendo saúde, autonomia e superação com acompanhamento especializado." },
+              { icon: Users,        color: "text-[#7eb5f5]",  border: "border-[#1B4B8A]/20 bg-[#1B4B8A]/5",   title: "Assistência Social",      desc: "Orientação, encaminhamentos e apoio para que atletas e famílias acessem direitos, benefícios e serviços públicos disponíveis." },
+              { icon: Heart,        color: "text-[#f59e0b]",  border: "border-[#f59e0b]/20 bg-[#f59e0b]/5",   title: "Suporte Psicológico",     desc: "Espaço de escuta e acolhimento emocional para atletas e familiares, com foco no bem-estar e na saúde mental." },
+              { icon: Sparkles,     color: "text-[#059669]",  border: "border-[#059669]/20 bg-[#059669]/5",   title: "Pilates para Mães",       desc: "Aulas de Pilates conduzidas por voluntários, criando um momento de cuidado com o corpo e descanso para as mães e responsáveis." },
+              { icon: CalendarHeart,color: "text-[#7c3aed]",  border: "border-[#7c3aed]/20 bg-[#7c3aed]/5",   title: "Eventos Comunitários",    desc: "Encontros, celebrações e ações solidárias que fortalecem os laços entre atletas, famílias, voluntários e a comunidade." },
+              { icon: HandHeart,    color: "text-[#38bdf8]",  border: "border-[#38bdf8]/20 bg-[#38bdf8]/5",   title: "Voluntariado",            desc: "Programa de voluntariado que conecta pessoas dispostas a contribuir com seu tempo e talento ao crescimento da associação." },
+            ].map(({ icon: Icon, color, border, title, desc }) => (
+              <div key={title} className={`glass neon-border rounded-3xl border p-7 ${border}`}>
+                <span className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 ${color}`}><Icon /></span>
+                <p className="mt-4 text-xl font-black text-foreground">{title}</p>
+                <p className="mt-3 text-sm leading-7 text-foreground/60">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══ FAMÍLIAS ══ */}
+      <section id="familias" className="py-20 sm:py-24" style={{background:"radial-gradient(ellipse 80% 60% at 50% 0%, rgba(27,75,138,.12), transparent), var(--color-secondary)"}}>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl">
+            <span className="section-kicker">Famílias atípicas</span>
+            <h2 className="mt-4 text-3xl font-black sm:text-4xl">
+              Cuidar de quem cuida também faz parte da <span className="gradient-text">nossa missão.</span>
+            </h2>
+            <p className="mt-5 text-lg leading-8 text-foreground/60">
+              Além do esporte adaptado, a AMEAS oferece uma rede de acolhimento e assistência social para as famílias atípicas da associação.
+            </p>
+          </div>
+          <div className="mt-12 grid gap-5 md:grid-cols-3">
+            {[
+              { icon: Heart,    label: "Suporte psicológico", border: "border-[#E8392A]/20 bg-[#E8392A]/5",  iconCls: "text-[#E8392A]", text: "Espaço de escuta e acolhimento emocional para mães, pais e responsáveis enfrentarem os desafios da rotina com mais apoio e segurança." },
+              { icon: Users,    label: "Assistência social",  border: "border-[#1B4B8A]/20 bg-[#1B4B8A]/5",  iconCls: "text-[#7eb5f5]", text: "Orientação e encaminhamentos para fortalecer o acesso das famílias a direitos, serviços e oportunidades na comunidade." },
+              { icon: Activity, label: "Pilates para as mães",border: "border-[#f59e0b]/20 bg-[#f59e0b]/5",  iconCls: "text-[#f59e0b]", text: "Aulas de Pilates conduzidas por voluntários, criando um momento de cuidado com o corpo, descanso e fortalecimento." },
+            ].map(({ icon: Icon, label, border, iconCls, text }) => (
+              <div key={label} className={`glass neon-border rounded-3xl border p-7 ${border}`}>
+                <span className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 ${iconCls}`}><Icon /></span>
+                <p className="mt-4 text-xl font-black text-foreground">{label}</p>
+                <p className="mt-3 text-sm leading-7 text-foreground/60">{text}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 rounded-3xl border border-[#1B4B8A]/20 bg-[#1B4B8A]/10 p-8 backdrop-blur">
+            <p className="text-lg font-bold text-foreground">Na AMEAS, atletas e famílias caminham juntos: o esporte abre caminhos e a assistência social sustenta a rede de apoio.</p>
+            <p className="mt-3 text-sm leading-7 text-foreground/50">Todas essas ações são realizadas com a dedicação de voluntários e parceiros que doam tempo, conhecimento e cuidado para transformar vidas.</p>
           </div>
         </div>
       </section>
@@ -474,6 +503,57 @@ function AmeasHome() {
               <Button asChild variant="outline" className="mt-3 w-full rounded-2xl border-[#1B4B8A]/30 text-[#7eb5f5] hover:bg-[#1B4B8A]/10">
                 <a href={whatsappUrl} target="_blank" rel="noreferrer"><Clock /> Falar no WhatsApp</a>
               </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ══ VOLUNTÁRIO ══ */}
+      <section id="voluntario" className="py-20 sm:py-24" style={{background:"radial-gradient(ellipse 70% 50% at 50% 100%, rgba(27,75,138,.15), transparent), var(--color-secondary)"}}>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-3xl text-center">
+            <span className="section-kicker">Voluntariado</span>
+            <h2 className="mt-4 text-3xl font-black sm:text-4xl">Doe seu tempo e <span className="gradient-text">transforme vidas.</span></h2>
+            <p className="mt-5 text-lg leading-8 text-foreground/60">
+              A AMEAS é movida por pessoas que acreditam na inclusão. Voluntários são o coração da nossa associação — cada hora doada muda histórias reais.
+            </p>
+          </div>
+
+          <div className="mt-14 grid gap-6 lg:grid-cols-[1.2fr_0.8fr] items-center">
+            {/* Cards de formas de contribuir */}
+            <div className="grid gap-4 sm:grid-cols-2">
+              {[
+                { icon: Activity,      color: "text-[#E8392A]",  border: "border-[#E8392A]/20", title: "Apoio esportivo",       desc: "Auxilie nos treinos adaptados, acompanhe atletas e colabore com educadores físicos." },
+                { icon: Heart,         color: "text-[#f59e0b]",  border: "border-[#f59e0b]/20", title: "Suporte emocional",     desc: "Ofereça escuta, acolhimento e presença para atletas e famílias em momentos difíceis." },
+                { icon: Users,         color: "text-[#7eb5f5]",  border: "border-[#1B4B8A]/20", title: "Assistência social",    desc: "Oriente famílias sobre direitos, benefícios e serviços disponíveis na comunidade." },
+                { icon: CalendarHeart, color: "text-[#059669]",  border: "border-[#059669]/20", title: "Eventos e ações",       desc: "Ajude na organização de encontros, celebrações e campanhas solidárias da AMEAS." },
+              ].map(({ icon: Icon, color, border, title, desc }) => (
+                <div key={title} className={`glass rounded-2xl border p-5 ${border}`}>
+                  <span className={`flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 ${color}`}><Icon className="h-5 w-5" /></span>
+                  <p className="mt-3 font-black text-foreground">{title}</p>
+                  <p className="mt-2 text-sm leading-6 text-foreground/60">{desc}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* CTA */}
+            <div className="relative overflow-hidden rounded-3xl border border-[#1B4B8A]/40 bg-gradient-to-br from-[#1B4B8A]/60 to-[#0d1b2e]/80 p-8 shadow-2xl glow-blue backdrop-blur text-center">
+              <div className="pointer-events-none absolute -top-16 -right-16 h-48 w-48 rounded-full bg-[#E8392A]/10 blur-3xl" />
+              <span className="flex mx-auto h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-white mb-5">
+                <HandHeart className="h-8 w-8" />
+              </span>
+              <p className="text-2xl font-black text-white">Quero ser voluntário(a)</p>
+              <p className="mt-3 text-sm leading-7 text-white/60">
+                Entre em contato com a AMEAS pelo WhatsApp e conte como você quer contribuir. Cada talento é bem-vindo.
+              </p>
+              <Button asChild size="lg"
+                className="mt-7 w-full rounded-2xl bg-[#25D366] text-white shadow-lg shadow-[#25D366]/30 hover:bg-[#25D366]/90 hover:shadow-[#25D366]/50">
+                <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Olá, AMEAS! Tenho interesse em ser voluntário(a). Gostaria de saber como posso contribuir.")}`}
+                  target="_blank" rel="noreferrer">
+                  <MessageCircle className="h-5 w-5" /> Falar pelo WhatsApp
+                </a>
+              </Button>
+              <p className="mt-4 text-xs text-white/40">Respondemos em horário comercial · São Roque e região</p>
             </div>
           </div>
         </div>

@@ -64,29 +64,61 @@ const navLinks = [
   { href: "#contato", label: "Contato" },
 ];
 
-const galleryImages = [
-  { src: parceirosBannerAsset,    alt: "Banner comemorativo com parceiros da AMEAS",           title: "Parceiros AMEAS" },
-  { src: acolhimentoCafeAsset,    alt: "Grupo da AMEAS reunido em momento de acolhimento",      title: "Acolhimento" },
-  { src: corridaAdaptadaAsset,    alt: "Atleta em triciclo adaptado durante atividade",         title: "Esporte adaptado" },
-  { src: parceriaTiaLinaAsset,    alt: "Participantes da AMEAS em ação de parceria",            title: "Parcerias locais" },
-  { src: encontroComunidadeAsset, alt: "Grande grupo da AMEAS reunido com banner",              title: "Comunidade" },
-  { src: crossfitGrupoAsset,      alt: "Equipe AMEAS em encontro esportivo no CrossFit",        title: "Treino coletivo" },
-  { src: acaoSolidariaAsset,      alt: "Grupo da AMEAS em ação solidária",                     title: "Ação solidária" },
-  { src: treinoAdaptadoAsset,     alt: "Mulheres da AMEAS realizando treino adaptado",         title: "Superação em treino" },
-  { src: karinaAsset,             alt: "Retrato oficial de Karina Meneguini, fundadora",        title: "Karina Meneguini" },
+const galleryEvents = [
+  {
+    id: "esporte-adaptado",
+    label: "Esporte Adaptado",
+    color: "bg-[#1B4B8A] text-white",
+    colorHover: "hover:bg-[#1B4B8A]/80",
+    images: [
+      { src: corridaAdaptadaAsset,    alt: "Atleta em triciclo adaptado durante atividade",    title: "Corrida adaptada" },
+      { src: crossfitGrupoAsset,      alt: "Equipe AMEAS em encontro esportivo no CrossFit",   title: "Treino coletivo" },
+      { src: treinoAdaptadoAsset,     alt: "Mulheres da AMEAS realizando treino adaptado",     title: "Superação em treino" },
+    ],
+  },
+  {
+    id: "comunidade",
+    label: "Comunidade",
+    color: "bg-[#E8392A] text-white",
+    colorHover: "hover:bg-[#E8392A]/80",
+    images: [
+      { src: encontroComunidadeAsset, alt: "Grande grupo da AMEAS reunido com banner",         title: "Encontro da comunidade" },
+      { src: acaoSolidariaAsset,      alt: "Grupo da AMEAS em ação solidária",                 title: "Ação solidária" },
+      { src: parceirosBannerAsset,    alt: "Banner comemorativo com parceiros da AMEAS",       title: "Parceiros AMEAS" },
+    ],
+  },
+  {
+    id: "acolhimento",
+    label: "Acolhimento",
+    color: "bg-[#059669] text-white",
+    colorHover: "hover:bg-[#059669]/80",
+    images: [
+      { src: acolhimentoCafeAsset,    alt: "Grupo da AMEAS reunido em momento de acolhimento", title: "Café de acolhimento" },
+      { src: parceriaTiaLinaAsset,    alt: "Participantes da AMEAS em ação de parceria",       title: "Parceria Tia Lina" },
+    ],
+  },
+  {
+    id: "fundadora",
+    label: "Fundadora",
+    color: "bg-[#7c3aed] text-white",
+    colorHover: "hover:bg-[#7c3aed]/80",
+    images: [
+      { src: karinaAsset,             alt: "Retrato oficial de Karina Meneguini, fundadora",   title: "Karina Meneguini" },
+    ],
+  },
 ];
 
 const partners = [
-  { slug: "rua-hum",          name: "Rua Hum",                          logo: sponsorRuaHumAsset },
-  { slug: "escola-aquarela",  name: "Escola Aquarela",                  logo: sponsorEscolaAquarelaAsset },
-  { slug: "ibicolor",         name: "Ibicolor",                         logo: sponsorIbicolorAsset },
-  { slug: "vila-don-patto",   name: "Vila Don Patto",                   logo: sponsorVilaDonPattoAsset },
-  { slug: "unimed-sao-roque", name: "Unimed São Roque",                 logo: sponsorUnimedAsset },
-  { slug: "emporio-qn",       name: "Empório QN",                       logo: sponsorEmporioQnAsset },
-  { slug: "tia-lina",         name: "Tia Lina",                         logo: sponsorTiaLinaAsset },
-  { slug: "fernando-araujo",  name: "Fernando Araújo Artista Plástico", logo: sponsorFernandoAraujoAsset },
-  { slug: "qualiser",         name: "Qualiser Contabilidade",           logo: sponsorQualiserAsset },
-  { slug: "jornal-da-economia",name: "Jornal da Economia",              logo: sponsorJornalEconomiaAsset },
+  { slug: "rua-hum",           name: "Rua Hum",                          logo: sponsorRuaHumAsset,          website_url: "https://www.instagram.com/ruahum" },
+  { slug: "escola-aquarela",   name: "Escola Aquarela",                  logo: sponsorEscolaAquarelaAsset,  website_url: "https://www.instagram.com/escolaaquarelasr" },
+  { slug: "ibicolor",          name: "Ibicolor",                         logo: sponsorIbicolorAsset,         website_url: "https://www.instagram.com/ibicolor_sr" },
+  { slug: "vila-don-patto",    name: "Vila Don Patto",                   logo: sponsorVilaDonPattoAsset,    website_url: "https://www.instagram.com/viladonpatto" },
+  { slug: "unimed-sao-roque",  name: "Unimed São Roque",                 logo: sponsorUnimedAsset,          website_url: "https://www.unimed.coop.br/site/web/saoroque" },
+  { slug: "emporio-qn",        name: "Empório QN",                       logo: sponsorEmporioQnAsset,       website_url: "" },
+  { slug: "tia-lina",          name: "Tia Lina",                         logo: sponsorTiaLinaAsset,         website_url: "https://www.instagram.com/cantinatialina" },
+  { slug: "fernando-araujo",   name: "Fernando Araújo Artista Plástico", logo: sponsorFernandoAraujoAsset,  website_url: "https://www.instagram.com/araujoartistaplastico" },
+  { slug: "qualiser",          name: "Qualiser Contabilidade",           logo: sponsorQualiserAsset,        website_url: "" },
+  { slug: "jornal-da-economia", name: "Jornal da Economia",              logo: sponsorJornalEconomiaAsset,  website_url: "" },
 ];
 
 const values = [
@@ -115,9 +147,9 @@ function AmeasHome() {
   const [partnerLinks, setPartnerLinks] = useState<PartnerLink[]>([]);
   const [donationOpen, setDonationOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<(typeof galleryImages)[number] | null>(null);
+  const [selectedImage, setSelectedImage] = useState<{ src: string; alt: string; title: string } | null>(null);
   const [copied, setCopied] = useState(false);
-  const [showAllGallery, setShowAllGallery] = useState(false);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [donationAmount, setDonationAmount] = useState("50");
   const [volunteerOpen, setVolunteerOpen] = useState(false);
   const [volunteerForm, setVolunteerForm] = useState({ name: "", email: "", phone: "", message: "" });
@@ -132,7 +164,10 @@ function AmeasHome() {
   const volunteerWhatsapp = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Olá, AMEAS! Quero ser voluntário(a).\nNome: ${volunteerForm.name}\nE-mail: ${volunteerForm.email}\nTelefone: ${volunteerForm.phone}\n${volunteerForm.message}`)}`;
 
   const visiblePartners = partners
-    .map((p) => ({ ...p, website_url: partnerLinks.find((l) => l.slug === p.slug)?.website_url ?? "" }))
+    .map((p) => {
+      const link = partnerLinks.find((l) => l.slug === p.slug);
+      return { ...p, website_url: link?.website_url || p.website_url };
+    })
     .filter((p) => !partnerLinks.length || partnerLinks.some((l) => l.slug === p.slug && l.published));
 
   const year = useMemo(() => new Date().getFullYear(), []);
@@ -375,60 +410,6 @@ function AmeasHome() {
         </div>
       </section>
 
-      {/* ══ ORGANOGRAMA ══ */}
-      <section className="py-20 sm:py-24" style={{background:"radial-gradient(ellipse 70% 50% at 50% 0%, rgba(27,75,138,.15), transparent), var(--color-secondary)"}} aria-labelledby="org-title">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-12 text-center">
-            <span className="section-kicker">Organograma</span>
-            <h2 id="org-title" className="mt-4 text-3xl font-black sm:text-4xl">
-              Uma rede organizada para <span className="gradient-text">cuidar e apoiar.</span>
-            </h2>
-          </div>
-
-          {/* Presidente */}
-          <div className="flex flex-col items-center">
-            <div className="relative w-60 overflow-hidden rounded-3xl border border-[#1B4B8A]/50 bg-gradient-to-br from-[#1B4B8A]/80 to-[#0d1b2e]/90 px-5 py-5 text-center shadow-xl glow-blue backdrop-blur">
-              <div className="mx-auto mb-3 h-16 w-16 overflow-hidden rounded-full border-2 border-[#7eb5f5]/50 shadow-lg glow-blue">
-                <img src={karinaAsset} alt={sc.org_president_name} className="h-full w-full object-cover object-top" />
-              </div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-[#7eb5f5]/80">Presidente</p>
-              <p className="mt-0.5 text-sm font-black text-white">{sc.org_president_name}</p>
-            </div>
-            <div className="org-line-v h-8" aria-hidden="true" />
-          </div>
-
-          {/* Vice */}
-          <div className="flex flex-col items-center">
-            <div className="w-60 rounded-3xl border border-border/50 bg-card/80 px-5 py-4 text-center shadow-md backdrop-blur">
-              <p className="text-[10px] font-black uppercase tracking-widest text-[#E8392A]">Vice-Presidente</p>
-              <p className="mt-0.5 text-sm font-black text-foreground">{sc.org_vp_name}</p>
-            </div>
-            <div className="org-line-v h-8" aria-hidden="true" />
-          </div>
-
-          {/* Linha horizontal */}
-          <div className="flex justify-center" aria-hidden="true">
-            <div className="org-line-h w-2/3" />
-          </div>
-
-          {/* 3 colunas */}
-          <div className="mt-0 grid grid-cols-1 gap-5 sm:grid-cols-3">
-            {[
-              { dept: "Secretaria",   color: "text-[#7eb5f5]", border: "border-[#1B4B8A]/25", c1: "Primeiro Secretário",  n1: sc.org_sec1_name,    c2: "Segundo Secretário",   n2: sc.org_sec2_name },
-              { dept: "Tesouraria",   color: "text-[#38bdf8]", border: "border-[#38bdf8]/25", c1: "Primeiro Tesoureiro", n1: sc.org_treas1_name,  c2: "Segundo Tesoureiro",  n2: sc.org_treas2_name },
-              { dept: "Fiscalização", color: "text-[#E8392A]", border: "border-[#E8392A]/25", c1: "Primeiro Fiscal",     n1: sc.org_audit1_name,  c2: "Segundo Fiscal",      n2: sc.org_audit2_name },
-            ].map(({ dept, color, border, c1, n1, c2, n2 }) => (
-              <div key={dept} className="flex flex-col items-center gap-3">
-                <div className="org-line-v h-8" aria-hidden="true" />
-                <p className={`text-[10px] font-black uppercase tracking-widest ${color}`}>{dept}</p>
-                <OrgCard cargo={c1} nome={n1} border={border} />
-                <OrgCard cargo={c2} nome={n2} border={border} />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ══ COMO AJUDAR ══ */}
       <section id="ajudar" className="bg-donation-pattern py-20 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -528,28 +509,72 @@ function AmeasHome() {
             <span className="section-kicker">Galeria</span>
             <h2 className="mt-4 text-3xl font-black sm:text-4xl">Histórias da AMEAS <span className="gradient-text">em movimento.</span></h2>
           </div>
-          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {(showAllGallery ? galleryImages : galleryImages.slice(0, 8)).map((img) => (
-              <button key={img.src} onClick={() => setSelectedImage(img)}
-                className="glass neon-border group overflow-hidden rounded-3xl border border-border/30 text-left transition-all hover:border-[#1B4B8A]/40">
-                <span className="flex aspect-[4/3] w-full items-center justify-center overflow-hidden bg-background/30 p-2">
-                  <img src={img.src} alt={img.alt} className="max-h-full w-full object-contain transition-transform group-hover:scale-105" loading="lazy" />
-                </span>
-                <span className="flex items-center justify-between gap-3 px-4 py-3">
-                  <span className="text-sm font-black text-foreground/80">{img.title}</span>
-                  <ArrowRight className="h-4 w-4 text-[#7eb5f5] transition-transform group-hover:translate-x-1" />
-                </span>
-              </button>
-            ))}
-          </div>
-          {galleryImages.length > 8 && (
-            <div className="mt-8 flex justify-center">
-              <Button variant="outline" size="lg" onClick={() => setShowAllGallery((v) => !v)}
-                className="rounded-2xl border-[#1B4B8A]/40 px-8 text-[#7eb5f5] hover:bg-[#1B4B8A]/10">
-                {showAllGallery ? "Ver menos" : "Ver mais fotos"}
-                <ChevronDown className={`h-4 w-4 transition-transform ${showAllGallery ? "rotate-180" : ""}`} />
-              </Button>
+
+          {selectedEventId === null ? (
+            /* ── Vista: grade de eventos ── */
+            <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {galleryEvents.map((ev) => {
+                const cover = ev.images[0];
+                return (
+                  <button key={ev.id} onClick={() => setSelectedEventId(ev.id)}
+                    className="glass neon-border group overflow-hidden rounded-3xl border border-border/30 text-left transition-all hover:border-[#1B4B8A]/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7eb5f5]">
+                    <span className="relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden bg-background/30">
+                      <img src={cover.src} alt={cover.alt}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
+                      {/* Tag de evento */}
+                      <span className={`absolute left-3 top-3 rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-wide shadow-lg ${ev.color}`}>
+                        {ev.label}
+                      </span>
+                      {/* Contagem de fotos */}
+                      <span className="absolute right-3 bottom-3 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur">
+                        {ev.images.length} foto{ev.images.length !== 1 ? "s" : ""}
+                      </span>
+                    </span>
+                    <span className="flex items-center justify-between gap-3 px-4 py-3">
+                      <span className="text-sm font-black text-foreground/80">{ev.label}</span>
+                      <ArrowRight className="h-4 w-4 text-[#7eb5f5] transition-transform group-hover:translate-x-1" />
+                    </span>
+                  </button>
+                );
+              })}
             </div>
+          ) : (
+            /* ── Vista: fotos do evento selecionado ── */
+            (() => {
+              const ev = galleryEvents.find((e) => e.id === selectedEventId)!;
+              return (
+                <div className="mt-10">
+                  {/* Cabeçalho do evento */}
+                  <div className="mb-8 flex flex-wrap items-center gap-4">
+                    <button onClick={() => setSelectedEventId(null)}
+                      className="flex items-center gap-2 rounded-2xl border border-border/40 px-4 py-2 text-sm font-bold text-foreground/60 transition-all hover:border-[#1B4B8A]/40 hover:text-[#7eb5f5]">
+                      <ArrowRight className="h-4 w-4 rotate-180" /> Todos os eventos
+                    </button>
+                    <span className={`rounded-full px-4 py-1.5 text-sm font-black uppercase tracking-wide shadow ${ev.color}`}>
+                      {ev.label}
+                    </span>
+                    <span className="text-sm text-foreground/40">{ev.images.length} foto{ev.images.length !== 1 ? "s" : ""}</span>
+                  </div>
+
+                  {/* Grade de fotos */}
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {ev.images.map((img) => (
+                      <button key={img.src} onClick={() => setSelectedImage(img)}
+                        className="glass neon-border group overflow-hidden rounded-3xl border border-border/30 text-left transition-all hover:border-[#1B4B8A]/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7eb5f5]">
+                        <span className="flex aspect-[4/3] w-full items-center justify-center overflow-hidden bg-background/30 p-2">
+                          <img src={img.src} alt={img.alt}
+                            className="max-h-full w-full object-contain transition-transform duration-300 group-hover:scale-105" loading="lazy" />
+                        </span>
+                        <span className="flex items-center justify-between gap-3 px-4 py-3">
+                          <span className="text-sm font-black text-foreground/80">{img.title}</span>
+                          <ArrowRight className="h-4 w-4 text-[#7eb5f5] transition-transform group-hover:translate-x-1" />
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()
           )}
         </div>
       </section>
@@ -696,15 +721,6 @@ function AmeasHome() {
 }
 
 /* ─── Sub-componentes ─── */
-
-function OrgCard({ cargo, nome, border = "border-border/40" }: { cargo: string; nome: string; border?: string }) {
-  return (
-    <div className={`glass w-full rounded-2xl border p-4 text-center backdrop-blur ${border}`}>
-      <p className="text-[10px] font-black uppercase tracking-wide text-foreground/50">{cargo}</p>
-      <p className="mt-1 text-sm font-black text-foreground">{nome}</p>
-    </div>
-  );
-}
 
 function DemoQr() {
   const qrCells = [

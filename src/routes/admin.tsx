@@ -16,15 +16,20 @@ const ADMIN_LOGIN = "ameas";
 const ADMIN_PASSWORD = "123456789";
 
 type UploadPreview = { file: File; url: string };
-type Tab = "hero" | "fundadora" | "organograma" | "depoimentos" | "pix" | "voluntario" | "parceiros" | "galeria";
+type Tab = "hero" | "fundadora" | "depoimentos" | "pix" | "voluntario" | "parceiros" | "galeria";
 
-const defaultPartnerLinks: PartnerLink[] = ([
-  ["rua-hum", "Rua Hum"], ["escola-aquarela", "Escola Aquarela"], ["ibicolor", "Ibicolor"],
-  ["vila-don-patto", "Vila Don Patto"], ["unimed-sao-roque", "Unimed São Roque"],
-  ["emporio-qn", "Empório QN"], ["tia-lina", "Tia Lina"],
-  ["fernando-araujo", "Fernando Araújo Artista Plástico"],
-  ["qualiser", "Qualiser Contabilidade"], ["jornal-da-economia", "Jornal da Economia"],
-] as const).map(([slug, name], i) => ({ slug, name, website_url: "", sort_order: i + 1, published: true }));
+const defaultPartnerLinks: PartnerLink[] = [
+  { slug: "rua-hum",            name: "Rua Hum",                          website_url: "https://www.instagram.com/ruahum",                   sort_order: 1,  published: true },
+  { slug: "escola-aquarela",    name: "Escola Aquarela",                  website_url: "https://www.instagram.com/escolaaquarelasr",          sort_order: 2,  published: true },
+  { slug: "ibicolor",           name: "Ibicolor",                         website_url: "https://www.instagram.com/ibicolor_sr",              sort_order: 3,  published: true },
+  { slug: "vila-don-patto",     name: "Vila Don Patto",                   website_url: "https://www.instagram.com/viladonpatto",             sort_order: 4,  published: true },
+  { slug: "unimed-sao-roque",   name: "Unimed São Roque",                 website_url: "https://www.unimed.coop.br/site/web/saoroque",       sort_order: 5,  published: true },
+  { slug: "emporio-qn",         name: "Empório QN",                       website_url: "",                                                   sort_order: 6,  published: true },
+  { slug: "tia-lina",           name: "Tia Lina",                         website_url: "https://www.instagram.com/cantinatialina",           sort_order: 7,  published: true },
+  { slug: "fernando-araujo",    name: "Fernando Araújo Artista Plástico", website_url: "https://www.instagram.com/araujoartistaplastico",    sort_order: 8,  published: true },
+  { slug: "qualiser",           name: "Qualiser Contabilidade",           website_url: "",                                                   sort_order: 9,  published: true },
+  { slug: "jornal-da-economia", name: "Jornal da Economia",               website_url: "",                                                   sort_order: 10, published: true },
+];
 
 export default function AdminPage() {
   const [loginInput, setLoginInput] = useState("");
@@ -158,7 +163,6 @@ export default function AdminPage() {
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: "hero",        label: "Hero / Sobre",   icon: <Settings className="h-4 w-4" /> },
     { id: "fundadora",   label: "Fundadora",      icon: <Users className="h-4 w-4" /> },
-    { id: "organograma", label: "Organograma",    icon: <LayoutDashboard className="h-4 w-4" /> },
     { id: "depoimentos", label: "Depoimentos",    icon: <CheckCircle2 className="h-4 w-4" /> },
     { id: "pix",         label: "PIX / Doação",   icon: <QrCode className="h-4 w-4" /> },
     { id: "voluntario",  label: "Voluntário",     icon: <HandHeart className="h-4 w-4" /> },
@@ -253,38 +257,6 @@ export default function AdminPage() {
               <F label="Nome da fundadora" value={content.founder_name} onChange={(v) => set("founder_name", v)} />
               <F label="Biografia — parágrafo 1" value={content.founder_bio1} onChange={(v) => set("founder_bio1", v)} multi />
               <F label="Biografia — parágrafo 2" value={content.founder_bio2} onChange={(v) => set("founder_bio2", v)} multi />
-            </div>
-            <SaveBtn onClick={saveAll} busy={busy} />
-          </AdminCard>
-        )}
-
-        {/* ── Organograma ── */}
-        {tab === "organograma" && (
-          <AdminCard title="Organograma" desc="Nomes dos cargos exibidos no organograma hierárquico.">
-            <div className="grid gap-5 sm:grid-cols-2">
-              <F label="Presidente" value={content.org_president_name} onChange={(v) => set("org_president_name", v)} />
-              <F label="Vice-Presidente" value={content.org_vp_name} onChange={(v) => set("org_vp_name", v)} />
-              <div className="sm:col-span-2 border-t border-border/20 pt-4">
-                <p className="mb-3 text-xs font-black uppercase tracking-widest text-[#7eb5f5]/70">Secretaria</p>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <F label="Primeiro Secretário" value={content.org_sec1_name} onChange={(v) => set("org_sec1_name", v)} />
-                  <F label="Segundo Secretário" value={content.org_sec2_name} onChange={(v) => set("org_sec2_name", v)} />
-                </div>
-              </div>
-              <div className="sm:col-span-2 border-t border-border/20 pt-4">
-                <p className="mb-3 text-xs font-black uppercase tracking-widest text-[#38bdf8]/70">Tesouraria</p>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <F label="Primeiro Tesoureiro" value={content.org_treas1_name} onChange={(v) => set("org_treas1_name", v)} />
-                  <F label="Segundo Tesoureiro" value={content.org_treas2_name} onChange={(v) => set("org_treas2_name", v)} />
-                </div>
-              </div>
-              <div className="sm:col-span-2 border-t border-border/20 pt-4">
-                <p className="mb-3 text-xs font-black uppercase tracking-widest text-[#E8392A]/70">Fiscalização</p>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <F label="Primeiro Fiscal" value={content.org_audit1_name} onChange={(v) => set("org_audit1_name", v)} />
-                  <F label="Segundo Fiscal" value={content.org_audit2_name} onChange={(v) => set("org_audit2_name", v)} />
-                </div>
-              </div>
             </div>
             <SaveBtn onClick={saveAll} busy={busy} />
           </AdminCard>

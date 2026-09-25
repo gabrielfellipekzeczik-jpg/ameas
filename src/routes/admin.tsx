@@ -31,7 +31,7 @@ const ADMIN_LOGIN = "ameas";
 const ADMIN_PASSWORD = "123456789";
 
 type UploadPreview = { file: File; url: string };
-type Tab = "hero" | "fundadora" | "depoimentos" | "pix" | "voluntario" | "parceiros" | "logos" | "galeria";
+type Tab = "hero" | "depoimentos" | "pix" | "voluntario" | "parceiros" | "galeria";
 
 /* â”€â”€ Static gallery items (mirroring index.tsx galleryEvents) â”€â”€ */
 const STATIC_GALLERY: { src: string; alt: string; title: string; category: string }[] = [
@@ -340,7 +340,11 @@ export default function AdminPage() {
         const up = await supabase.storage.from("ameas-site-media").upload(path, blob, { upsert: true, contentType: "image/png" });
         if (up.error) { errors.push(`${item.name}: ${up.error.message}`); continue; }
         const { data: urlData } = supabase.storage.from("ameas-site-media").getPublicUrl(path);
-        await supabase.from("ameas_partners").update({ logo_url: urlData.publicUrl }).eq("slug", item.slug);
+        // Salva a URL no ameas_site_content como logo_url_<slug>
+        await supabase.from("ameas_site_content").upsert(
+          { key: `logo_url_${item.slug}`, value: urlData.publicUrl },
+          { onConflict: "key" }
+        );
       } catch (e: unknown) { errors.push(`${item.name}: ${e instanceof Error ? e.message : "erro"}`); }
     }
     setBusy(false);
@@ -391,12 +395,10 @@ export default function AdminPage() {
   /* â•â• PAINEL â•â• */
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: "hero",        label: "Hero / Sobre",  icon: <Settings className="h-4 w-4" /> },
-    { id: "fundadora",   label: "Fundadora",     icon: <Users className="h-4 w-4" /> },
     { id: "depoimentos", label: "Depoimentos",   icon: <CheckCircle2 className="h-4 w-4" /> },
     { id: "pix",         label: "PIX / Doacao",  icon: <QrCode className="h-4 w-4" /> },
     { id: "voluntario",  label: "Voluntario",    icon: <HandHeart className="h-4 w-4" /> },
     { id: "parceiros",   label: "Parceiros",     icon: <Link2 className="h-4 w-4" /> },
-    { id: "logos",       label: "Logos",         icon: <ImageIcon className="h-4 w-4" /> },
     { id: "galeria",     label: "Galeria",       icon: <ImagePlus className="h-4 w-4" /> },
   ];
 
@@ -466,30 +468,28 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {/* â”€â”€ Hero â”€â”€ */}
+        {/* Hero / Sobre / Fundadora */}
         {tab === "hero" && (
-          <AdminCard title="Hero e Sobre" desc="Textos principais da pagina inicial.">
-            <div className="grid gap-5 sm:grid-cols-2">
-              <F label="Titulo do hero" value={content.hero_title} onChange={(v) => set("hero_title", v)} />
-              <F label="WhatsApp" value={content.contact_whatsapp} onChange={(v) => set("contact_whatsapp", v)} />
-              <div className="sm:col-span-2"><F label="Subtitulo do hero" value={content.hero_subtitle} onChange={(v) => set("hero_subtitle", v)} multi /></div>
-              <div className="sm:col-span-2"><F label="Texto sobre a AMEAS" value={content.about_text} onChange={(v) => set("about_text", v)} multi /></div>
-              <F label="Instagram URL" value={content.instagram_url} onChange={(v) => set("instagram_url", v)} />
-            </div>
-            <SaveBtn onClick={saveAll} busy={busy} />
-          </AdminCard>
-        )}
-
-        {/* â”€â”€ Fundadora â”€â”€ */}
-        {tab === "fundadora" && (
-          <AdminCard title="Secao Fundadora" desc="Nome e textos biograficos da fundadora.">
-            <div className="grid gap-5">
-              <F label="Nome da fundadora" value={content.founder_name} onChange={(v) => set("founder_name", v)} />
-              <F label="Biografia 1" value={content.founder_bio1} onChange={(v) => set("founder_bio1", v)} multi />
-              <F label="Biografia 2" value={content.founder_bio2} onChange={(v) => set("founder_bio2", v)} multi />
-            </div>
-            <SaveBtn onClick={saveAll} busy={busy} />
-          </AdminCard>
+          <div className="space-y-6">
+            <AdminCard title="Hero e Sobre" desc="Textos principais da pagina inicial.">
+              <div className="grid gap-5 sm:grid-cols-2">
+                <F label="Titulo do hero" value={content.hero_title} onChange={(v) => set("hero_title", v)} />
+                <F label="WhatsApp" value={content.contact_whatsapp} onChange={(v) => set("contact_whatsapp", v)} />
+                <div className="sm:col-span-2"><F label="Subtitulo do hero" value={content.hero_subtitle} onChange={(v) => set("hero_subtitle", v)} multi /></div>
+                <div className="sm:col-span-2"><F label="Texto sobre a AMEAS" value={content.about_text} onChange={(v) => set("about_text", v)} multi /></div>
+                <F label="Instagram URL" value={content.instagram_url} onChange={(v) => set("instagram_url", v)} />
+              </div>
+              <SaveBtn onClick={saveAll} busy={busy} />
+            </AdminCard>
+            <AdminCard title="Fundadora" desc="Nome e textos biograficos exibidos na secao da fundadora.">
+              <div className="grid gap-5">
+                <F label="Nome da fundadora" value={content.founder_name} onChange={(v) => set("founder_name", v)} />
+                <F label="Biografia 1" value={content.founder_bio1} onChange={(v) => set("founder_bio1", v)} multi />
+                <F label="Biografia 2" value={content.founder_bio2} onChange={(v) => set("founder_bio2", v)} multi />
+              </div>
+              <SaveBtn onClick={saveAll} busy={busy} />
+            </AdminCard>
+          </div>
         )}
 
         {/* â”€â”€ Depoimentos â”€â”€ */}
@@ -560,52 +560,50 @@ export default function AdminPage() {
           </AdminCard>
         )}
 
-        {/* â”€â”€ Parceiros â”€â”€ */}
+        {/* Parceiros + Logos */}
         {tab === "parceiros" && (
-          <AdminCard title="Links dos Parceiros" desc="O logo de cada parceiro ficara clicavel no site. Ative/desative a visibilidade.">
-            <div className="space-y-3">
-              {partnerLinks.map((p, i) => (
-                <div key={p.slug} className="grid items-center gap-3 rounded-2xl border border-border/20 bg-secondary/20 p-4 sm:grid-cols-[1fr_2fr_auto]">
-                  <div>
-                    <p className="text-xs font-black text-foreground/80">{p.name}</p>
-                    <p className="text-[10px] text-foreground/40 uppercase tracking-wide">{p.slug}</p>
+          <div className="space-y-6">
+            <AdminCard title="Links dos Parceiros" desc="O logo de cada parceiro ficara clicavel no site. Ative/desative a visibilidade.">
+              <div className="space-y-3">
+                {partnerLinks.map((p, i) => (
+                  <div key={p.slug} className="grid items-center gap-3 rounded-2xl border border-border/20 bg-secondary/20 p-4 sm:grid-cols-[1fr_2fr_auto]">
+                    <div>
+                      <p className="text-xs font-black text-foreground/80">{p.name}</p>
+                      <p className="text-[10px] text-foreground/40 uppercase tracking-wide">{p.slug}</p>
+                    </div>
+                    <Input type="url" placeholder="https://..." value={p.website_url}
+                      onChange={(e) => setPartnerLinks(partnerLinks.map((x, j) => j === i ? { ...x, website_url: e.target.value } : x))}
+                      className="rounded-xl border-border/30 bg-white/5 text-sm text-foreground placeholder:text-foreground/30" />
+                    <button onClick={() => setPartnerLinks(partnerLinks.map((x, j) => j === i ? { ...x, published: !x.published } : x))}
+                      className={`rounded-xl border px-3 py-1.5 text-xs font-bold transition-all ${p.published ? "border-emerald-500/30 bg-emerald-500/15 text-emerald-400" : "border-border/30 text-foreground/40"}`}>
+                      {p.published ? "Visivel" : "Oculto"}
+                    </button>
                   </div>
-                  <Input type="url" placeholder="https://..." value={p.website_url}
-                    onChange={(e) => setPartnerLinks(partnerLinks.map((x, j) => j === i ? { ...x, website_url: e.target.value } : x))}
-                    className="rounded-xl border-border/30 bg-white/5 text-sm text-foreground placeholder:text-foreground/30" />
-                  <button onClick={() => setPartnerLinks(partnerLinks.map((x, j) => j === i ? { ...x, published: !x.published } : x))}
-                    className={`rounded-xl border px-3 py-1.5 text-xs font-bold transition-all ${p.published ? "border-emerald-500/30 bg-emerald-500/15 text-emerald-400" : "border-border/30 text-foreground/40"}`}>
-                    {p.published ? "Visivel" : "Oculto"}
-                  </button>
-                </div>
-              ))}
-            </div>
-            <Button onClick={savePartners} disabled={busy} className="mt-6 rounded-2xl bg-[#1B4B8A] text-white hover:bg-[#1B4B8A]/90">
-              <Save className="mr-2 h-4 w-4" /> {busy ? "Salvando..." : "Salvar parceiros"}
-            </Button>
-          </AdminCard>
-        )}
-
-        {/* â”€â”€ Logos â”€â”€ */}
-        {tab === "logos" && (
-          <AdminCard title="Logos dos Apoiadores" desc="Faca upload da nova logo. Normalizada automaticamente para 400x300 px, fundo branco.">
-            <div className="space-y-4">
-              {PARTNER_SLUGS.map(({ slug, name }) => {
-                const item = logoUploads.find((l) => l.slug === slug);
-                return (
-                  <LogoUploadRow key={slug} slug={slug} name={name} item={item ?? null}
-                    onFile={(file) => addLogoFile(slug, name, file)}
-                    onRemove={() => setLogoUploads((prev) => prev.filter((l) => l.slug !== slug))} />
-                );
-              })}
-            </div>
-            {logoUploads.some((l) => l.normalized && !l.processing) && (
-              <Button onClick={publishLogos} disabled={busy} className="mt-8 rounded-2xl bg-[#1B4B8A] text-white hover:bg-[#1B4B8A]/90">
-                <Upload className="mr-2 h-4 w-4" />
-                {busy ? "Publicando..." : `Publicar ${logoUploads.filter((l) => l.normalized && !l.processing).length} logo(s)`}
+                ))}
+              </div>
+              <Button onClick={savePartners} disabled={busy} className="mt-6 rounded-2xl bg-[#1B4B8A] text-white hover:bg-[#1B4B8A]/90">
+                <Save className="mr-2 h-4 w-4" /> {busy ? "Salvando..." : "Salvar parceiros"}
               </Button>
-            )}
-          </AdminCard>
+            </AdminCard>
+            <AdminCard title="Logos dos Apoiadores" desc="Faca upload da nova logo. Normalizada para 400x300 px, fundo branco.">
+              <div className="space-y-4">
+                {PARTNER_SLUGS.map(({ slug, name }) => {
+                  const item = logoUploads.find((l) => l.slug === slug);
+                  return (
+                    <LogoUploadRow key={slug} slug={slug} name={name} item={item ?? null}
+                      onFile={(file) => addLogoFile(slug, name, file)}
+                      onRemove={() => setLogoUploads((prev) => prev.filter((l) => l.slug !== slug))} />
+                  );
+                })}
+              </div>
+              {logoUploads.some((l) => l.normalized && !l.processing) && (
+                <Button onClick={publishLogos} disabled={busy} className="mt-8 rounded-2xl bg-[#1B4B8A] text-white hover:bg-[#1B4B8A]/90">
+                  <Upload className="mr-2 h-4 w-4" />
+                  {busy ? "Publicando..." : `Publicar ${logoUploads.filter((l) => l.normalized && !l.processing).length} logo(s)`}
+                </Button>
+              )}
+            </AdminCard>
+          </div>
         )}
 
         {/* â”€â”€ Galeria â”€â”€ */}

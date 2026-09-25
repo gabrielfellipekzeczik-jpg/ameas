@@ -161,7 +161,10 @@ function AmeasHome() {
   const visiblePartners = partners
     .map((p) => {
       const link = partnerLinks.find((l) => l.slug === p.slug);
-      return { ...p, website_url: link?.website_url || p.website_url };
+      // Logo: prefer base64 saved from admin, then remote storage URL, then static asset
+      const b64Key = `logo_b64_${p.slug}` as keyof SiteContent;
+      const customLogo = (sc[b64Key] as string | undefined) || p.remoteLogoUrl || null;
+      return { ...p, website_url: link?.website_url || p.website_url, customLogo };
     })
     .filter((p) => !partnerLinks.length || partnerLinks.some((l) => l.slug === p.slug && l.published));
 
@@ -597,7 +600,7 @@ function AmeasHome() {
                 className="glass neon-border group flex flex-col items-center gap-3 rounded-3xl border border-border/40 p-5 text-center transition-all hover:border-[#1B4B8A]/40">
                 <span className="flex h-20 w-full items-center justify-center rounded-2xl bg-white p-2">
                   <img
-                    src={p.remoteLogoUrl ?? p.logo}
+                    src={p.customLogo ?? p.logo}
                     alt={`Logo de ${p.name}`}
                     className="h-full w-full object-contain"
                     loading="lazy"

@@ -3,6 +3,12 @@ import { createClient } from "@supabase/supabase-js";
 const supabaseUrl = import.meta.env["VITE_SUPABASE_URL"] as string | undefined;
 const supabaseAnonKey = import.meta.env["VITE_SUPABASE_ANON_KEY"] as string | undefined;
 
+/** Base URL for public Storage objects. e.g. getStorageUrl("logos/ibicolor.png") */
+export function getStorageUrl(path: string): string | null {
+  if (!supabaseUrl) return null;
+  return `${supabaseUrl}/storage/v1/object/public/ameas-site-media/${path}`;
+}
+
 export const supabase =
   supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
 

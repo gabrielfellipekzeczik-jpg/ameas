@@ -339,17 +339,11 @@ export default function AdminPage() {
         const path = `logos/${item.slug}.png`;
         const up = await supabase.storage.from("ameas-site-media").upload(path, blob, { upsert: true, contentType: "image/png" });
         if (up.error) { errors.push(`${item.name}: ${up.error.message}`); continue; }
-        const { data: urlData } = supabase.storage.from("ameas-site-media").getPublicUrl(path);
-        // Salva a URL no ameas_site_content como logo_url_<slug>
-        await supabase.from("ameas_site_content").upsert(
-          { key: `logo_url_${item.slug}`, value: urlData.publicUrl },
-          { onConflict: "key" }
-        );
       } catch (e: unknown) { errors.push(`${item.name}: ${e instanceof Error ? e.message : "erro"}`); }
     }
     setBusy(false);
     if (errors.length) notify(errors.join(" | "), false);
-    else { notify(`${ready.length} logo(s) publicada(s)!`); setLogoUploads([]); }
+    else { notify(`${ready.length} logo(s) publicada(s)! Disponivel no site em instantes.`); setLogoUploads([]); }
   }
 
   /* â•â• LOGIN â•â• */

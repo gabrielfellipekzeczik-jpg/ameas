@@ -33,7 +33,7 @@ import sponsorFernandoAraujoAsset from "@/assets/sponsor-fernando-araujo.png";
 import sponsorQualiserAsset from "@/assets/sponsor-qualiser-contabilidade.png";
 import sponsorJornalEconomiaAsset from "@/assets/sponsor-jornal-da-economia.png";
 import {
-  defaultSiteContent, getPartnerLinks, getSiteContent, getGalleryCategories, getGalleryItems,
+  defaultSiteContent, getPartnerLinks, getSiteContent, getGalleryCategories, getGalleryItems, getStorageUrl,
   type PartnerLink, type SiteContent, type GalleryCategory,
 } from "@/lib/supabase";
 
@@ -122,7 +122,7 @@ const partners = [
   { slug: "fernando-araujo",   name: "Fernando Araújo Artista Plástico", logo: sponsorFernandoAraujoAsset,  website_url: "https://www.instagram.com/araujoartistaplastico" },
   { slug: "qualiser",          name: "Qualiser Contabilidade",           logo: sponsorQualiserAsset,        website_url: "" },
   { slug: "jornal-da-economia", name: "Jornal da Economia",              logo: sponsorJornalEconomiaAsset,  website_url: "" },
-];
+].map((p) => ({ ...p, remoteLogoUrl: getStorageUrl(`logos/${p.slug}.png`) }));
 
 const values = [
   { icon: Target, title: "Missão",  text: "Promover inclusão, autonomia e qualidade de vida por meio do esporte adaptado, criando caminhos reais de participação social." },
@@ -596,7 +596,13 @@ function AmeasHome() {
                 onClick={(e) => !p.website_url && e.preventDefault()}
                 className="glass neon-border group flex flex-col items-center gap-3 rounded-3xl border border-border/40 p-5 text-center transition-all hover:border-[#1B4B8A]/40">
                 <span className="flex h-20 w-full items-center justify-center rounded-2xl bg-white p-2">
-                  <img src={p.logo} alt={`Logo de ${p.name}`} className="h-full w-full object-contain" loading="lazy" />
+                  <img
+                    src={p.remoteLogoUrl ?? p.logo}
+                    alt={`Logo de ${p.name}`}
+                    className="h-full w-full object-contain"
+                    loading="lazy"
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = p.logo; }}
+                  />
                 </span>
                 <span className="text-xs font-black uppercase leading-snug text-foreground/70 group-hover:text-[#7eb5f5] transition-colors">{p.name}</span>
               </a>

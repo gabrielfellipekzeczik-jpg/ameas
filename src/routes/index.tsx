@@ -2,7 +2,7 @@
 
 import { createFileRoute } from "@tanstack/react-router";
 import {
-  Activity, ArrowRight, CalendarHeart, CheckCircle2, ChevronDown,
+  Activity, ArrowRight, CalendarHeart, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight,
   Clock, Copy, Gift, HandHeart, Heart, LayoutDashboard, MapPin,
   Menu, MessageCircle, QrCode, Repeat, Sparkles, Star, Target,
   Trophy, Users, X,
@@ -12,16 +12,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import logoAsset from "@/assets/ameas-logo.png";
-import parceirosBannerAsset from "@/assets/ameas-parceiros-banner.png";
-import acolhimentoCafeAsset from "@/assets/ameas-acolhimento-cafe.png";
-import corridaAdaptadaAsset from "@/assets/ameas-corrida-adaptada.png";
-import parceriaTiaLinaAsset from "@/assets/ameas-parceria-tia-lina.png";
-import encontroComunidadeAsset from "@/assets/ameas-encontro-comunidade.png";
-import karinaAsset from "@/assets/karina-meneguini-retrato.png";
-import crossfitGrupoAsset from "@/assets/ameas-crossfit-grupo.png";
-import acaoSolidariaAsset from "@/assets/ameas-acao-solidaria.png";
-import treinoAdaptadoAsset from "@/assets/ameas-treino-adaptado.png";
-import pixQrcodeAsset from "@/assets/pix-qrcode.png";
 import sponsorRuaHumAsset from "@/assets/sponsor-rua-hum.png";
 import sponsorEscolaAquarelaAsset from "@/assets/sponsor-escola-aquarela.png";
 import sponsorIbicolorAsset from "@/assets/sponsor-ibicolor.png";
@@ -36,6 +26,11 @@ import {
   defaultSiteContent, getPartnerLinks, getSiteContent, getGalleryCategories, getGalleryItems, getStorageUrl,
   type PartnerLink, type SiteContent, type GalleryCategory,
 } from "@/lib/supabase";
+import { parseStringList, pick, type HeroSlide } from "@/lib/cms-schema";
+import {
+  BUILTIN_PHOTOS, DEFAULT_FIELD_IMAGES, defaultHeroSlides, getHeroSlides, resolveImage,
+} from "@/lib/builtin-images";
+import { STATIC_CATEGORIES, STATIC_GALLERY } from "@/lib/gallery-static";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -51,9 +46,6 @@ export const Route = createFileRoute("/")({
 });
 
 /* ─── Constantes ─── */
-const whatsappNumber = "5511999433480";
-const whatsappDisplay = "(11) 99943-3480";
-
 const navLinks = [
   { href: "#sobre",      label: "Sobre" },
   { href: "#fundadora",  label: "Fundadora" },
@@ -65,50 +57,6 @@ const navLinks = [
   { href: "#ajudar",     label: "Apoiar" },
   { href: "#parceiros",  label: "Parceiros" },
   { href: "#contato",    label: "Contato" },
-];
-
-const galleryEvents = [
-  {
-    id: "esporte-adaptado",
-    label: "Esporte Adaptado",
-    color: "bg-[#1B4B8A] text-white",
-    colorHover: "hover:bg-[#1B4B8A]/80",
-    images: [
-      { src: corridaAdaptadaAsset,    alt: "Atleta em triciclo adaptado durante atividade",    title: "Corrida adaptada" },
-      { src: crossfitGrupoAsset,      alt: "Equipe AMEAS em encontro esportivo no CrossFit",   title: "Treino coletivo" },
-      { src: treinoAdaptadoAsset,     alt: "Mulheres da AMEAS realizando treino adaptado",     title: "Superação em treino" },
-    ],
-  },
-  {
-    id: "comunidade",
-    label: "Comunidade",
-    color: "bg-[#E8392A] text-white",
-    colorHover: "hover:bg-[#E8392A]/80",
-    images: [
-      { src: encontroComunidadeAsset, alt: "Grande grupo da AMEAS reunido com banner",         title: "Encontro da comunidade" },
-      { src: acaoSolidariaAsset,      alt: "Grupo da AMEAS em ação solidária",                 title: "Ação solidária" },
-      { src: parceirosBannerAsset,    alt: "Banner comemorativo com parceiros da AMEAS",       title: "Parceiros AMEAS" },
-    ],
-  },
-  {
-    id: "acolhimento",
-    label: "Acolhimento",
-    color: "bg-[#059669] text-white",
-    colorHover: "hover:bg-[#059669]/80",
-    images: [
-      { src: acolhimentoCafeAsset,    alt: "Grupo da AMEAS reunido em momento de acolhimento", title: "Café de acolhimento" },
-      { src: parceriaTiaLinaAsset,    alt: "Participantes da AMEAS em ação de parceria",       title: "Parceria Tia Lina" },
-    ],
-  },
-  {
-    id: "fundadora",
-    label: "Fundadora",
-    color: "bg-[#7c3aed] text-white",
-    colorHover: "hover:bg-[#7c3aed]/80",
-    images: [
-      { src: karinaAsset,             alt: "Retrato oficial de Karina Meneguini, fundadora",   title: "Karina Meneguini" },
-    ],
-  },
 ];
 
 const partners = [
@@ -124,12 +72,6 @@ const partners = [
   { slug: "jornal-da-economia", name: "Jornal da Economia",              logo: sponsorJornalEconomiaAsset,  website_url: "" },
 ].map((p) => ({ ...p, remoteLogoUrl: getStorageUrl(`logos/${p.slug}.png`) }));
 
-const values = [
-  { icon: Target, title: "Missão",  text: "Promover inclusão, autonomia e qualidade de vida por meio do esporte adaptado, criando caminhos reais de participação social." },
-  { icon: Trophy, title: "Visão",   text: "Ser referência regional em esporte adaptado, acolhimento e oportunidades para pessoas com deficiência e suas famílias." },
-  { icon: Heart,  title: "Valores", text: "Respeito, empatia, superação, compromisso, transparência, colaboração e amor pelo desenvolvimento humano." },
-];
-
 const donationPresets = [25, 50, 100, 200];
 
 /* ─── Componente principal ─── */
@@ -139,6 +81,7 @@ function AmeasHome() {
   const [dynamicCategories, setDynamicCategories] = useState<GalleryCategory[]>([]);
   const [dbGalleryItems, setDbGalleryItems] = useState<Array<{ id: string; title: string; alt: string; image_url: string; category: string | null; sort_order: number; published: boolean }>>([]);
   const [donationOpen, setDonationOpen] = useState(false);
+  const [dialogAmount, setDialogAmount] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<{ src: string; alt: string; title: string } | null>(null);
   const [copied, setCopied] = useState(false);
@@ -155,6 +98,17 @@ function AmeasHome() {
     getGalleryItems().then(setDbGalleryItems);
   }, []);
 
+  // Número vem do painel (campo WhatsApp). Sem DDI, assume Brasil (55).
+  const waDigits = sc.contact_whatsapp.replace(/\D/g, "");
+  const whatsappNumber = waDigits.length >= 12 ? waDigits : `55${waDigits}`;
+
+  const heroSlides = useMemo(() => {
+    const active = getHeroSlides(sc).filter((x) => x.active);
+    return active.length ? active : defaultHeroSlides(sc);
+  }, [sc]);
+  const heroIntervalRaw = Number(sc.hero_interval);
+  const heroInterval = Number.isFinite(heroIntervalRaw) && heroIntervalRaw >= 0 ? heroIntervalRaw : 6;
+
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Olá, AMEAS! Quero apoiar a Associação Movimento Esporte Adaptado e Superação.")}`;
   const volunteerWhatsapp = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Olá, AMEAS! Quero ser voluntário(a).\nNome: ${volunteerForm.name}\nE-mail: ${volunteerForm.email}\nTelefone: ${volunteerForm.phone}\n${volunteerForm.message}`)}`;
 
@@ -162,33 +116,29 @@ function AmeasHome() {
     .map((p) => {
       const link = partnerLinks.find((l) => l.slug === p.slug);
       // Logo: prefer base64 saved from admin, then remote storage URL, then static asset
-      const b64Key = `logo_b64_${p.slug}` as keyof SiteContent;
-      const customLogo = (sc[b64Key] as string | undefined) || p.remoteLogoUrl || null;
+      const customLogo = pick(sc, `logo_b64_${p.slug}`) || p.remoteLogoUrl || null;
       return { ...p, website_url: link?.website_url || p.website_url, customLogo };
     })
     .filter((p) => !partnerLinks.length || partnerLinks.some((l) => l.slug === p.slug && l.published));
 
-  // Merge static gallery events with dynamic categories + DB images
+  // Junta fotos fixas do site + categorias/fotos do banco (respeitando as fotos ocultadas no painel)
+  const hiddenStatic = sc.gallery_hidden;
   const activeEvents = useMemo(() => {
-    // Start from dynamic categories if loaded, else fall back to static galleryEvents
-    const cats = dynamicCategories.length ? dynamicCategories : galleryEvents.map((e) => ({
+    const hidden = parseStringList(hiddenStatic);
+    const cats = dynamicCategories.length ? dynamicCategories : STATIC_CATEGORIES.map((e) => ({
       id: e.id, label: e.label, color: e.color, sort_order: 0,
     }));
 
     return cats.map((cat) => {
-      // Static images for this category
-      const staticImgs = galleryEvents
-        .find((e) => e.id === cat.id)?.images
-        .map((img) => ({ src: img.src, alt: img.alt, title: img.title, isDb: false })) ?? [];
-
-      // DB images for this category
+      const staticImgs = STATIC_GALLERY
+        .filter((img) => img.category === cat.id && !hidden.includes(img.title))
+        .map((img) => ({ src: img.src, alt: img.alt, title: img.title, isDb: false }));
       const dbImgs = dbGalleryItems
         .filter((item) => item.category === cat.id)
         .map((item) => ({ src: item.image_url, alt: item.alt, title: item.title, isDb: true }));
-
       return { ...cat, images: [...staticImgs, ...dbImgs] };
     }).filter((ev) => ev.images.length > 0);
-  }, [dynamicCategories, dbGalleryItems]);
+  }, [dynamicCategories, dbGalleryItems, hiddenStatic]);
 
   const year = useMemo(() => new Date().getFullYear(), []);
 
@@ -270,86 +220,37 @@ function AmeasHome() {
         )}
       </header>
 
-      {/* ══ HERO ══ */}
-      <section id="inicio" className="relative overflow-hidden bg-hero-pattern">
-        <div className="pointer-events-none absolute -top-40 left-1/4 h-96 w-96 rounded-full bg-[#1B4B8A]/20 blur-3xl" aria-hidden="true" />
-        <div className="pointer-events-none absolute -bottom-20 right-1/4 h-80 w-80 rounded-full bg-[#E8392A]/10 blur-3xl" aria-hidden="true" />
-
-        <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:px-8 lg:py-24">
-          <div className="max-w-2xl">
-            <Badge className="border border-[#1B4B8A]/30 bg-[#1B4B8A]/10 px-3 py-1 text-[#7eb5f5] hover:bg-[#1B4B8A]/20">
-              Associação Movimento Esporte Adaptado e Superação
-            </Badge>
-            <h1 className="mt-6 text-5xl font-black leading-tight sm:text-6xl lg:text-7xl">
-              <span className="gradient-text">AMEAS</span>
-            </h1>
-            <p className="mt-4 text-2xl font-bold text-foreground/90 sm:text-3xl">{sc.hero_title}</p>
-            <p className="mt-5 text-lg leading-8 text-foreground/60">{sc.hero_subtitle}</p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Button asChild size="lg" className="rounded-2xl bg-[#E8392A] text-white shadow-lg shadow-[#E8392A]/30 hover:bg-[#E8392A]/90 hover:shadow-[#E8392A]/50">
-                <a href="#ajudar"><Heart aria-hidden="true" /> Fazer Doação</a>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="rounded-2xl border-[#1B4B8A]/40 text-[#7eb5f5] hover:bg-[#1B4B8A]/10">
-                <a href={whatsappUrl} target="_blank" rel="noreferrer"><MessageCircle aria-hidden="true" /> WhatsApp</a>
-              </Button>
-            </div>
-            <div className="mt-8 flex flex-wrap gap-4 text-sm font-semibold text-foreground/60">
-              {["Inclusão", "Acolhimento", "Superação"].map((t) => (
-                <span key={t} className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-[#E8392A]" /> {t}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-[1.2fr_0.8fr]">
-            <figure className="glass neon-border relative flex min-h-[340px] items-center justify-center overflow-hidden rounded-3xl p-3 shadow-2xl">
-              <img src={treinoAdaptadoAsset} alt="Atletas da AMEAS em treino adaptado" className="max-h-[520px] w-full object-contain" loading="eager" />
-            </figure>
-            <div className="grid gap-4">
-              {[corridaAdaptadaAsset, crossfitGrupoAsset].map((src, i) => (
-                <figure key={i} className="glass flex min-h-[160px] items-center justify-center overflow-hidden rounded-2xl p-3">
-                  <img src={src} alt="" className="max-h-60 w-full object-contain" />
-                </figure>
-              ))}
-            </div>
-          </div>
-        </div>
-        <div className="mx-auto flex max-w-7xl justify-center px-4 pb-10 sm:px-6 lg:px-8">
-          <a href="#sobre" className="inline-flex items-center gap-2 text-sm font-semibold text-foreground/40 hover:text-[#7eb5f5] transition-colors">
-            Conheça a associação <ChevronDown className="h-4 w-4" />
-          </a>
-        </div>
-      </section>
+      {/* ══ HERO / CARROSSEL ══ */}
+      <HeroCarousel slides={heroSlides} intervalSec={heroInterval} badge={sc.hero_badge} whatsappUrl={whatsappUrl} />
 
       {/* ══ SOBRE ══ */}
       <section id="sobre" className="py-20 sm:py-24">
         <div className="mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
           <div>
-            <span className="section-kicker">Sobre a Associação</span>
+            {sc.about_kicker && <span className="section-kicker">{sc.about_kicker}</span>}
             <h2 className="mt-4 text-3xl font-black sm:text-4xl">
-              Movimento, esporte e acolhimento para <span className="gradient-text">transformar vidas.</span>
+              {sc.about_title} <span className="gradient-text">{sc.about_title_hl}</span>
             </h2>
             <div className="mt-6 space-y-4 text-base leading-8 text-foreground/60">
-              <p>A AMEAS nasceu do compromisso com a inclusão e com a superação diária de pessoas que encontram no esporte adaptado um espaço de desenvolvimento, amizade e conquista.</p>
-              <p>{sc.about_text}</p>
-              <p>Mais do que treinos, a AMEAS constrói uma rede de apoio em que cada pessoa é vista, respeitada e incentivada a alcançar novas possibilidades.</p>
+              {sc.about_p1 && <p>{sc.about_p1}</p>}
+              {sc.about_text && <p>{sc.about_text}</p>}
+              {sc.about_p3 && <p>{sc.about_p3}</p>}
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <figure className="glass neon-border flex min-h-[280px] items-center justify-center overflow-hidden rounded-3xl p-3">
-              <img src={encontroComunidadeAsset} alt="Comunidade AMEAS reunida" className="max-h-[360px] w-full object-contain" loading="lazy" />
+              <img src={resolveImage(sc.about_image) || DEFAULT_FIELD_IMAGES["about_image"]} alt="Comunidade AMEAS reunida" className="max-h-[360px] w-full object-contain" loading="lazy" />
             </figure>
             <div className="grid gap-4">
               <div className="glass-blue rounded-3xl p-5">
                 <Sparkles className="h-7 w-7 text-[#f59e0b] mb-3" />
-                <p className="font-black text-foreground">Impacto humano</p>
-                <p className="mt-2 text-sm leading-6 text-foreground/60">Inclusão que começa no treino e alcança a autoestima, a família e a comunidade.</p>
+                <p className="font-black text-foreground">{sc.about_card1_title}</p>
+                <p className="mt-2 text-sm leading-6 text-foreground/60">{sc.about_card1_text}</p>
               </div>
               <div className="glass rounded-3xl border border-[#E8392A]/20 p-5">
                 <CalendarHeart className="h-7 w-7 text-[#E8392A] mb-3" />
-                <p className="font-black text-foreground">Presença contínua</p>
-                <p className="mt-2 text-sm leading-6 text-foreground/60">Projetos, encontros e ações que mantêm o esporte adaptado vivo e acessível.</p>
+                <p className="font-black text-foreground">{sc.about_card2_title}</p>
+                <p className="mt-2 text-sm leading-6 text-foreground/60">{sc.about_card2_text}</p>
               </div>
             </div>
           </div>
@@ -362,16 +263,16 @@ function AmeasHome() {
           <figure className="relative mx-auto w-full max-w-sm">
             <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-[#1B4B8A]/30 to-[#E8392A]/20 blur-2xl" aria-hidden="true" />
             <div className="glass-blue relative overflow-hidden rounded-3xl border border-[#1B4B8A]/40 p-4 shadow-2xl glow-blue">
-              <img src={karinaAsset} alt={`${sc.founder_name}, fundadora da AMEAS`} className="max-h-[520px] w-full rounded-2xl object-contain" loading="lazy" />
+              <img src={resolveImage(sc.founder_image) || DEFAULT_FIELD_IMAGES["founder_image"]} alt={`${sc.founder_name}, fundadora da AMEAS`} className="max-h-[520px] w-full rounded-2xl object-contain" loading="lazy" />
             </div>
           </figure>
           <div>
-            <span className="section-kicker">Fundadora</span>
+            {sc.founder_kicker && <span className="section-kicker">{sc.founder_kicker}</span>}
             <h2 className="mt-4 text-3xl font-black sm:text-4xl"><span className="gradient-text">{sc.founder_name}</span></h2>
-            <p className="mt-6 text-lg leading-8 text-foreground/70">{sc.founder_bio1}</p>
-            <p className="mt-4 text-lg leading-8 text-foreground/70">{sc.founder_bio2}</p>
+            {sc.founder_bio1 && <p className="mt-6 text-lg leading-8 text-foreground/70">{sc.founder_bio1}</p>}
+            {sc.founder_bio2 && <p className="mt-4 text-lg leading-8 text-foreground/70">{sc.founder_bio2}</p>}
             <div className="mt-8 grid gap-3 sm:grid-cols-3">
-              {["Dedicação", "Liderança transformadora", "Inclusão com afeto"].map((item) => (
+              {[sc.founder_tag1, sc.founder_tag2, sc.founder_tag3].filter(Boolean).map((item) => (
                 <div key={item} className="glass-blue rounded-2xl border border-[#1B4B8A]/20 p-4 text-center text-sm font-bold text-[#7eb5f5]">{item}</div>
               ))}
             </div>
@@ -383,22 +284,21 @@ function AmeasHome() {
       <section id="missao" className="py-20 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
-            <span className="section-kicker">Missão, Visão e Valores</span>
-            <h2 className="mt-4 text-3xl font-black sm:text-4xl">Princípios que orientam cada treino, encontro e <span className="gradient-text">conquista.</span></h2>
+            {sc.mission_kicker && <span className="section-kicker">{sc.mission_kicker}</span>}
+            <h2 className="mt-4 text-3xl font-black sm:text-4xl">{sc.mission_title} <span className="gradient-text">{sc.mission_title_hl}</span></h2>
           </div>
           <div className="mt-12 grid gap-5 md:grid-cols-3">
-            {values.map((item, i) => {
-              const Icon = item.icon;
+            {[Target, Trophy, Heart].map((Icon, i) => {
               const styles = [
                 "border-[#1B4B8A]/30 bg-[#1B4B8A]/5 text-[#7eb5f5]",
                 "border-[#38bdf8]/30 bg-[#38bdf8]/5 text-[#38bdf8]",
                 "border-[#E8392A]/30 bg-[#E8392A]/5 text-[#E8392A]",
               ];
               return (
-                <div key={item.title} className={`glass neon-border rounded-3xl border p-7 ${styles[i]}`}>
-                  <span className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5`}><Icon /></span>
-                  <p className="mt-4 text-xl font-black text-foreground">{item.title}</p>
-                  <p className="mt-3 text-sm leading-7 text-foreground/60">{item.text}</p>
+                <div key={i} className={`glass neon-border rounded-3xl border p-7 ${styles[i]}`}>
+                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5"><Icon /></span>
+                  <p className="mt-4 text-xl font-black text-foreground">{pick(sc, `mvv${i + 1}_title`)}</p>
+                  <p className="mt-3 text-sm leading-7 text-foreground/60">{pick(sc, `mvv${i + 1}_text`)}</p>
                 </div>
               );
             })}
@@ -410,23 +310,23 @@ function AmeasHome() {
       <section id="servicos" className="py-20 sm:py-24" style={{background:"radial-gradient(ellipse 80% 60% at 50% 0%, rgba(232,57,42,.08), transparent), var(--color-secondary)"}}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
-            <span className="section-kicker">O que fazemos</span>
-            <h2 className="mt-4 text-3xl font-black sm:text-4xl">Serviços e atividades que <span className="gradient-text">transformam cada dia.</span></h2>
-            <p className="mt-5 text-lg leading-8 text-foreground/60">Da prática esportiva ao apoio social, a AMEAS oferece um conjunto de ações que acolhem, desenvolvem e incluem.</p>
+            {sc.services_kicker && <span className="section-kicker">{sc.services_kicker}</span>}
+            <h2 className="mt-4 text-3xl font-black sm:text-4xl">{sc.services_title} <span className="gradient-text">{sc.services_title_hl}</span></h2>
+            {sc.services_desc && <p className="mt-5 text-lg leading-8 text-foreground/60">{sc.services_desc}</p>}
           </div>
           <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {[
-              { icon: Activity,     color: "text-[#E8392A]",  border: "border-[#E8392A]/20 bg-[#E8392A]/5",   title: "Esporte Adaptado",        desc: "Treinos e atividades físicas adaptadas para pessoas com deficiência, promovendo saúde, autonomia e superação com acompanhamento especializado." },
-              { icon: Users,        color: "text-[#7eb5f5]",  border: "border-[#1B4B8A]/20 bg-[#1B4B8A]/5",   title: "Assistência Social",      desc: "Orientação, encaminhamentos e apoio para que atletas e famílias acessem direitos, benefícios e serviços públicos disponíveis." },
-              { icon: Heart,        color: "text-[#f59e0b]",  border: "border-[#f59e0b]/20 bg-[#f59e0b]/5",   title: "Suporte Psicológico",     desc: "Espaço de escuta e acolhimento emocional para atletas e familiares, com foco no bem-estar e na saúde mental." },
-              { icon: Sparkles,     color: "text-[#059669]",  border: "border-[#059669]/20 bg-[#059669]/5",   title: "Pilates para Mães",       desc: "Aulas de Pilates conduzidas por voluntários, criando um momento de cuidado com o corpo e descanso para as mães e responsáveis." },
-              { icon: CalendarHeart,color: "text-[#7c3aed]",  border: "border-[#7c3aed]/20 bg-[#7c3aed]/5",   title: "Eventos Comunitários",    desc: "Encontros, celebrações e ações solidárias que fortalecem os laços entre atletas, famílias, voluntários e a comunidade." },
-              { icon: HandHeart,    color: "text-[#38bdf8]",  border: "border-[#38bdf8]/20 bg-[#38bdf8]/5",   title: "Voluntariado",            desc: "Programa de voluntariado que conecta pessoas dispostas a contribuir com seu tempo e talento ao crescimento da associação." },
-            ].map(({ icon: Icon, color, border, title, desc }) => (
-              <div key={title} className={`glass neon-border rounded-3xl border p-7 ${border}`}>
+              { icon: Activity,      color: "text-[#E8392A]", border: "border-[#E8392A]/20 bg-[#E8392A]/5" },
+              { icon: Users,         color: "text-[#7eb5f5]", border: "border-[#1B4B8A]/20 bg-[#1B4B8A]/5" },
+              { icon: Heart,         color: "text-[#f59e0b]", border: "border-[#f59e0b]/20 bg-[#f59e0b]/5" },
+              { icon: Sparkles,      color: "text-[#059669]", border: "border-[#059669]/20 bg-[#059669]/5" },
+              { icon: CalendarHeart, color: "text-[#7c3aed]", border: "border-[#7c3aed]/20 bg-[#7c3aed]/5" },
+              { icon: HandHeart,     color: "text-[#38bdf8]", border: "border-[#38bdf8]/20 bg-[#38bdf8]/5" },
+            ].map(({ icon: Icon, color, border }, i) => (
+              <div key={i} className={`glass neon-border rounded-3xl border p-7 ${border}`}>
                 <span className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 ${color}`}><Icon /></span>
-                <p className="mt-4 text-xl font-black text-foreground">{title}</p>
-                <p className="mt-3 text-sm leading-7 text-foreground/60">{desc}</p>
+                <p className="mt-4 text-xl font-black text-foreground">{pick(sc, `service${i + 1}_title`)}</p>
+                <p className="mt-3 text-sm leading-7 text-foreground/60">{pick(sc, `service${i + 1}_desc`)}</p>
               </div>
             ))}
           </div>
@@ -437,31 +337,31 @@ function AmeasHome() {
       <section id="familias" className="py-20 sm:py-24" style={{background:"radial-gradient(ellipse 80% 60% at 50% 0%, rgba(27,75,138,.12), transparent), var(--color-secondary)"}}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
-            <span className="section-kicker">Famílias atípicas</span>
+            {sc.families_kicker && <span className="section-kicker">{sc.families_kicker}</span>}
             <h2 className="mt-4 text-3xl font-black sm:text-4xl">
-              Cuidar de quem cuida também faz parte da <span className="gradient-text">nossa missão.</span>
+              {sc.families_title} <span className="gradient-text">{sc.families_title_hl}</span>
             </h2>
-            <p className="mt-5 text-lg leading-8 text-foreground/60">
-              Além do esporte adaptado, a AMEAS oferece uma rede de acolhimento e assistência social para as famílias atípicas da associação.
-            </p>
+            {sc.families_desc && <p className="mt-5 text-lg leading-8 text-foreground/60">{sc.families_desc}</p>}
           </div>
           <div className="mt-12 grid gap-5 md:grid-cols-3">
             {[
-              { icon: Heart,    label: "Suporte psicológico", border: "border-[#E8392A]/20 bg-[#E8392A]/5",  iconCls: "text-[#E8392A]", text: "Espaço de escuta e acolhimento emocional para mães, pais e responsáveis enfrentarem os desafios da rotina com mais apoio e segurança." },
-              { icon: Users,    label: "Assistência social",  border: "border-[#1B4B8A]/20 bg-[#1B4B8A]/5",  iconCls: "text-[#7eb5f5]", text: "Orientação e encaminhamentos para fortalecer o acesso das famílias a direitos, serviços e oportunidades na comunidade." },
-              { icon: Activity, label: "Pilates para as mães",border: "border-[#f59e0b]/20 bg-[#f59e0b]/5",  iconCls: "text-[#f59e0b]", text: "Aulas de Pilates conduzidas por voluntários, criando um momento de cuidado com o corpo, descanso e fortalecimento." },
-            ].map(({ icon: Icon, label, border, iconCls, text }) => (
-              <div key={label} className={`glass neon-border rounded-3xl border p-7 ${border}`}>
+              { icon: Heart,    border: "border-[#E8392A]/20 bg-[#E8392A]/5", iconCls: "text-[#E8392A]" },
+              { icon: Users,    border: "border-[#1B4B8A]/20 bg-[#1B4B8A]/5", iconCls: "text-[#7eb5f5]" },
+              { icon: Activity, border: "border-[#f59e0b]/20 bg-[#f59e0b]/5", iconCls: "text-[#f59e0b]" },
+            ].map(({ icon: Icon, border, iconCls }, i) => (
+              <div key={i} className={`glass neon-border rounded-3xl border p-7 ${border}`}>
                 <span className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 ${iconCls}`}><Icon /></span>
-                <p className="mt-4 text-xl font-black text-foreground">{label}</p>
-                <p className="mt-3 text-sm leading-7 text-foreground/60">{text}</p>
+                <p className="mt-4 text-xl font-black text-foreground">{pick(sc, `fam${i + 1}_title`)}</p>
+                <p className="mt-3 text-sm leading-7 text-foreground/60">{pick(sc, `fam${i + 1}_text`)}</p>
               </div>
             ))}
           </div>
-          <div className="mt-8 rounded-3xl border border-[#1B4B8A]/20 bg-[#1B4B8A]/10 p-8 backdrop-blur">
-            <p className="text-lg font-bold text-foreground">Na AMEAS, atletas e famílias caminham juntos: o esporte abre caminhos e a assistência social sustenta a rede de apoio.</p>
-            <p className="mt-3 text-sm leading-7 text-foreground/50">Todas essas ações são realizadas com a dedicação de voluntários e parceiros que doam tempo, conhecimento e cuidado para transformar vidas.</p>
-          </div>
+          {(sc.families_box_title || sc.families_box_text) && (
+            <div className="mt-8 rounded-3xl border border-[#1B4B8A]/20 bg-[#1B4B8A]/10 p-8 backdrop-blur">
+              {sc.families_box_title && <p className="text-lg font-bold text-foreground">{sc.families_box_title}</p>}
+              {sc.families_box_text && <p className="mt-3 text-sm leading-7 text-foreground/50">{sc.families_box_text}</p>}
+            </div>
+          )}
         </div>
       </section>
 
@@ -469,34 +369,36 @@ function AmeasHome() {
       <section id="ajudar" className="bg-donation-pattern py-20 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
-            <span className="section-kicker">Como Ajudar</span>
-            <h2 className="mt-4 text-3xl font-black sm:text-4xl"><span className="gradient-text">Apoie a AMEAS</span></h2>
-            <p className="mt-5 text-lg leading-8 text-foreground/60">Escolha a forma de contribuir que combina com você. Cada apoio mantém o esporte adaptado em movimento.</p>
+            {sc.help_kicker && <span className="section-kicker">{sc.help_kicker}</span>}
+            <h2 className="mt-4 text-3xl font-black sm:text-4xl"><span className="gradient-text">{sc.help_title}</span></h2>
+            {sc.help_desc && <p className="mt-5 text-lg leading-8 text-foreground/60">{sc.help_desc}</p>}
           </div>
 
           <div className="mt-14 grid items-start gap-6 lg:grid-cols-3">
             {/* Apoiador Mensal */}
             <div className="glass neon-border rounded-3xl border border-[#1B4B8A]/20 p-7">
               <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#1B4B8A]/15 text-[#7eb5f5]"><Repeat /></span>
-              <p className="mt-4 text-2xl font-black text-foreground">Apoiador Mensal</p>
+              <p className="mt-4 text-2xl font-black text-foreground">{sc.monthly_title}</p>
               <p className="mt-1 text-3xl font-black text-[#7eb5f5]">R$ 30<span className="text-base font-bold text-foreground/40">/mês</span></p>
               <ul className="mt-5 space-y-3 text-sm text-foreground/60">
-                {["Apoio contínuo aos treinos", "Materiais e equipamentos adaptados", "Relatos das conquistas dos atletas"].map((item) => (
+                {[sc.monthly_b1, sc.monthly_b2, sc.monthly_b3].filter(Boolean).map((item) => (
                   <li key={item} className="flex gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#7eb5f5]" />{item}</li>
                 ))}
               </ul>
-              <Button onClick={() => setDonationOpen(true)} className="mt-6 w-full rounded-2xl bg-[#1B4B8A]/20 text-[#7eb5f5] border border-[#1B4B8A]/30 hover:bg-[#1B4B8A]/40">
+              <Button onClick={() => { setDialogAmount("30"); setDonationOpen(true); }} className="mt-6 w-full rounded-2xl bg-[#1B4B8A]/20 text-[#7eb5f5] border border-[#1B4B8A]/30 hover:bg-[#1B4B8A]/40">
                 <QrCode /> Doar via PIX
               </Button>
             </div>
 
             {/* Doação Única */}
             <div className="relative overflow-hidden rounded-3xl border border-[#1B4B8A]/50 bg-gradient-to-br from-[#1B4B8A]/60 to-[#0d1b2e]/80 p-7 shadow-2xl glow-blue backdrop-blur lg:-mt-4">
-              <div className="absolute right-4 top-4 flex items-center gap-1 rounded-full border border-[#f59e0b]/30 bg-[#f59e0b]/20 px-3 py-1 text-xs font-black text-[#f59e0b]">
-                <Star className="h-3 w-3" /> Mais popular
-              </div>
+              {sc.donation_badge && (
+                <div className="absolute right-4 top-4 flex items-center gap-1 rounded-full border border-[#f59e0b]/30 bg-[#f59e0b]/20 px-3 py-1 text-xs font-black text-[#f59e0b]">
+                  <Star className="h-3 w-3" /> {sc.donation_badge}
+                </div>
+              )}
               <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-white"><Gift /></span>
-              <p className="mt-4 text-2xl font-black text-white">Doação Única</p>
+              <p className="mt-4 text-2xl font-black text-white">{sc.donation_title}</p>
               <p className="mt-1 text-3xl font-black text-white">R$ {donationAmount || "0"}<span className="text-base font-bold text-white/50"> por doação</span></p>
               <div className="mt-5 flex flex-wrap gap-2">
                 {donationPresets.map((v) => (
@@ -538,26 +440,24 @@ function AmeasHome() {
       <section id="voluntario" className="py-20 sm:py-24" style={{background:"radial-gradient(ellipse 70% 50% at 50% 100%, rgba(27,75,138,.15), transparent), var(--color-secondary)"}}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
-            <span className="section-kicker">Voluntariado</span>
-            <h2 className="mt-4 text-3xl font-black sm:text-4xl">Doe seu tempo e <span className="gradient-text">transforme vidas.</span></h2>
-            <p className="mt-5 text-lg leading-8 text-foreground/60">
-              A AMEAS é movida por pessoas que acreditam na inclusão. Voluntários são o coração da nossa associação — cada hora doada muda histórias reais.
-            </p>
+            {sc.vol_kicker && <span className="section-kicker">{sc.vol_kicker}</span>}
+            <h2 className="mt-4 text-3xl font-black sm:text-4xl">{sc.vol_title} <span className="gradient-text">{sc.vol_title_hl}</span></h2>
+            {sc.vol_desc && <p className="mt-5 text-lg leading-8 text-foreground/60">{sc.vol_desc}</p>}
           </div>
 
           <div className="mt-14 grid gap-6 lg:grid-cols-[1.2fr_0.8fr] items-center">
             {/* Cards de formas de contribuir */}
             <div className="grid gap-4 sm:grid-cols-2">
               {[
-                { icon: Activity,      color: "text-[#E8392A]",  border: "border-[#E8392A]/20", title: "Apoio esportivo",       desc: "Auxilie nos treinos adaptados, acompanhe atletas e colabore com educadores físicos." },
-                { icon: Heart,         color: "text-[#f59e0b]",  border: "border-[#f59e0b]/20", title: "Suporte emocional",     desc: "Ofereça escuta, acolhimento e presença para atletas e famílias em momentos difíceis." },
-                { icon: Users,         color: "text-[#7eb5f5]",  border: "border-[#1B4B8A]/20", title: "Assistência social",    desc: "Oriente famílias sobre direitos, benefícios e serviços disponíveis na comunidade." },
-                { icon: CalendarHeart, color: "text-[#059669]",  border: "border-[#059669]/20", title: "Eventos e ações",       desc: "Ajude na organização de encontros, celebrações e campanhas solidárias da AMEAS." },
-              ].map(({ icon: Icon, color, border, title, desc }) => (
-                <div key={title} className={`glass rounded-2xl border p-5 ${border}`}>
+                { icon: Activity,      color: "text-[#E8392A]", border: "border-[#E8392A]/20" },
+                { icon: Heart,         color: "text-[#f59e0b]", border: "border-[#f59e0b]/20" },
+                { icon: Users,         color: "text-[#7eb5f5]", border: "border-[#1B4B8A]/20" },
+                { icon: CalendarHeart, color: "text-[#059669]", border: "border-[#059669]/20" },
+              ].map(({ icon: Icon, color, border }, i) => (
+                <div key={i} className={`glass rounded-2xl border p-5 ${border}`}>
                   <span className={`flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 ${color}`}><Icon className="h-5 w-5" /></span>
-                  <p className="mt-3 font-black text-foreground">{title}</p>
-                  <p className="mt-2 text-sm leading-6 text-foreground/60">{desc}</p>
+                  <p className="mt-3 font-black text-foreground">{pick(sc, `vol${i + 1}_title`)}</p>
+                  <p className="mt-2 text-sm leading-6 text-foreground/60">{pick(sc, `vol${i + 1}_desc`)}</p>
                 </div>
               ))}
             </div>
@@ -568,18 +468,16 @@ function AmeasHome() {
               <span className="flex mx-auto h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-white mb-5">
                 <HandHeart className="h-8 w-8" />
               </span>
-              <p className="text-2xl font-black text-white">Quero ser voluntário(a)</p>
-              <p className="mt-3 text-sm leading-7 text-white/60">
-                Entre em contato com a AMEAS pelo WhatsApp e conte como você quer contribuir. Cada talento é bem-vindo.
-              </p>
+              <p className="text-2xl font-black text-white">{sc.vol_cta_title}</p>
+              <p className="mt-3 text-sm leading-7 text-white/60">{sc.vol_cta_text}</p>
               <Button asChild size="lg"
                 className="mt-7 w-full rounded-2xl bg-[#25D366] text-white shadow-lg shadow-[#25D366]/30 hover:bg-[#25D366]/90 hover:shadow-[#25D366]/50">
                 <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Olá, AMEAS! Tenho interesse em ser voluntário(a). Gostaria de saber como posso contribuir.")}`}
                   target="_blank" rel="noreferrer">
-                  <MessageCircle className="h-5 w-5" /> Falar pelo WhatsApp
+                  <MessageCircle className="h-5 w-5" /> {sc.vol_cta_button}
                 </a>
               </Button>
-              <p className="mt-4 text-xs text-white/40">Respondemos em horário comercial · São Roque e região</p>
+              {sc.vol_cta_note && <p className="mt-4 text-xs text-white/40">{sc.vol_cta_note}</p>}
             </div>
           </div>
         </div>
@@ -589,8 +487,8 @@ function AmeasHome() {
       <section id="parceiros" className="py-20 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
-            <span className="section-kicker">Apoiadores e Patrocinadores</span>
-            <h2 className="mt-4 text-3xl font-black sm:text-4xl">Parceiros que fortalecem cada <span className="gradient-text">história de superação.</span></h2>
+            {sc.partners_kicker && <span className="section-kicker">{sc.partners_kicker}</span>}
+            <h2 className="mt-4 text-3xl font-black sm:text-4xl">{sc.partners_title} <span className="gradient-text">{sc.partners_title_hl}</span></h2>
           </div>
           <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
             {visiblePartners.map((p) => (
@@ -618,8 +516,8 @@ function AmeasHome() {
       <section id="galeria" className="py-20 sm:py-24" style={{background:"var(--color-secondary)"}}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
-            <span className="section-kicker">Galeria</span>
-            <h2 className="mt-4 text-3xl font-black sm:text-4xl">Histórias da AMEAS <span className="gradient-text">em movimento.</span></h2>
+            {sc.gallery_kicker && <span className="section-kicker">{sc.gallery_kicker}</span>}
+            <h2 className="mt-4 text-3xl font-black sm:text-4xl">{sc.gallery_title} <span className="gradient-text">{sc.gallery_title_hl}</span></h2>
           </div>
 
           {selectedEventId === null ? (
@@ -692,8 +590,8 @@ function AmeasHome() {
       <section className="py-20 sm:py-24" aria-labelledby="dep-title">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
-            <span className="section-kicker">Depoimentos</span>
-            <h2 id="dep-title" className="mt-4 text-3xl font-black sm:text-4xl">Vozes de quem vive a <span className="gradient-text">inclusão de perto.</span></h2>
+            {sc.test_kicker && <span className="section-kicker">{sc.test_kicker}</span>}
+            <h2 id="dep-title" className="mt-4 text-3xl font-black sm:text-4xl">{sc.test_title} <span className="gradient-text">{sc.test_title_hl}</span></h2>
           </div>
           <div className="mt-12 grid gap-5 lg:grid-cols-3">
             {[
@@ -723,17 +621,22 @@ function AmeasHome() {
               </span>
               <div>
                 <p className="gradient-text-blue text-xl font-black">AMEAS</p>
-                <p className="text-xs text-foreground/40">Associação Movimento Esporte Adaptado e Superação</p>
+                <p className="text-xs text-foreground/40">{sc.footer_org}</p>
               </div>
             </div>
-            <p className="mt-5 max-w-sm text-sm leading-7 text-foreground/50">Inclusão, esporte adaptado, acolhimento e superação construídos com atletas, famílias, voluntários e parceiros.</p>
+            <p className="mt-5 max-w-sm text-sm leading-7 text-foreground/50">{sc.footer_desc}</p>
           </div>
           <div className="space-y-3 text-sm text-foreground/60">
             <p className="font-black text-foreground">Contato</p>
             <a className="flex items-center gap-2 hover:text-[#7eb5f5] transition-colors" href={whatsappUrl} target="_blank" rel="noreferrer">
-              <MessageCircle className="h-4 w-4" /> {sc.contact_whatsapp || whatsappDisplay}
+              <MessageCircle className="h-4 w-4" /> {sc.contact_whatsapp}
             </a>
-            <p className="flex items-center gap-2"><MapPin className="h-4 w-4" /> São Roque e região</p>
+            {sc.instagram_url && (
+              <a className="flex items-center gap-2 hover:text-[#7eb5f5] transition-colors" href={sc.instagram_url} target="_blank" rel="noreferrer">
+                <InstagramIcon className="h-4 w-4" /> Instagram
+              </a>
+            )}
+            <p className="flex items-center gap-2"><MapPin className="h-4 w-4" /> {sc.footer_location}</p>
           </div>
           <div className="space-y-3 text-sm text-foreground/60">
             <p className="font-black text-foreground">Doações</p>
@@ -757,7 +660,7 @@ function AmeasHome() {
       </Button>
 
       {/* ══ MODAL: DOAÇÃO ══ */}
-      <DonationDialog open={donationOpen} onOpenChange={setDonationOpen} copied={copied} onCopyPix={copyPix} sc={sc} whatsappUrl={whatsappUrl} donationAmount={donationAmount} />
+      <DonationDialog open={donationOpen} onOpenChange={(o) => { setDonationOpen(o); if (!o) setDialogAmount(null); }} copied={copied} onCopyPix={copyPix} sc={sc} whatsappUrl={whatsappUrl} donationAmount={dialogAmount ?? donationAmount} />
 
       {/* ══ MODAL: VOLUNTÁRIO ══ */}
       <Dialog open={volunteerOpen} onOpenChange={setVolunteerOpen}>
@@ -867,7 +770,7 @@ function DonationDialog({ open, onOpenChange, copied, onCopyPix, sc, whatsappUrl
           {/* QR Code real */}
           <div className="mx-auto w-full max-w-52">
             <div className="overflow-hidden rounded-2xl border border-[#1B4B8A]/20 bg-white p-2 shadow-lg">
-              <img src={pixQrcodeAsset} alt="QR Code PIX AMEAS" className="h-full w-full object-contain" />
+              <img src={resolveImage(sc.pix_qr_image) || DEFAULT_FIELD_IMAGES["pix_qr_image"]} alt="QR Code PIX AMEAS" className="h-full w-full object-contain" />
             </div>
             <p className="mt-2 text-center text-[0.65rem] font-bold uppercase text-foreground/40">Escaneie para pagar</p>
           </div>
@@ -908,5 +811,112 @@ function DonationDialog({ open, onOpenChange, copied, onCopyPix, sc, whatsappUrl
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/* ─── Carrossel do topo ─── */
+function HeroCarousel({ slides, intervalSec, badge, whatsappUrl }: {
+  slides: HeroSlide[]; intervalSec: number; badge: string; whatsappUrl: string;
+}) {
+  const [idx, setIdx] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const count = slides.length;
+  const fallbackPhoto = BUILTIN_PHOTOS["treino"]?.src ?? "";
+
+  useEffect(() => { if (idx >= count) setIdx(0); }, [count, idx]);
+
+  useEffect(() => {
+    if (count < 2 || paused || intervalSec <= 0) return;
+    const id = window.setTimeout(() => setIdx((i) => (i + 1) % count), intervalSec * 1000);
+    return () => window.clearTimeout(id);
+  }, [idx, count, paused, intervalSec]);
+
+  if (!count) return null;
+  const go = (n: number) => setIdx(((n % count) + count) % count);
+  const cur = slides[idx] ?? slides[0];
+  if (!cur) return null;
+  const external = /^https?:\/\//i.test(cur.cta_link);
+
+  return (
+    <section id="inicio" className="relative overflow-hidden bg-hero-pattern"
+      aria-roledescription="carrossel" aria-label="Destaques da AMEAS"
+      onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}
+      onFocus={() => setPaused(true)} onBlur={() => setPaused(false)}>
+      <div className="pointer-events-none absolute -top-40 left-1/4 h-96 w-96 rounded-full bg-[#1B4B8A]/20 blur-3xl" aria-hidden="true" />
+      <div className="pointer-events-none absolute -bottom-20 right-1/4 h-80 w-80 rounded-full bg-[#E8392A]/10 blur-3xl" aria-hidden="true" />
+
+      <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 py-14 sm:px-6 lg:grid-cols-2 lg:px-8 lg:py-20">
+        {/* Texto do slide */}
+        <div className="max-w-2xl" aria-live={paused ? "polite" : "off"}>
+          {badge && (
+            <Badge className="border border-[#1B4B8A]/30 bg-[#1B4B8A]/10 px-3 py-1 text-[#7eb5f5] hover:bg-[#1B4B8A]/20">{badge}</Badge>
+          )}
+          <div key={cur.id} className="animate-in fade-in slide-in-from-bottom-3 duration-700 lg:min-h-[300px]">
+            <h1 className="mt-6 text-4xl font-black leading-tight sm:text-5xl lg:text-6xl">
+              <span className="gradient-text">{cur.title}</span>
+            </h1>
+            {cur.subtitle && <p className="mt-5 text-lg leading-8 text-foreground/60">{cur.subtitle}</p>}
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              {cur.cta_label && cur.cta_link && (
+                <Button asChild size="lg" className="rounded-2xl bg-[#E8392A] text-white shadow-lg shadow-[#E8392A]/30 hover:bg-[#E8392A]/90 hover:shadow-[#E8392A]/50">
+                  <a href={cur.cta_link} {...(external ? { target: "_blank", rel: "noreferrer" } : {})}>
+                    <Heart aria-hidden="true" /> {cur.cta_label}
+                  </a>
+                </Button>
+              )}
+              <Button asChild size="lg" variant="outline" className="rounded-2xl border-[#1B4B8A]/40 text-[#7eb5f5] hover:bg-[#1B4B8A]/10">
+                <a href={whatsappUrl} target="_blank" rel="noreferrer"><MessageCircle aria-hidden="true" /> WhatsApp</a>
+              </Button>
+            </div>
+          </div>
+          <div className="mt-8 flex flex-wrap gap-4 text-sm font-semibold text-foreground/60">
+            {["Inclusão", "Acolhimento", "Superação"].map((t) => (
+              <span key={t} className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#E8392A]" /> {t}</span>
+            ))}
+          </div>
+        </div>
+
+        {/* Foto do slide (troca com fade) */}
+        <div>
+          <div className="glass neon-border relative h-[320px] overflow-hidden rounded-3xl shadow-2xl sm:h-[440px] lg:h-[520px]">
+            {slides.map((sl, i) => (
+              <img key={sl.id} src={resolveImage(sl.image) || fallbackPhoto}
+                alt={i === idx ? sl.title : ""} aria-hidden={i !== idx}
+                loading={i === 0 ? "eager" : "lazy"}
+                className={`absolute inset-0 h-full w-full object-contain p-3 transition-opacity duration-700 ${i === idx ? "opacity-100" : "opacity-0"}`} />
+            ))}
+          </div>
+          {count > 1 && (
+            <div className="mt-4 flex items-center justify-center gap-3">
+              <button onClick={() => go(idx - 1)} aria-label="Slide anterior"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-[#1B4B8A]/40 text-[#7eb5f5] hover:bg-[#1B4B8A]/20"><ChevronLeft className="h-4 w-4" /></button>
+              <div className="flex items-center gap-2" role="tablist" aria-label="Escolher slide">
+                {slides.map((sl, i) => (
+                  <button key={sl.id} role="tab" aria-selected={i === idx} aria-label={`Slide ${i + 1}`} onClick={() => go(i)}
+                    className={`h-2.5 rounded-full transition-all ${i === idx ? "w-8 bg-[#E8392A]" : "w-2.5 bg-foreground/25 hover:bg-foreground/50"}`} />
+                ))}
+              </div>
+              <button onClick={() => go(idx + 1)} aria-label="Próximo slide"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-[#1B4B8A]/40 text-[#7eb5f5] hover:bg-[#1B4B8A]/20"><ChevronRight className="h-4 w-4" /></button>
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="mx-auto flex max-w-7xl justify-center px-4 pb-10 sm:px-6 lg:px-8">
+        <a href="#sobre" className="inline-flex items-center gap-2 text-sm font-semibold text-foreground/40 hover:text-[#7eb5f5] transition-colors">
+          Conheça a associação <ChevronDown className="h-4 w-4" />
+        </a>
+      </div>
+    </section>
+  );
+}
+
+function InstagramIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+    </svg>
   );
 }

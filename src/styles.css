@@ -332,6 +332,7 @@ button:hover { transform: translateY(-1px); }
   border-radius: 18px;
   box-shadow: 0 1px 3px rgba(10,42,82,.05);
 }
+.adm-login-head { background: linear-gradient(160deg, var(--adm-navy), var(--adm-navy-2)); }
 .adm-panel-title {
   font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
   color: var(--adm-mute);

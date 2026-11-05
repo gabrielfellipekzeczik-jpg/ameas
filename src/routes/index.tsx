@@ -3,8 +3,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
   Activity, ArrowRight, CalendarHeart, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight,
-  Clock, Copy, Gift, HandHeart, Heart, LayoutDashboard, MapPin,
-  Menu, MessageCircle, QrCode, Repeat, Sparkles, Star, Target,
+  Clock, Copy, Gift, HandHeart, Handshake, Heart, LayoutDashboard, MapPin,
+  Menu, MessageCircle, Sparkles, Star, Target,
   Trophy, Users, X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -30,7 +30,7 @@ import { parseStringList, pick, type HeroSlide } from "@/lib/cms-schema";
 import {
   BUILTIN_PHOTOS, DEFAULT_FIELD_IMAGES, defaultHeroSlides, getHeroSlides, resolveImage,
 } from "@/lib/builtin-images";
-import { STATIC_CATEGORIES, STATIC_GALLERY } from "@/lib/gallery-static";
+import { STATIC_GALLERY, mergeEventCategories } from "@/lib/gallery-static";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -81,7 +81,6 @@ function AmeasHome() {
   const [dynamicCategories, setDynamicCategories] = useState<GalleryCategory[]>([]);
   const [dbGalleryItems, setDbGalleryItems] = useState<Array<{ id: string; title: string; alt: string; image_url: string; category: string | null; sort_order: number; published: boolean }>>([]);
   const [donationOpen, setDonationOpen] = useState(false);
-  const [dialogAmount, setDialogAmount] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<{ src: string; alt: string; title: string } | null>(null);
   const [copied, setCopied] = useState(false);
@@ -110,6 +109,7 @@ function AmeasHome() {
   const heroInterval = Number.isFinite(heroIntervalRaw) && heroIntervalRaw >= 0 ? heroIntervalRaw : 6;
 
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Olá, AMEAS! Quero apoiar a Associação Movimento Esporte Adaptado e Superação.")}`;
+  const partnerWhatsapp = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Olá, AMEAS! Quero ser um parceiro da associação e gostaria de saber como funciona.")}`;
   const volunteerWhatsapp = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Olá, AMEAS! Quero ser voluntário(a).\nNome: ${volunteerForm.name}\nE-mail: ${volunteerForm.email}\nTelefone: ${volunteerForm.phone}\n${volunteerForm.message}`)}`;
 
   const visiblePartners = partners
@@ -125,9 +125,7 @@ function AmeasHome() {
   const hiddenStatic = sc.gallery_hidden;
   const activeEvents = useMemo(() => {
     const hidden = parseStringList(hiddenStatic);
-    const cats = dynamicCategories.length ? dynamicCategories : STATIC_CATEGORIES.map((e) => ({
-      id: e.id, label: e.label, color: e.color, sort_order: 0,
-    }));
+    const cats = mergeEventCategories(dynamicCategories);
 
     return cats.map((cat) => {
       const staticImgs = STATIC_GALLERY
@@ -146,7 +144,6 @@ function AmeasHome() {
     // Escolhe o código copia-e-cola mais específico para o valor
     const a = amount ?? donationAmount;
     const code =
-      a === "30"  ? sc.pix_monthly :
       a === "25"  ? sc.pix_25 :
       a === "50"  ? sc.pix_50 :
       a === "100" ? sc.pix_100 :
@@ -316,17 +313,21 @@ function AmeasHome() {
           </div>
           <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {[
-              { icon: Activity,      color: "text-accent-red", border: "border-[#E8392A]/20 bg-[#E8392A]/5" },
-              { icon: Users,         color: "text-accent-blue", border: "border-[#1B4B8A]/20 bg-[#1B4B8A]/5" },
-              { icon: Heart,         color: "text-accent-gold", border: "border-[#f59e0b]/20 bg-[#f59e0b]/5" },
-              { icon: Sparkles,      color: "text-accent-green", border: "border-[#059669]/20 bg-[#059669]/5" },
-              { icon: CalendarHeart, color: "text-accent-violet", border: "border-[#7c3aed]/20 bg-[#7c3aed]/5" },
-              { icon: HandHeart,     color: "text-accent-cyan", border: "border-[#38bdf8]/20 bg-[#38bdf8]/5" },
-            ].map(({ icon: Icon, color, border }, i) => (
-              <div key={i} className={`glass neon-border rounded-3xl border p-7 ${border}`}>
-                <span className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 ${color}`}><Icon /></span>
-                <p className="mt-4 text-xl font-black text-foreground">{pick(sc, `service${i + 1}_title`)}</p>
-                <p className="mt-3 text-[15px] leading-7 text-body">{pick(sc, `service${i + 1}_desc`)}</p>
+              { icon: Activity,      color: "text-accent-red", border: "border-[#E8392A]/20", alt: "Atleta da AMEAS em triciclo adaptado durante corrida de rua" },
+              { icon: Users,         color: "text-accent-blue", border: "border-[#1B4B8A]/20", alt: "Famílias reunidas em encontro de acolhimento da AMEAS" },
+              { icon: Heart,         color: "text-accent-gold", border: "border-[#f59e0b]/20", alt: "Equipe da AMEAS em evento sobre saúde mental materna" },
+              { icon: Sparkles,      color: "text-accent-green", border: "border-[#059669]/20", alt: "Mulheres fazendo exercícios em colchonetes" },
+              { icon: CalendarHeart, color: "text-accent-violet", border: "border-[#7c3aed]/20", alt: "Participantes da AMEAS fantasiadas no Carnaval inclusivo" },
+              { icon: HandHeart,     color: "text-accent-cyan", border: "border-[#38bdf8]/20", alt: "Voluntários da AMEAS preparando a feijoada beneficente" },
+            ].map(({ icon: Icon, color, border, alt }, i) => (
+              <div key={i} className={`glass neon-border overflow-hidden rounded-3xl border ${border}`}>
+                <img src={resolveImage(pick(sc, `service${i + 1}_image`)) || DEFAULT_FIELD_IMAGES[`service${i + 1}_image`]} alt={alt}
+                  className="aspect-[16/10] w-full object-cover" loading="lazy" />
+                <div className="px-7 pb-7">
+                  <span className={`relative -mt-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-card shadow-lg ${color}`}><Icon /></span>
+                  <p className="mt-4 text-xl font-black text-foreground">{pick(sc, `service${i + 1}_title`)}</p>
+                  <p className="mt-3 text-[15px] leading-7 text-body">{pick(sc, `service${i + 1}_desc`)}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -375,18 +376,18 @@ function AmeasHome() {
           </div>
 
           <div className="mt-14 grid items-start gap-6 lg:grid-cols-3">
-            {/* Apoiador Mensal */}
+            {/* Seja um parceiro */}
             <div className="glass neon-border rounded-3xl border border-[#1B4B8A]/20 p-7">
-              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#1B4B8A]/15 text-accent-blue"><Repeat /></span>
-              <p className="mt-4 text-2xl font-black text-foreground">{sc.monthly_title}</p>
-              <p className="mt-1 text-3xl font-black text-accent-blue">R$ 30<span className="text-base font-bold text-soft">/mês</span></p>
+              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#1B4B8A]/15 text-accent-blue"><Handshake /></span>
+              <p className="mt-4 text-2xl font-black text-foreground">{sc.partner_cta_title}</p>
+              <p className="mt-3 text-[15px] leading-7 text-body">{sc.partner_cta_desc}</p>
               <ul className="mt-5 space-y-3 text-sm text-body">
-                {[sc.monthly_b1, sc.monthly_b2, sc.monthly_b3].filter(Boolean).map((item) => (
+                {[sc.partner_cta_b1, sc.partner_cta_b2, sc.partner_cta_b3].filter(Boolean).map((item) => (
                   <li key={item} className="flex gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-accent-blue" />{item}</li>
                 ))}
               </ul>
-              <Button onClick={() => { setDialogAmount("30"); setDonationOpen(true); }} className="mt-6 w-full rounded-2xl bg-[#1B4B8A] text-white hover:bg-[#1B4B8A]/90">
-                <QrCode /> Doar via PIX
+              <Button asChild className="mt-6 w-full rounded-2xl bg-[#1B4B8A] text-white hover:bg-[#1B4B8A]/90">
+                <a href={partnerWhatsapp} target="_blank" rel="noreferrer"><MessageCircle /> {sc.partner_cta_button}</a>
               </Button>
             </div>
 
@@ -532,16 +533,13 @@ function AmeasHome() {
                     <span className="relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden bg-background/30">
                       <img src={cover.src} alt={cover.alt}
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
-                      <span className={`absolute left-3 top-3 rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-wide shadow-lg ${ev.color}`}>
-                        {ev.label}
-                      </span>
                       <span className="absolute right-3 bottom-3 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur">
                         {ev.images.length} foto{ev.images.length !== 1 ? "s" : ""}
                       </span>
                     </span>
                     <span className="flex items-center justify-between gap-3 px-4 py-3">
-                      <span className="text-sm font-black text-foreground">{ev.label}</span>
-                      <ArrowRight className="h-4 w-4 text-accent-blue transition-transform group-hover:translate-x-1" />
+                      <span className="text-sm font-black leading-5 text-foreground">{ev.label}</span>
+                      <ArrowRight className="h-4 w-4 shrink-0 text-accent-blue transition-transform group-hover:translate-x-1" />
                     </span>
                   </button>
                 );
@@ -559,7 +557,7 @@ function AmeasHome() {
                       className="flex items-center gap-2 rounded-2xl border border-border/40 px-4 py-2 text-sm font-bold text-body transition-all hover:border-[#1B4B8A]/40 hover:text-accent-blue">
                       <ArrowRight className="h-4 w-4 rotate-180" /> Todos os eventos
                     </button>
-                    <span className={`rounded-full px-4 py-1.5 text-sm font-black uppercase tracking-wide shadow ${ev.color}`}>
+                    <span className={`rounded-2xl px-4 py-1.5 text-sm font-black shadow ${ev.color}`}>
                       {ev.label}
                     </span>
                     <span className="text-sm text-soft">{ev.images.length} foto{ev.images.length !== 1 ? "s" : ""}</span>
@@ -568,9 +566,9 @@ function AmeasHome() {
                     {ev.images.map((img) => (
                       <button key={img.src} onClick={() => setSelectedImage(img)}
                         className="glass neon-border group overflow-hidden rounded-3xl border border-border/30 text-left transition-all hover:border-[#1B4B8A]/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7eb5f5]">
-                        <span className="flex aspect-[4/3] w-full items-center justify-center overflow-hidden bg-background/30 p-2">
+                        <span className="flex aspect-[4/3] w-full items-center justify-center overflow-hidden bg-background/30">
                           <img src={img.src} alt={img.alt}
-                            className="max-h-full w-full object-contain transition-transform duration-300 group-hover:scale-105" loading="lazy" />
+                            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
                         </span>
                         <span className="flex items-center justify-between gap-3 px-4 py-3">
                           <span className="text-sm font-black text-foreground">{img.title}</span>
@@ -660,7 +658,7 @@ function AmeasHome() {
       </Button>
 
       {/* ══ MODAL: DOAÇÃO ══ */}
-      <DonationDialog open={donationOpen} onOpenChange={(o) => { setDonationOpen(o); if (!o) setDialogAmount(null); }} copied={copied} onCopyPix={copyPix} sc={sc} whatsappUrl={whatsappUrl} donationAmount={dialogAmount ?? donationAmount} />
+      <DonationDialog open={donationOpen} onOpenChange={setDonationOpen} copied={copied} onCopyPix={copyPix} sc={sc} whatsappUrl={whatsappUrl} donationAmount={donationAmount} />
 
       {/* ══ MODAL: VOLUNTÁRIO ══ */}
       <Dialog open={volunteerOpen} onOpenChange={setVolunteerOpen}>
@@ -741,7 +739,6 @@ function DonationDialog({ open, onOpenChange, copied, onCopyPix, sc, whatsappUrl
 }) {
   // Pick the most specific pix code for the current amount
   const pixCode = (() => {
-    if (donationAmount === "30")  return sc.pix_monthly || sc.pix_copypaste || sc.pix_key;
     if (donationAmount === "25")  return sc.pix_25  || sc.pix_copypaste || sc.pix_key;
     if (donationAmount === "50")  return sc.pix_50  || sc.pix_copypaste || sc.pix_key;
     if (donationAmount === "100") return sc.pix_100 || sc.pix_copypaste || sc.pix_key;
@@ -750,7 +747,6 @@ function DonationDialog({ open, onOpenChange, copied, onCopyPix, sc, whatsappUrl
   })();
 
   const hasSpecificCode =
-    (donationAmount === "30"  && sc.pix_monthly) ||
     (donationAmount === "25"  && sc.pix_25)  ||
     (donationAmount === "50"  && sc.pix_50)  ||
     (donationAmount === "100" && sc.pix_100) ||
@@ -821,7 +817,7 @@ function HeroCarousel({ slides, intervalSec, badge, whatsappUrl }: {
   const [idx, setIdx] = useState(0);
   const [paused, setPaused] = useState(false);
   const count = slides.length;
-  const fallbackPhoto = BUILTIN_PHOTOS["treino"]?.src ?? "";
+  const fallbackPhoto = BUILTIN_PHOTOS["capa-aleluia"]?.src ?? "";
 
   useEffect(() => { if (idx >= count) setIdx(0); }, [count, idx]);
 
@@ -883,7 +879,7 @@ function HeroCarousel({ slides, intervalSec, badge, whatsappUrl }: {
               <img key={sl.id} src={resolveImage(sl.image) || fallbackPhoto}
                 alt={i === idx ? sl.title : ""} aria-hidden={i !== idx}
                 loading={i === 0 ? "eager" : "lazy"}
-                className={`absolute inset-0 h-full w-full object-contain p-3 transition-opacity duration-700 ${i === idx ? "opacity-100" : "opacity-0"}`} />
+                className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${i === idx ? "opacity-100" : "opacity-0"}`} />
             ))}
           </div>
           {count > 1 && (

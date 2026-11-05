@@ -193,6 +193,7 @@ const _SECTIONS = [
       {
         title: "Cartão 1",
         fields: [
+          img("service1_image", "Foto do cartão", "Se ficar vazia, usa a foto padrão do site."),
           t("service1_title", "Título", "Esporte Adaptado"),
           ta("service1_desc", "Texto", "Treinos e atividades físicas adaptadas para pessoas com deficiência, promovendo saúde, autonomia e superação com acompanhamento especializado."),
         ],
@@ -200,6 +201,7 @@ const _SECTIONS = [
       {
         title: "Cartão 2",
         fields: [
+          img("service2_image", "Foto do cartão", "Se ficar vazia, usa a foto padrão do site."),
           t("service2_title", "Título", "Assistência Social"),
           ta("service2_desc", "Texto", "Orientação, encaminhamentos e apoio para que atletas e famílias acessem direitos, benefícios e serviços públicos disponíveis."),
         ],
@@ -207,6 +209,7 @@ const _SECTIONS = [
       {
         title: "Cartão 3",
         fields: [
+          img("service3_image", "Foto do cartão", "Se ficar vazia, usa a foto padrão do site."),
           t("service3_title", "Título", "Suporte Psicológico"),
           ta("service3_desc", "Texto", "Espaço de escuta e acolhimento emocional para atletas e familiares, com foco no bem-estar e na saúde mental."),
         ],
@@ -214,6 +217,7 @@ const _SECTIONS = [
       {
         title: "Cartão 4",
         fields: [
+          img("service4_image", "Foto do cartão", "Se ficar vazia, usa a foto padrão do site."),
           t("service4_title", "Título", "Pilates para Mães"),
           ta("service4_desc", "Texto", "Aulas de Pilates conduzidas por voluntários, criando um momento de cuidado com o corpo e descanso para as mães e responsáveis."),
         ],
@@ -221,6 +225,7 @@ const _SECTIONS = [
       {
         title: "Cartão 5",
         fields: [
+          img("service5_image", "Foto do cartão", "Se ficar vazia, usa a foto padrão do site."),
           t("service5_title", "Título", "Eventos Comunitários"),
           ta("service5_desc", "Texto", "Encontros, celebrações e ações solidárias que fortalecem os laços entre atletas, famílias, voluntários e a comunidade."),
         ],
@@ -228,6 +233,7 @@ const _SECTIONS = [
       {
         title: "Cartão 6",
         fields: [
+          img("service6_image", "Foto do cartão", "Se ficar vazia, usa a foto padrão do site."),
           t("service6_title", "Título", "Voluntariado"),
           ta("service6_desc", "Texto", "Programa de voluntariado que conecta pessoas dispostas a contribuir com seu tempo e talento ao crescimento da associação."),
         ],
@@ -298,12 +304,15 @@ const _SECTIONS = [
         ],
       },
       {
-        title: "Cartão “Apoiador mensal” (R$ 30)",
+        title: "Cartão “Seja um parceiro”",
+        desc: "O botão abre o WhatsApp da AMEAS.",
         fields: [
-          t("monthly_title", "Título", "Apoiador Mensal"),
-          t("monthly_b1", "Benefício 1", "Apoio contínuo aos treinos"),
-          t("monthly_b2", "Benefício 2", "Materiais e equipamentos adaptados"),
-          t("monthly_b3", "Benefício 3", "Relatos das conquistas dos atletas"),
+          t("partner_cta_title", "Título", "Seja um parceiro"),
+          ta("partner_cta_desc", "Texto", "Empresas e profissionais que caminham com a AMEAS ajudam a manter o esporte adaptado em movimento."),
+          t("partner_cta_b1", "Benefício 1", "Sua marca ao lado da inclusão"),
+          t("partner_cta_b2", "Benefício 2", "Logo na área de parceiros do site"),
+          t("partner_cta_b3", "Benefício 3", "Apoio direto a atletas e famílias"),
+          t("partner_cta_button", "Texto do botão", "Quero ser parceiro"),
         ],
       },
       {
@@ -332,7 +341,6 @@ const _SECTIONS = [
         title: "Códigos PIX “copia e cola” por valor",
         desc: "Gere cada código no aplicativo do banco e cole aqui. Se um valor ficar vazio, o site usa o código genérico (ou a chave PIX).",
         fields: [
-          code("pix_monthly", "Apoiador mensal — R$ 30"),
           code("pix_25", "R$ 25"),
           code("pix_50", "R$ 50"),
           code("pix_100", "R$ 100"),

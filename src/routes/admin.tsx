@@ -18,7 +18,7 @@ import {
   BUILTIN_PHOTOS, DEFAULT_FIELD_IMAGES, getHeroSlides, resolveImage,
 } from "@/lib/builtin-images";
 import { uploadSiteImage } from "@/lib/media";
-import { STATIC_GALLERY } from "@/lib/gallery-static";
+import { STATIC_CATEGORIES, STATIC_GALLERY, mergeEventCategories } from "@/lib/gallery-static";
 
 export const Route = createFileRoute("/admin")({ component: AdminPage });
 
@@ -204,7 +204,7 @@ export default function AdminPage() {
     return (
       <main className="adm flex min-h-screen items-center justify-center px-4">
         <div className="adm-card w-full max-w-sm overflow-hidden">
-          <div className="adm-side px-8 py-7 text-center">
+          <div className="adm-login-head px-8 py-7 text-center">
             <span className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-white p-2 shadow-lg">
               <img src={logoAsset} alt="AMEAS" className="h-full w-full object-contain" />
             </span>
@@ -805,10 +805,10 @@ function GalleryEditor({ content, setField, notify }: {
     ]).then(([items, cats]) => {
       if (!alive) return;
       setDbGallery((items.data ?? []) as DbGalleryItem[]);
-      if (cats.data?.length) {
-        setCategories((cats.data as GalleryCategory[]).map((c) => ({ ...c, color: readableChipColor(c.color) })));
-        setUploadCategory((cur) => (cats.data!.some((c) => c.id === cur) ? cur : (cats.data![0] as GalleryCategory).id));
-      }
+      const saved = (cats.data ?? []) as GalleryCategory[];
+      const all: GalleryCategory[] = mergeEventCategories(saved.map((c) => ({ ...c, color: readableChipColor(c.color) })));
+      setCategories(all);
+      setUploadCategory((cur) => (all.some((c) => c.id === cur) ? cur : (all[0]?.id ?? cur)));
       setLoading(false);
     });
     return () => { alive = false; };
@@ -915,11 +915,15 @@ function GalleryEditor({ content, setField, notify }: {
               ) : (
                 <>
                   {catChip(cat)}
-                  <span className="adm-mute text-xs">{dbGallery.filter((g) => g.category === cat.id).length} foto(s) enviadas</span>
-                  <div className="adm-crud-actions ml-auto">
-                    <IconBtn label="Editar" onClick={() => setEditingCat(cat)}><Pencil className="h-4 w-4" /></IconBtn>
-                    <IconBtn label="Excluir" danger onClick={() => void deleteCategory(cat.id)}><Trash2 className="h-4 w-4" /></IconBtn>
-                  </div>
+                  <span className="adm-mute text-xs">
+                    {STATIC_GALLERY.filter((p) => p.category === cat.id).length} do site · {dbGallery.filter((g) => g.category === cat.id).length} enviada(s)
+                  </span>
+                  {!cat.fixed && (
+                    <div className="adm-crud-actions ml-auto">
+                      <IconBtn label="Editar" onClick={() => setEditingCat(cat)}><Pencil className="h-4 w-4" /></IconBtn>
+                      <IconBtn label="Excluir" danger onClick={() => void deleteCategory(cat.id)}><Trash2 className="h-4 w-4" /></IconBtn>
+                    </div>
+                  )}
                 </>
               )}
             </div>
@@ -1027,20 +1031,35 @@ function GalleryEditor({ content, setField, notify }: {
       <section className="adm-card p-5 sm:p-6">
         <h2 className="adm-panel-title">Fotos que já vêm com o site</h2>
         <p className="adm-mute mt-1 text-sm">Você pode ocultar qualquer uma delas. Depois clique em “Salvar alterações”.</p>
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          {STATIC_GALLERY.map((p) => {
-            const off = hidden.includes(p.title);
+        <div className="mt-4 space-y-2">
+          {STATIC_CATEGORIES.map((cat) => {
+            const photos = STATIC_GALLERY.filter((p) => p.category === cat.id);
+            if (!photos.length) return null;
+            const offCount = photos.filter((p) => hidden.includes(p.title)).length;
             return (
-              <div key={p.title} className="overflow-hidden rounded-xl border border-[color:var(--adm-line)] bg-white">
-                <div className={`aspect-[4/3] bg-[#f7f9fd] ${off ? "opacity-40" : ""}`}><img src={p.src} alt={p.alt} className="h-full w-full object-cover" loading="lazy" /></div>
-                <div className="space-y-2 p-2.5">
-                  <p className="truncate text-xs font-bold">{p.title}</p>
-                  <button onClick={() => toggleStatic(p.title)}
-                    className={`adm-btn adm-btn-sm w-full ${off ? "adm-off-chip" : "adm-ok-chip"}`} style={{ border: "1px solid var(--adm-line-2)" }}>
-                    {off ? <><EyeOff className="h-3.5 w-3.5" /> Oculta</> : <><Eye className="h-3.5 w-3.5" /> Visível</>}
-                  </button>
+              <details key={cat.id} className="adm-sub p-3">
+                <summary className="cursor-pointer text-sm font-extrabold">
+                  {categories.find((c) => c.id === cat.id)?.label ?? cat.label}
+                  <span className="adm-mute ml-2 text-xs font-semibold">{photos.length} foto(s){offCount ? ` · ${offCount} oculta(s)` : ""}</span>
+                </summary>
+                <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+                  {photos.map((p) => {
+                    const off = hidden.includes(p.title);
+                    return (
+                      <div key={p.title} className="overflow-hidden rounded-xl border border-[color:var(--adm-line)] bg-white">
+                        <div className={`aspect-[4/3] bg-[#f7f9fd] ${off ? "opacity-40" : ""}`}><img src={p.src} alt={p.alt} className="h-full w-full object-cover" loading="lazy" /></div>
+                        <div className="space-y-2 p-2.5">
+                          <p className="truncate text-xs font-bold">{p.title}</p>
+                          <button onClick={() => toggleStatic(p.title)}
+                            className={`adm-btn adm-btn-sm w-full ${off ? "adm-off-chip" : "adm-ok-chip"}`} style={{ border: "1px solid var(--adm-line-2)" }}>
+                            {off ? <><EyeOff className="h-3.5 w-3.5" /> Oculta</> : <><Eye className="h-3.5 w-3.5" /> Visível</>}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              </div>
+              </details>
             );
           })}
         </div>

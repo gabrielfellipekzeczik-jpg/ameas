@@ -27,8 +27,8 @@ function normalizeKey(key: string) {
 /** CRC16-CCITT (polinômio 0x1021, início 0xFFFF), exigido no fim do código. */
 function crc16(text: string) {
   let crc = 0xffff;
-  for (let i = 0; i < text.length; i++) {
-    crc ^= text.charCodeAt(i) << 8;
+  for (const byte of new TextEncoder().encode(text)) {
+    crc ^= byte << 8;
     for (let bit = 0; bit < 8; bit++) {
       crc = crc & 0x8000 ? ((crc << 1) ^ 0x1021) & 0xffff : (crc << 1) & 0xffff;
     }
@@ -52,4 +52,30 @@ export function buildPixCode({ key, name, city, amount }: {
     "6304",
   ].join("");
   return body + crc16(body);
+}
+
+/** Confere um código colado pelo painel. Devolve null se estiver incompleto ou alterado. */
+export function readPixCode(raw: string): { amount: number | null } | null {
+  const code = raw.trim();
+  if (!code.startsWith("000201") || !/6304[0-9A-Fa-f]{4}$/.test(code)) return null;
+  if (crc16(code.slice(0, -4)) !== code.slice(-4).toUpperCase()) return null;
+  for (let i = 0; i + 4 <= code.length;) {
+    const size = Number(code.slice(i + 2, i + 4));
+    if (!Number.isInteger(size)) break;
+    if (code.slice(i, i + 2) === "54") return { amount: Number(code.slice(i + 4, i + 4 + size)) };
+    i += 4 + size;
+  }
+  return { amount: null };
+}
+
+type PixSettings = {
+  pix_key: string; pix_name: string; pix_city: string;
+  pix_25: string; pix_50: string; pix_100: string; pix_200: string;
+};
+
+/** Código do valor: o cadastrado no painel, se for válido, ou um gerado na hora. */
+export function pixCodeFor(sc: PixSettings, amount: string) {
+  const saved = { "25": sc.pix_25, "50": sc.pix_50, "100": sc.pix_100, "200": sc.pix_200 }[amount]?.trim();
+  if (saved && readPixCode(saved)) return saved;
+  return buildPixCode({ key: sc.pix_key, name: sc.pix_name, city: sc.pix_city, amount: Number(amount) || 0 });
 }

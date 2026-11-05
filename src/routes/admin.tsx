@@ -18,6 +18,7 @@ import {
   BUILTIN_PHOTOS, DEFAULT_FIELD_IMAGES, getHeroSlides, resolveImage,
 } from "@/lib/builtin-images";
 import { uploadSiteImage } from "@/lib/media";
+import { readPixCode } from "@/lib/pix";
 import { STATIC_CATEGORIES, STATIC_GALLERY, mergeEventCategories } from "@/lib/gallery-static";
 
 export const Route = createFileRoute("/admin")({ component: AdminPage });
@@ -393,6 +394,23 @@ function GroupCard({ group, content, setField, notify }: {
   );
 }
 
+/* Avisa na hora se o código colado está quebrado ou é de outro valor. */
+function PixCodeStatus({ code, expected }: { code: string; expected: number }) {
+  const info = readPixCode(code);
+  const problem = !info
+    ? "Código inválido ou incompleto. O site vai gerar outro no lugar. Copie de novo do banco."
+    : info.amount !== null && info.amount !== expected
+      ? `Atenção: este código é de R$ ${info.amount.toFixed(2).replace(".", ",")}, não de R$ ${expected},00.`
+      : "";
+  return problem
+    ? <p role="alert" className="mt-1.5 flex items-start gap-1.5 text-xs font-bold text-[#a3281c]"><AlertCircle className="h-3.5 w-3.5 shrink-0" /> {problem}</p>
+    : (
+      <p className="mt-1.5 flex items-center gap-1.5 text-xs font-bold text-[#0f7a4d]">
+        <CheckCircle2 className="h-3.5 w-3.5 shrink-0" /> Código válido{info?.amount === null ? " (sem valor definido: a pessoa digita no banco)" : ""}
+      </p>
+    );
+}
+
 function FieldInput({ field, value, onChange, notify }: {
   field: Field; value: string; onChange: (v: string) => void; notify: Notify;
 }) {
@@ -418,6 +436,7 @@ function FieldInput({ field, value, onChange, notify }: {
           value={value} onChange={(e) => onChange(e.target.value)} />
       )}
       {field.hint && <p className="adm-hint">{field.hint}</p>}
+      {field.type === "code" && value.trim() && <PixCodeStatus code={value} expected={Number(field.key.replace("pix_", ""))} />}
     </div>
   );
 }

@@ -293,7 +293,7 @@ const _SECTIONS = [
     id: "doacoes",
     label: "Doações e PIX",
     title: "Doações e PIX",
-    desc: "Textos da seção “Como ajudar” e dados bancários. O QR Code e o copia e cola são gerados sozinhos com a chave abaixo.",
+    desc: "Textos da seção “Como ajudar”, dados bancários e códigos PIX.",
     groups: [
       {
         title: "Textos da seção “Como ajudar”",
@@ -333,6 +333,16 @@ const _SECTIONS = [
           t("pix_account", "Conta", "48681-7"),
           t("pix_name", "Nome no PIX", "AMEAS", "Até 25 letras, sem acento. Aparece no código gerado."),
           t("pix_city", "Cidade no PIX", "SAO ROQUE", "Até 15 letras, sem acento."),
+        ],
+      },
+      {
+        title: "Códigos PIX copia e cola por valor",
+        desc: "Gere cada código no aplicativo do banco e cole aqui. Ao clicar no valor, o site copia o código e abre o QR Code. Se ficar vazio, o código é gerado com a chave PIX.",
+        fields: [
+          code("pix_25", "R$ 25"),
+          code("pix_50", "R$ 50"),
+          code("pix_100", "R$ 100"),
+          code("pix_200", "R$ 200"),
         ],
       },
     ],

@@ -32,7 +32,7 @@ import {
   BUILTIN_PHOTOS, DEFAULT_FIELD_IMAGES, defaultHeroSlides, getHeroSlides, resolveImage,
 } from "@/lib/builtin-images";
 import { STATIC_GALLERY, mergeEventCategories } from "@/lib/gallery-static";
-import { buildPixCode } from "@/lib/pix";
+import { pixCodeFor } from "@/lib/pix";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -147,9 +147,20 @@ function AmeasHome() {
   const year = useMemo(() => new Date().getFullYear(), []);
 
   const copyPix = async (code: string) => {
-    if (typeof navigator !== "undefined" && navigator.clipboard) await navigator.clipboard.writeText(code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1800);
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 5000);
+    } catch {
+      setCopied(false); // o navegador bloqueou: o botão "Copiar" e o QR Code continuam na janela
+    }
+  };
+
+  /* Já copia o código no clique, enquanto o navegador ainda permite, e abre o QR Code. */
+  const openDonation = (amount = donationAmount) => {
+    setDonationAmount(amount);
+    setDonationOpen(true);
+    void copyPix(pixCodeFor(sc, amount));
   };
 
   /* ─── RENDER ─── */
@@ -179,7 +190,7 @@ function AmeasHome() {
             <Button asChild size="sm" variant="ghost" className="hidden text-xs text-body hover:text-accent-blue xl:inline-flex">
               <a href={whatsappUrl} target="_blank" rel="noreferrer"><MessageCircle className="h-3.5 w-3.5" /> WhatsApp</a>
             </Button>
-            <Button size="sm" onClick={() => setDonationOpen(true)}
+            <Button size="sm" onClick={() => openDonation()}
               className="hidden bg-[#d62f21] px-3 text-xs text-white shadow-lg shadow-[#E8392A]/30 hover:bg-[#d62f21]/90 hover:shadow-[#E8392A]/50 xl:inline-flex">
               <Heart className="h-3.5 w-3.5" /> Doar
             </Button>
@@ -202,7 +213,7 @@ function AmeasHome() {
                 </a>
               ))}
               <div className="mt-2 flex gap-2">
-                <Button onClick={() => setDonationOpen(true)} className="flex-1 bg-[#d62f21] text-xs text-white">
+                <Button onClick={() => openDonation()} className="flex-1 bg-[#d62f21] text-xs text-white">
                   <Heart className="h-3.5 w-3.5" /> Doar Agora
                 </Button>
                 <Button asChild variant="ghost" size="sm" className="text-soft">
@@ -400,7 +411,7 @@ function AmeasHome() {
               <p className="mt-1 text-3xl font-black text-white">R$ {donationAmount || "0"}<span className="text-base font-bold text-white/85"> por doação</span></p>
               <div className="mt-5 flex flex-wrap gap-2">
                 {donationPresets.map((v) => (
-                  <button key={v} onClick={() => setDonationAmount(String(v))}
+                  <button key={v} onClick={() => openDonation(String(v))}
                     className={`rounded-full border px-4 py-1.5 text-sm font-bold transition-all ${donationAmount === String(v) ? "border-[#f59e0b] bg-[#f59e0b] text-black" : "border-white/40 text-white hover:border-white/60"}`}>
                     R$ {v}
                   </button>
@@ -412,7 +423,7 @@ function AmeasHome() {
                   onChange={(e) => setDonationAmount(e.target.value.replace(/\D/g, ""))} placeholder="Digite o valor"
                   className="mt-2 w-full rounded-2xl border border-white/20 bg-white/15 px-4 py-2 text-base font-bold text-white placeholder:text-white/70 focus:outline-none focus:ring-2 focus:ring-[#7eb5f5]" />
               </div>
-              <Button onClick={() => setDonationOpen(true)} className="mt-5 w-full rounded-2xl bg-[#d62f21] text-white shadow-lg shadow-[#E8392A]/30 hover:bg-[#d62f21]/90">
+              <Button onClick={() => openDonation()} className="mt-5 w-full rounded-2xl bg-[#d62f21] text-white shadow-lg shadow-[#E8392A]/30 hover:bg-[#d62f21]/90">
                 <Heart /> Doar R$ {donationAmount || "0"} via PIX
               </Button>
               <p className="mt-3 text-center text-xs text-white/85">{sc.pix_bank} · Ag. {sc.pix_agency} · CC {sc.pix_account}</p>
@@ -633,7 +644,7 @@ function AmeasHome() {
             <p className="font-black text-foreground">Doações</p>
             <p>PIX CNPJ {sc.pix_key}</p>
             <p>{sc.pix_bank} · Ag. {sc.pix_agency} · CC {sc.pix_account}</p>
-            <Button onClick={() => setDonationOpen(true)} className="rounded-2xl bg-[#d62f21] text-white shadow-md shadow-[#E8392A]/25 hover:bg-[#d62f21]/90">
+            <Button onClick={() => openDonation()} className="rounded-2xl bg-[#d62f21] text-white shadow-md shadow-[#E8392A]/25 hover:bg-[#d62f21]/90">
               <Heart /> Doar Agora
             </Button>
           </div>
@@ -644,14 +655,14 @@ function AmeasHome() {
       </footer>
 
       {/* Botão flutuante */}
-      <Button onClick={() => setDonationOpen(true)}
+      <Button onClick={() => openDonation()}
         className="fixed bottom-5 right-5 z-40 h-14 rounded-full bg-[#d62f21] px-5 text-white shadow-xl shadow-[#E8392A]/30 donation-pulse hover:bg-[#d62f21]/90 hover:shadow-[#E8392A]/50"
         aria-label="Fazer doação">
         <Heart /> Fazer Doação
       </Button>
 
       {/* ══ MODAL: DOAÇÃO ══ */}
-      <DonationDialog open={donationOpen} onOpenChange={setDonationOpen} copied={copied} onCopyPix={copyPix} sc={sc} whatsappUrl={whatsappUrl} donationAmount={donationAmount} onAmountChange={setDonationAmount} />
+      <DonationDialog open={donationOpen} onOpenChange={setDonationOpen} copied={copied} onCopyPix={copyPix} sc={sc} whatsappUrl={whatsappUrl} donationAmount={donationAmount} onAmountChange={(v) => { setDonationAmount(v); setCopied(false); }} />
 
       {/* ══ MODAL: VOLUNTÁRIO ══ */}
       <Dialog open={volunteerOpen} onOpenChange={setVolunteerOpen}>
@@ -731,10 +742,7 @@ function DonationDialog({ open, onOpenChange, copied, onCopyPix, sc, whatsappUrl
   sc: SiteContent; whatsappUrl: string; donationAmount: string; onAmountChange: (v: string) => void;
 }) {
   const amount = Number(donationAmount) || 0;
-  const pixCode = useMemo(
-    () => buildPixCode({ key: sc.pix_key, name: sc.pix_name, city: sc.pix_city, amount }),
-    [sc.pix_key, sc.pix_name, sc.pix_city, amount],
-  );
+  const pixCode = useMemo(() => pixCodeFor(sc, donationAmount), [sc, donationAmount]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -745,8 +753,13 @@ function DonationDialog({ open, onOpenChange, copied, onCopyPix, sc, whatsappUrl
           </DialogTitle>
           <DialogDescription className="text-soft">Sua doação fortalece esporte adaptado, inclusão e acolhimento.</DialogDescription>
         </DialogHeader>
+        {copied && (
+          <p role="status" className="flex items-center gap-2 rounded-2xl border border-[#047857]/30 bg-[#047857]/10 px-4 py-2.5 text-sm font-bold text-accent-green">
+            <CheckCircle2 className="h-4 w-4 shrink-0" /> Código PIX copiado! Cole no app do banco ou escaneie o QR Code.
+          </p>
+        )}
         <div className="grid gap-5 sm:grid-cols-[0.9fr_1.1fr]">
-          {/* QR Code gerado com o valor escolhido */}
+          {/* QR Code do valor escolhido */}
           <div className="mx-auto w-full max-w-52">
             <div className="overflow-hidden rounded-2xl border border-[#1B4B8A]/20 bg-white p-2 shadow-lg">
               <QRCodeSVG value={pixCode} size={256} level="M" marginSize={2} title={`QR Code PIX de ${amount ? `R$ ${amount}` : "valor livre"} para a AMEAS`} className="h-auto w-full" />

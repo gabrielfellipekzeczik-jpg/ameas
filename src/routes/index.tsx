@@ -222,7 +222,7 @@ function AmeasHome() {
 
       {/* ══ SOBRE ══ */}
       <section id="sobre" className="py-20 sm:py-24">
-        <div className="mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
+        <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
           <div>
             {sc.about_kicker && <span className="section-kicker">{sc.about_kicker}</span>}
             <h2 className="mt-4 text-3xl font-black sm:text-4xl">
@@ -234,19 +234,19 @@ function AmeasHome() {
               {sc.about_p3 && <p>{sc.about_p3}</p>}
             </div>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <figure className="glass neon-border flex min-h-[280px] items-center justify-center overflow-hidden rounded-3xl p-3">
-              <img src={resolveImage(sc.about_image) || DEFAULT_FIELD_IMAGES["about_image"]} alt="Comunidade AMEAS reunida" className="max-h-[360px] w-full object-contain" loading="lazy" />
+          <div className="grid gap-4">
+            <figure className="glass neon-border overflow-hidden rounded-3xl border border-[#1B4B8A]/20">
+              <img src={resolveImage(sc.about_image) || DEFAULT_FIELD_IMAGES["about_image"]} alt="Comunidade da AMEAS reunida em festa, com os braços para cima" className="aspect-[16/10] w-full object-cover" loading="lazy" />
             </figure>
-            <div className="grid gap-4">
-              <div className="glass-blue rounded-3xl p-5">
-                <Sparkles className="h-7 w-7 text-accent-gold mb-3" />
-                <p className="font-black text-foreground">{sc.about_card1_title}</p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="glass neon-border rounded-3xl border border-[#f59e0b]/20 p-6">
+                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-card text-accent-gold shadow-lg"><Sparkles className="h-5 w-5" /></span>
+                <p className="mt-4 text-lg font-black text-foreground">{sc.about_card1_title}</p>
                 <p className="mt-2 text-[15px] leading-6 text-body">{sc.about_card1_text}</p>
               </div>
-              <div className="glass rounded-3xl border border-[#E8392A]/20 p-5">
-                <CalendarHeart className="h-7 w-7 text-accent-red mb-3" />
-                <p className="font-black text-foreground">{sc.about_card2_title}</p>
+              <div className="glass neon-border rounded-3xl border border-[#E8392A]/20 p-6">
+                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-card text-accent-red shadow-lg"><CalendarHeart className="h-5 w-5" /></span>
+                <p className="mt-4 text-lg font-black text-foreground">{sc.about_card2_title}</p>
                 <p className="mt-2 text-[15px] leading-6 text-body">{sc.about_card2_text}</p>
               </div>
             </div>

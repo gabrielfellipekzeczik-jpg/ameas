@@ -11,6 +11,7 @@ import acolhimentoCafe from "@/assets/ameas-acolhimento-cafe.png";
 import parceriaTiaLina from "@/assets/ameas-parceria-tia-lina.png";
 import karina from "@/assets/karina-meneguini-retrato.png";
 import pixQr from "@/assets/pix-qrcode.png";
+import sobreComunidade from "@/assets/site/sobre-comunidade.webp";
 import capaAleluia from "@/assets/site/capa-corrida-aleluia.webp";
 import capaTrackField from "@/assets/site/capa-track-field.webp";
 import capaEquipeAleluia from "@/assets/site/capa-equipe-aleluia.webp";
@@ -47,7 +48,7 @@ export const BUILTIN_PHOTOS: Record<string, { src: string; label: string }> = {
 
 /** Foto padrão de cada campo de imagem do schema. */
 export const DEFAULT_FIELD_IMAGES: Record<string, string> = {
-  about_image: encontroComunidade,
+  about_image: sobreComunidade,
   founder_image: karina,
   pix_qr_image: pixQr,
   service1_image: servicoEsporte,

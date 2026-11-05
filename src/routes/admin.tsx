@@ -873,6 +873,9 @@ function GalleryEditor({ content, setField, notify }: {
   const [editingCat, setEditingCat] = useState<GalleryCategory | null>(null);
 
   const hidden = parseStringList(content.gallery_hidden);
+  const hiddenEvents = parseStringList(content.gallery_hidden_events);
+  const liveCategories = categories.filter((c) => !hiddenEvents.includes(c.id));
+  const removedCategories = categories.filter((c) => hiddenEvents.includes(c.id));
 
   async function reloadPhotos() {
     if (!supabase) return;
@@ -946,8 +949,9 @@ function GalleryEditor({ content, setField, notify }: {
   async function saveEditCategory() {
     if (!editingCat || !supabase) return;
     setBusy(true);
-    const { error } = await supabase.from("ameas_gallery_categories")
-      .update({ label: editingCat.label, color: editingCat.color }).eq("id", editingCat.id);
+    // upsert: os eventos que vêm com o site ainda não têm linha no banco
+    const { id, label, color, sort_order } = editingCat;
+    const { error } = await supabase.from("ameas_gallery_categories").upsert({ id, label, color, sort_order }, { onConflict: "id" });
     setBusy(false);
     if (error) return notify(error.message, false);
     setCategories((p) => p.map((c) => (c.id === editingCat.id ? editingCat : c)));
@@ -957,11 +961,21 @@ function GalleryEditor({ content, setField, notify }: {
     if (!supabase) return;
     if (dbGallery.some((g) => g.category === id)) return notify("Mova ou exclua as fotos desse evento antes.", false);
     if (!window.confirm("Excluir este evento?")) return;
+    // As fotos que vêm com o site não saem do código: o evento só deixa de aparecer e pode voltar.
+    if (STATIC_GALLERY.some((p) => p.category === id)) {
+      setField("gallery_hidden_events", JSON.stringify([...hiddenEvents, id]));
+      return notify("Evento removido. Clique em “Salvar e publicar alterações” para aplicar no site.");
+    }
     setBusy(true);
     const { error } = await supabase.from("ameas_gallery_categories").delete().eq("id", id);
     setBusy(false);
     if (error) return notify(error.message, false);
     setCategories((p) => p.filter((c) => c.id !== id)); notify("Evento removido.");
+  }
+
+  function restoreEvent(id: string) {
+    const next = hiddenEvents.filter((h) => h !== id);
+    setField("gallery_hidden_events", next.length ? JSON.stringify(next) : "");
   }
 
   function toggleStatic(title: string) {
@@ -981,7 +995,7 @@ function GalleryEditor({ content, setField, notify }: {
         <p className="adm-mute mt-1 text-sm">Cada evento vira um cartão na galeria do site.</p>
         <div className="adm-crud-list mt-4">
           {loading && <p className="adm-mute py-3 text-sm">Carregando…</p>}
-          {categories.map((cat) => (
+          {liveCategories.map((cat) => (
             <div key={cat.id} className="adm-crud-row flex-wrap">
               {editingCat?.id === cat.id ? (
                 <>
@@ -1003,17 +1017,30 @@ function GalleryEditor({ content, setField, notify }: {
                   <span className="adm-mute text-xs">
                     {STATIC_GALLERY.filter((p) => p.category === cat.id).length} do site · {dbGallery.filter((g) => g.category === cat.id).length} enviada(s)
                   </span>
-                  {!cat.fixed && (
-                    <div className="adm-crud-actions ml-auto">
-                      <IconBtn label="Editar" onClick={() => setEditingCat(cat)}><Pencil className="h-4 w-4" /></IconBtn>
-                      <IconBtn label="Excluir" danger onClick={() => void deleteCategory(cat.id)}><Trash2 className="h-4 w-4" /></IconBtn>
-                    </div>
-                  )}
+                  <div className="adm-crud-actions ml-auto">
+                    <IconBtn label="Editar" onClick={() => setEditingCat(cat)}><Pencil className="h-4 w-4" /></IconBtn>
+                    <IconBtn label="Excluir" danger onClick={() => void deleteCategory(cat.id)}><Trash2 className="h-4 w-4" /></IconBtn>
+                  </div>
                 </>
               )}
             </div>
           ))}
         </div>
+        {removedCategories.length > 0 && (
+          <div className="mt-4">
+            <p className="adm-label">Eventos excluídos</p>
+            <div className="adm-crud-list">
+              {removedCategories.map((cat) => (
+                <div key={cat.id} className="adm-crud-row is-off flex-wrap">
+                  {catChip(cat)}
+                  <button className="adm-btn adm-btn-ghost adm-btn-sm ml-auto" onClick={() => restoreEvent(cat.id)}>
+                    <RotateCcw className="h-3.5 w-3.5" /> Restaurar
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         <div className="adm-sub mt-5 p-4">
           <p className="mb-3 flex items-center gap-2 text-sm font-extrabold"><Plus className="h-4 w-4" /> Novo evento</p>
           <div className="flex flex-wrap items-end gap-4">
@@ -1047,7 +1074,7 @@ function GalleryEditor({ content, setField, notify }: {
         <h2 className="adm-panel-title">Adicionar fotos</h2>
         <p className="adm-mute mt-1 text-sm">Escolha o evento e envie quantas fotos quiser. Elas são reduzidas automaticamente.</p>
         <div className="mt-4 flex flex-wrap gap-2">
-          {categories.map((c) => (
+          {liveCategories.map((c) => (
             <button key={c.id} onClick={() => setUploadCategory(c.id)}
               className={`rounded-full border-2 px-4 py-1.5 text-xs font-extrabold uppercase tracking-wide ${uploadCategory === c.id ? `${c.color} border-[color:var(--adm-ink)]` : "border-[color:var(--adm-line-2)] bg-white text-[color:var(--adm-ink)]"}`}>
               {c.label}
@@ -1114,18 +1141,18 @@ function GalleryEditor({ content, setField, notify }: {
 
       {/* Fotos fixas do site */}
       <section className="adm-card p-5 sm:p-6">
-        <h2 className="adm-panel-title">Fotos que já vêm com o site</h2>
-        <p className="adm-mute mt-1 text-sm">Você pode ocultar qualquer uma delas. Depois clique em “Salvar alterações”.</p>
+        <h2 className="adm-panel-title">Fotos de cada evento</h2>
+        <p className="adm-mute mt-1 text-sm">Abra um evento e clique em “Excluir” na foto. Depois clique em “Salvar e publicar alterações”. Se mudar de ideia, use “Restaurar”.</p>
         <div className="mt-4 space-y-2">
           {STATIC_CATEGORIES.map((cat) => {
             const photos = STATIC_GALLERY.filter((p) => p.category === cat.id);
-            if (!photos.length) return null;
+            if (!photos.length || hiddenEvents.includes(cat.id)) return null;
             const offCount = photos.filter((p) => hidden.includes(p.title)).length;
             return (
               <details key={cat.id} className="adm-sub p-3">
                 <summary className="cursor-pointer text-sm font-extrabold">
                   {categories.find((c) => c.id === cat.id)?.label ?? cat.label}
-                  <span className="adm-mute ml-2 text-xs font-semibold">{photos.length} foto(s){offCount ? ` · ${offCount} oculta(s)` : ""}</span>
+                  <span className="adm-mute ml-2 text-xs font-semibold">{photos.length} foto(s){offCount ? ` · ${offCount} excluída(s)` : ""}</span>
                 </summary>
                 <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
                   {photos.map((p) => {
@@ -1136,8 +1163,8 @@ function GalleryEditor({ content, setField, notify }: {
                         <div className="space-y-2 p-2.5">
                           <p className="truncate text-xs font-bold">{p.title}</p>
                           <button onClick={() => toggleStatic(p.title)}
-                            className={`adm-btn adm-btn-sm w-full ${off ? "adm-off-chip" : "adm-ok-chip"}`} style={{ border: "1px solid var(--adm-line-2)" }}>
-                            {off ? <><EyeOff className="h-3.5 w-3.5" /> Oculta</> : <><Eye className="h-3.5 w-3.5" /> Visível</>}
+                            className={`adm-btn adm-btn-sm w-full ${off ? "adm-btn-ghost" : "adm-btn-danger"}`}>
+                            {off ? <><RotateCcw className="h-3.5 w-3.5" /> Restaurar</> : <><Trash2 className="h-3.5 w-3.5" /> Excluir</>}
                           </button>
                         </div>
                       </div>

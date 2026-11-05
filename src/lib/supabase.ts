@@ -82,7 +82,6 @@ export type GalleryCategory = {
   label: string;    // display name, e.g. "Esporte Adaptado"
   color: string;    // tailwind bg+text classes, e.g. "bg-[#1B4B8A] text-white"
   sort_order: number;
-  fixed?: boolean;  // evento que só existe no código, sem linha no banco
 };
 
 export const defaultGalleryCategories: GalleryCategory[] = [

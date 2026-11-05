@@ -125,9 +125,11 @@ function AmeasHome() {
 
   // Junta fotos fixas do site + categorias/fotos do banco (respeitando as fotos ocultadas no painel)
   const hiddenStatic = sc.gallery_hidden;
+  const hiddenEventsRaw = sc.gallery_hidden_events;
   const activeEvents = useMemo(() => {
     const hidden = parseStringList(hiddenStatic);
-    const cats = mergeEventCategories(dynamicCategories);
+    const hiddenEvents = parseStringList(hiddenEventsRaw);
+    const cats = mergeEventCategories(dynamicCategories).filter((c) => !hiddenEvents.includes(c.id));
 
     return cats.map((cat) => {
       const staticImgs = STATIC_GALLERY
@@ -138,7 +140,7 @@ function AmeasHome() {
         .map((item) => ({ src: item.image_url, alt: item.alt, title: item.title, isDb: true }));
       return { ...cat, images: [...staticImgs, ...dbImgs] };
     }).filter((ev) => ev.images.length > 0);
-  }, [dynamicCategories, dbGalleryItems, hiddenStatic]);
+  }, [dynamicCategories, dbGalleryItems, hiddenStatic, hiddenEventsRaw]);
 
   const testimonials = useMemo(() => getTestimonials(sc).filter((t) => t.active && t.quote.trim()), [sc]);
 

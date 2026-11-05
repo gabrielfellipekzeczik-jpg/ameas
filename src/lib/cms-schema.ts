@@ -500,6 +500,7 @@ const _SECTIONS = [
           t("hero_slides", "Slides do carrossel (JSON)", ""),
           t("gallery_hidden", "Fotos fixas ocultas (JSON)", ""),
           t("testimonials", "Depoimentos (JSON)", ""),
+          t("gallery_hidden_events", "Eventos excluídos (JSON)", ""),
           ta("test1_quote", "Citação", "A AMEAS mostra que o esporte também é pertencimento. Cada treino fortalece o corpo, a confiança e os vínculos."),
           t("test1_author", "Autor", "Família atendida"),
           ta("test2_quote", "Citação", "Ver a evolução dos atletas é acompanhar histórias de coragem sendo escritas com apoio, técnica e afeto."),

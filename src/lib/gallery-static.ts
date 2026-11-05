@@ -37,11 +37,14 @@ export const STATIC_CATEGORIES: StaticCategory[] = [
   { id: "fundadora",   label: "Fundadora",   color: "bg-[#7c3aed] text-white" },
 ];
 
-/** Soma aos eventos do banco os que só existem no código (não dá para editar nem excluir pelo painel). */
-export function mergeEventCategories<T extends { id: string }>(db: T[]) {
-  const saved = new Set(db.map((c) => c.id));
-  const fixed = STATIC_CATEGORIES.filter((c) => !saved.has(c.id)).map((c) => ({ ...c, sort_order: 0, fixed: true }));
-  return [...fixed, ...db];
+/** Eventos do código na ordem deles, com o nome e a cor salvos no banco, seguidos dos criados no painel. */
+export function mergeEventCategories<T extends StaticCategory>(db: T[]) {
+  const saved = new Map(db.map((c) => [c.id, c]));
+  const known = new Set(STATIC_CATEGORIES.map((c) => c.id));
+  return [
+    ...STATIC_CATEGORIES.map((c) => saved.get(c.id) ?? { ...c, sort_order: 0 }),
+    ...db.filter((c) => !known.has(c.id)),
+  ];
 }
 
 const eventFiles = import.meta.glob<string>("../assets/eventos/*/*.webp", { eager: true, import: "default" });

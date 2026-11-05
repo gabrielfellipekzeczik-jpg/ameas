@@ -79,6 +79,7 @@ const donationPresets = [25, 50, 100, 200];
 /* ─── Componente principal ─── */
 function AmeasHome() {
   const [sc, setSc] = useState<SiteContent>(defaultSiteContent);
+  const [contentReady, setContentReady] = useState(false);
   const [partnerLinks, setPartnerLinks] = useState<PartnerLink[]>([]);
   const [dynamicCategories, setDynamicCategories] = useState<GalleryCategory[]>([]);
   const [dbGalleryItems, setDbGalleryItems] = useState<Array<{ id: string; title: string; alt: string; image_url: string; category: string | null; sort_order: number; published: boolean }>>([]);
@@ -93,7 +94,9 @@ function AmeasHome() {
   const [volunteerSent, setVolunteerSent] = useState(false);
 
   useEffect(() => {
-    getSiteContent().then(setSc);
+    // Se o banco demorar demais, a capa mostra as fotos padrão em vez de ficar vazia
+    const giveUp = window.setTimeout(() => setContentReady(true), 6000);
+    getSiteContent().then(setSc).finally(() => { window.clearTimeout(giveUp); setContentReady(true); });
     getPartnerLinks().then(setPartnerLinks);
     getGalleryCategories().then(setDynamicCategories);
     getGalleryItems().then(setDbGalleryItems);
@@ -226,7 +229,7 @@ function AmeasHome() {
       </header>
 
       {/* ══ HERO / CARROSSEL ══ */}
-      <HeroCarousel slides={heroSlides} intervalSec={heroInterval} badge={sc.hero_badge} whatsappUrl={whatsappUrl} />
+      <HeroCarousel slides={heroSlides} intervalSec={heroInterval} badge={sc.hero_badge} whatsappUrl={whatsappUrl} ready={contentReady} />
 
       {/* ══ SOBRE ══ */}
       <section id="sobre" className="py-20 sm:py-24">
@@ -805,8 +808,8 @@ function DonationDialog({ open, onOpenChange, copied, onCopyPix, sc, whatsappUrl
 }
 
 /* ─── Carrossel do topo ─── */
-function HeroCarousel({ slides, intervalSec, badge, whatsappUrl }: {
-  slides: HeroSlide[]; intervalSec: number; badge: string; whatsappUrl: string;
+function HeroCarousel({ slides, intervalSec, badge, whatsappUrl, ready }: {
+  slides: HeroSlide[]; intervalSec: number; badge: string; whatsappUrl: string; ready: boolean;
 }) {
   const [idx, setIdx] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -869,12 +872,18 @@ function HeroCarousel({ slides, intervalSec, badge, whatsappUrl }: {
         {/* Foto do slide (troca com fade) */}
         <div>
           <div className="glass neon-border relative h-[320px] overflow-hidden rounded-3xl shadow-2xl sm:h-[440px] lg:h-[520px]">
-            {slides.map((sl, i) => (
-              <img key={sl.id} src={resolveImage(sl.image) || fallbackPhoto}
-                alt={i === idx ? sl.title : ""} aria-hidden={i !== idx}
-                loading={i === 0 ? "eager" : "lazy"}
-                className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${i === idx ? "opacity-100" : "opacity-0"}`} />
-            ))}
+            {ready ? (
+              <div className="absolute inset-0 animate-in fade-in duration-500">
+                {slides.map((sl, i) => (
+                  <img key={sl.id} src={resolveImage(sl.image) || fallbackPhoto}
+                    alt={i === idx ? sl.title : ""} aria-hidden={i !== idx}
+                    loading={i === 0 ? "eager" : "lazy"}
+                    className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${i === idx ? "opacity-100" : "opacity-0"}`} />
+                ))}
+              </div>
+            ) : (
+              <div className="absolute inset-0 animate-pulse bg-foreground/10" aria-hidden="true" />
+            )}
           </div>
           {count > 1 && (
             <div className="mt-4 flex items-center justify-center gap-3">

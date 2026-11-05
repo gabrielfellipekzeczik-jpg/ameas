@@ -166,52 +166,52 @@ function AmeasHome() {
       <header className="sticky top-0 z-40 border-b border-border/50 bg-background/85 backdrop-blur-2xl">
         <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-2.5 sm:px-6 lg:px-8">
           <a href="#inicio" className="flex shrink-0 items-center gap-2.5" aria-label="Início">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#1B4B8A]/40 bg-[#1B4B8A]/10 p-1 glow-blue">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white p-1 shadow-md">
               <img src={logoAsset} alt="Logo AMEAS" className="h-full w-full object-contain" />
             </span>
             <span className="gradient-text-blue text-sm font-black uppercase tracking-wider">AMEAS</span>
           </a>
 
-          <nav className="hidden flex-1 items-center justify-center gap-0.5 lg:flex" aria-label="Navegação principal">
+          <nav className="hidden flex-1 items-center justify-center gap-0.5 xl:flex" aria-label="Navegação principal">
             {navLinks.map((l) => (
               <a key={l.href} href={l.href}
-                className="rounded-xl px-2.5 py-1.5 text-xs font-semibold text-foreground/70 transition-all hover:bg-[#1B4B8A]/10 hover:text-[#7eb5f5]">
+                className="rounded-xl px-2.5 py-1.5 text-xs font-semibold text-body transition-all xl:text-[13px] hover:bg-[#1B4B8A]/10 hover:text-accent-blue">
                 {l.label}
               </a>
             ))}
           </nav>
 
           <div className="ml-auto flex items-center gap-1.5">
-            <Button asChild size="sm" variant="ghost" className="hidden text-xs text-foreground/60 hover:text-[#7eb5f5] lg:inline-flex">
+            <Button asChild size="sm" variant="ghost" className="hidden text-xs text-body hover:text-accent-blue xl:inline-flex">
               <a href={whatsappUrl} target="_blank" rel="noreferrer"><MessageCircle className="h-3.5 w-3.5" /> WhatsApp</a>
             </Button>
             <Button size="sm" onClick={() => setDonationOpen(true)}
-              className="hidden bg-[#E8392A] px-3 text-xs text-white shadow-lg shadow-[#E8392A]/30 hover:bg-[#E8392A]/90 hover:shadow-[#E8392A]/50 lg:inline-flex">
+              className="hidden bg-[#d62f21] px-3 text-xs text-white shadow-lg shadow-[#E8392A]/30 hover:bg-[#d62f21]/90 hover:shadow-[#E8392A]/50 xl:inline-flex">
               <Heart className="h-3.5 w-3.5" /> Doar
             </Button>
-            <Button asChild size="sm" variant="ghost" className="hidden px-2 text-foreground/40 hover:text-[#7eb5f5] lg:inline-flex" title="Painel admin">
+            <Button asChild size="sm" variant="ghost" className="hidden px-2 text-soft hover:text-accent-blue xl:inline-flex" title="Painel admin">
               <a href="/admin" aria-label="Painel administrativo"><LayoutDashboard className="h-4 w-4" /></a>
             </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-foreground/60 lg:hidden"
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-body xl:hidden"
               onClick={() => setMenuOpen((c) => !c)} aria-label="Menu">
               {menuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </Button>
           </div>
         </div>
         {menuOpen && (
-          <div className="border-t border-border/50 bg-background/95 px-4 py-3 backdrop-blur-xl lg:hidden">
+          <div className="border-t border-border/50 bg-background/95 px-4 py-3 backdrop-blur-xl xl:hidden">
             <nav className="mx-auto grid max-w-7xl gap-1">
               {navLinks.map((l) => (
                 <a key={l.href} href={l.href} onClick={() => setMenuOpen(false)}
-                  className="rounded-xl px-3 py-2.5 text-sm font-semibold text-foreground/70 hover:bg-[#1B4B8A]/10 hover:text-[#7eb5f5]">
+                  className="rounded-xl px-3 py-2.5 text-sm font-semibold text-body hover:bg-[#1B4B8A]/10 hover:text-accent-blue">
                   {l.label}
                 </a>
               ))}
               <div className="mt-2 flex gap-2">
-                <Button onClick={() => setDonationOpen(true)} className="flex-1 bg-[#E8392A] text-xs text-white">
+                <Button onClick={() => setDonationOpen(true)} className="flex-1 bg-[#d62f21] text-xs text-white">
                   <Heart className="h-3.5 w-3.5" /> Doar Agora
                 </Button>
-                <Button asChild variant="ghost" size="sm" className="text-foreground/50">
+                <Button asChild variant="ghost" size="sm" className="text-soft">
                   <a href="/admin"><LayoutDashboard className="h-4 w-4" /></a>
                 </Button>
               </div>
@@ -231,7 +231,7 @@ function AmeasHome() {
             <h2 className="mt-4 text-3xl font-black sm:text-4xl">
               {sc.about_title} <span className="gradient-text">{sc.about_title_hl}</span>
             </h2>
-            <div className="mt-6 space-y-4 text-base leading-8 text-foreground/60">
+            <div className="mt-6 space-y-4 text-base leading-8 text-body">
               {sc.about_p1 && <p>{sc.about_p1}</p>}
               {sc.about_text && <p>{sc.about_text}</p>}
               {sc.about_p3 && <p>{sc.about_p3}</p>}
@@ -243,14 +243,14 @@ function AmeasHome() {
             </figure>
             <div className="grid gap-4">
               <div className="glass-blue rounded-3xl p-5">
-                <Sparkles className="h-7 w-7 text-[#f59e0b] mb-3" />
+                <Sparkles className="h-7 w-7 text-accent-gold mb-3" />
                 <p className="font-black text-foreground">{sc.about_card1_title}</p>
-                <p className="mt-2 text-sm leading-6 text-foreground/60">{sc.about_card1_text}</p>
+                <p className="mt-2 text-[15px] leading-6 text-body">{sc.about_card1_text}</p>
               </div>
               <div className="glass rounded-3xl border border-[#E8392A]/20 p-5">
-                <CalendarHeart className="h-7 w-7 text-[#E8392A] mb-3" />
+                <CalendarHeart className="h-7 w-7 text-accent-red mb-3" />
                 <p className="font-black text-foreground">{sc.about_card2_title}</p>
-                <p className="mt-2 text-sm leading-6 text-foreground/60">{sc.about_card2_text}</p>
+                <p className="mt-2 text-[15px] leading-6 text-body">{sc.about_card2_text}</p>
               </div>
             </div>
           </div>
@@ -269,11 +269,11 @@ function AmeasHome() {
           <div>
             {sc.founder_kicker && <span className="section-kicker">{sc.founder_kicker}</span>}
             <h2 className="mt-4 text-3xl font-black sm:text-4xl"><span className="gradient-text">{sc.founder_name}</span></h2>
-            {sc.founder_bio1 && <p className="mt-6 text-lg leading-8 text-foreground/70">{sc.founder_bio1}</p>}
-            {sc.founder_bio2 && <p className="mt-4 text-lg leading-8 text-foreground/70">{sc.founder_bio2}</p>}
+            {sc.founder_bio1 && <p className="mt-6 text-lg leading-8 text-body">{sc.founder_bio1}</p>}
+            {sc.founder_bio2 && <p className="mt-4 text-lg leading-8 text-body">{sc.founder_bio2}</p>}
             <div className="mt-8 grid gap-3 sm:grid-cols-3">
               {[sc.founder_tag1, sc.founder_tag2, sc.founder_tag3].filter(Boolean).map((item) => (
-                <div key={item} className="glass-blue rounded-2xl border border-[#1B4B8A]/20 p-4 text-center text-sm font-bold text-[#7eb5f5]">{item}</div>
+                <div key={item} className="glass-blue rounded-2xl border border-[#1B4B8A]/20 p-4 text-center text-sm font-bold text-accent-blue">{item}</div>
               ))}
             </div>
           </div>
@@ -290,15 +290,15 @@ function AmeasHome() {
           <div className="mt-12 grid gap-5 md:grid-cols-3">
             {[Target, Trophy, Heart].map((Icon, i) => {
               const styles = [
-                "border-[#1B4B8A]/30 bg-[#1B4B8A]/5 text-[#7eb5f5]",
-                "border-[#38bdf8]/30 bg-[#38bdf8]/5 text-[#38bdf8]",
-                "border-[#E8392A]/30 bg-[#E8392A]/5 text-[#E8392A]",
+                "border-[#1B4B8A]/30 bg-[#1B4B8A]/5 text-accent-blue",
+                "border-[#38bdf8]/30 bg-[#38bdf8]/5 text-accent-cyan",
+                "border-[#E8392A]/30 bg-[#E8392A]/5 text-accent-red",
               ];
               return (
                 <div key={i} className={`glass neon-border rounded-3xl border p-7 ${styles[i]}`}>
                   <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5"><Icon /></span>
                   <p className="mt-4 text-xl font-black text-foreground">{pick(sc, `mvv${i + 1}_title`)}</p>
-                  <p className="mt-3 text-sm leading-7 text-foreground/60">{pick(sc, `mvv${i + 1}_text`)}</p>
+                  <p className="mt-3 text-[15px] leading-7 text-body">{pick(sc, `mvv${i + 1}_text`)}</p>
                 </div>
               );
             })}
@@ -312,21 +312,21 @@ function AmeasHome() {
           <div className="max-w-3xl">
             {sc.services_kicker && <span className="section-kicker">{sc.services_kicker}</span>}
             <h2 className="mt-4 text-3xl font-black sm:text-4xl">{sc.services_title} <span className="gradient-text">{sc.services_title_hl}</span></h2>
-            {sc.services_desc && <p className="mt-5 text-lg leading-8 text-foreground/60">{sc.services_desc}</p>}
+            {sc.services_desc && <p className="mt-5 text-lg leading-8 text-body">{sc.services_desc}</p>}
           </div>
           <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {[
-              { icon: Activity,      color: "text-[#E8392A]", border: "border-[#E8392A]/20 bg-[#E8392A]/5" },
-              { icon: Users,         color: "text-[#7eb5f5]", border: "border-[#1B4B8A]/20 bg-[#1B4B8A]/5" },
-              { icon: Heart,         color: "text-[#f59e0b]", border: "border-[#f59e0b]/20 bg-[#f59e0b]/5" },
-              { icon: Sparkles,      color: "text-[#059669]", border: "border-[#059669]/20 bg-[#059669]/5" },
-              { icon: CalendarHeart, color: "text-[#7c3aed]", border: "border-[#7c3aed]/20 bg-[#7c3aed]/5" },
-              { icon: HandHeart,     color: "text-[#38bdf8]", border: "border-[#38bdf8]/20 bg-[#38bdf8]/5" },
+              { icon: Activity,      color: "text-accent-red", border: "border-[#E8392A]/20 bg-[#E8392A]/5" },
+              { icon: Users,         color: "text-accent-blue", border: "border-[#1B4B8A]/20 bg-[#1B4B8A]/5" },
+              { icon: Heart,         color: "text-accent-gold", border: "border-[#f59e0b]/20 bg-[#f59e0b]/5" },
+              { icon: Sparkles,      color: "text-accent-green", border: "border-[#059669]/20 bg-[#059669]/5" },
+              { icon: CalendarHeart, color: "text-accent-violet", border: "border-[#7c3aed]/20 bg-[#7c3aed]/5" },
+              { icon: HandHeart,     color: "text-accent-cyan", border: "border-[#38bdf8]/20 bg-[#38bdf8]/5" },
             ].map(({ icon: Icon, color, border }, i) => (
               <div key={i} className={`glass neon-border rounded-3xl border p-7 ${border}`}>
                 <span className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 ${color}`}><Icon /></span>
                 <p className="mt-4 text-xl font-black text-foreground">{pick(sc, `service${i + 1}_title`)}</p>
-                <p className="mt-3 text-sm leading-7 text-foreground/60">{pick(sc, `service${i + 1}_desc`)}</p>
+                <p className="mt-3 text-[15px] leading-7 text-body">{pick(sc, `service${i + 1}_desc`)}</p>
               </div>
             ))}
           </div>
@@ -341,25 +341,25 @@ function AmeasHome() {
             <h2 className="mt-4 text-3xl font-black sm:text-4xl">
               {sc.families_title} <span className="gradient-text">{sc.families_title_hl}</span>
             </h2>
-            {sc.families_desc && <p className="mt-5 text-lg leading-8 text-foreground/60">{sc.families_desc}</p>}
+            {sc.families_desc && <p className="mt-5 text-lg leading-8 text-body">{sc.families_desc}</p>}
           </div>
           <div className="mt-12 grid gap-5 md:grid-cols-3">
             {[
-              { icon: Heart,    border: "border-[#E8392A]/20 bg-[#E8392A]/5", iconCls: "text-[#E8392A]" },
-              { icon: Users,    border: "border-[#1B4B8A]/20 bg-[#1B4B8A]/5", iconCls: "text-[#7eb5f5]" },
-              { icon: Activity, border: "border-[#f59e0b]/20 bg-[#f59e0b]/5", iconCls: "text-[#f59e0b]" },
+              { icon: Heart,    border: "border-[#E8392A]/20 bg-[#E8392A]/5", iconCls: "text-accent-red" },
+              { icon: Users,    border: "border-[#1B4B8A]/20 bg-[#1B4B8A]/5", iconCls: "text-accent-blue" },
+              { icon: Activity, border: "border-[#f59e0b]/20 bg-[#f59e0b]/5", iconCls: "text-accent-gold" },
             ].map(({ icon: Icon, border, iconCls }, i) => (
               <div key={i} className={`glass neon-border rounded-3xl border p-7 ${border}`}>
                 <span className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 ${iconCls}`}><Icon /></span>
                 <p className="mt-4 text-xl font-black text-foreground">{pick(sc, `fam${i + 1}_title`)}</p>
-                <p className="mt-3 text-sm leading-7 text-foreground/60">{pick(sc, `fam${i + 1}_text`)}</p>
+                <p className="mt-3 text-[15px] leading-7 text-body">{pick(sc, `fam${i + 1}_text`)}</p>
               </div>
             ))}
           </div>
           {(sc.families_box_title || sc.families_box_text) && (
             <div className="mt-8 rounded-3xl border border-[#1B4B8A]/20 bg-[#1B4B8A]/10 p-8 backdrop-blur">
               {sc.families_box_title && <p className="text-lg font-bold text-foreground">{sc.families_box_title}</p>}
-              {sc.families_box_text && <p className="mt-3 text-sm leading-7 text-foreground/50">{sc.families_box_text}</p>}
+              {sc.families_box_text && <p className="mt-3 text-[15px] leading-7 text-body">{sc.families_box_text}</p>}
             </div>
           )}
         </div>
@@ -371,64 +371,64 @@ function AmeasHome() {
           <div className="mx-auto max-w-3xl text-center">
             {sc.help_kicker && <span className="section-kicker">{sc.help_kicker}</span>}
             <h2 className="mt-4 text-3xl font-black sm:text-4xl"><span className="gradient-text">{sc.help_title}</span></h2>
-            {sc.help_desc && <p className="mt-5 text-lg leading-8 text-foreground/60">{sc.help_desc}</p>}
+            {sc.help_desc && <p className="mt-5 text-lg leading-8 text-body">{sc.help_desc}</p>}
           </div>
 
           <div className="mt-14 grid items-start gap-6 lg:grid-cols-3">
             {/* Apoiador Mensal */}
             <div className="glass neon-border rounded-3xl border border-[#1B4B8A]/20 p-7">
-              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#1B4B8A]/15 text-[#7eb5f5]"><Repeat /></span>
+              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#1B4B8A]/15 text-accent-blue"><Repeat /></span>
               <p className="mt-4 text-2xl font-black text-foreground">{sc.monthly_title}</p>
-              <p className="mt-1 text-3xl font-black text-[#7eb5f5]">R$ 30<span className="text-base font-bold text-foreground/40">/mês</span></p>
-              <ul className="mt-5 space-y-3 text-sm text-foreground/60">
+              <p className="mt-1 text-3xl font-black text-accent-blue">R$ 30<span className="text-base font-bold text-soft">/mês</span></p>
+              <ul className="mt-5 space-y-3 text-sm text-body">
                 {[sc.monthly_b1, sc.monthly_b2, sc.monthly_b3].filter(Boolean).map((item) => (
-                  <li key={item} className="flex gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#7eb5f5]" />{item}</li>
+                  <li key={item} className="flex gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-accent-blue" />{item}</li>
                 ))}
               </ul>
-              <Button onClick={() => { setDialogAmount("30"); setDonationOpen(true); }} className="mt-6 w-full rounded-2xl bg-[#1B4B8A]/20 text-[#7eb5f5] border border-[#1B4B8A]/30 hover:bg-[#1B4B8A]/40">
+              <Button onClick={() => { setDialogAmount("30"); setDonationOpen(true); }} className="mt-6 w-full rounded-2xl bg-[#1B4B8A] text-white hover:bg-[#1B4B8A]/90">
                 <QrCode /> Doar via PIX
               </Button>
             </div>
 
             {/* Doação Única */}
-            <div className="relative overflow-hidden rounded-3xl border border-[#1B4B8A]/50 bg-gradient-to-br from-[#1B4B8A]/60 to-[#0d1b2e]/80 p-7 shadow-2xl glow-blue backdrop-blur lg:-mt-4">
+            <div className="relative overflow-hidden rounded-3xl border border-[#1B4B8A]/50 bg-gradient-to-br from-[#1B4B8A] to-[#0d2a52] p-7 shadow-2xl glow-blue backdrop-blur lg:-mt-4">
               {sc.donation_badge && (
-                <div className="absolute right-4 top-4 flex items-center gap-1 rounded-full border border-[#f59e0b]/30 bg-[#f59e0b]/20 px-3 py-1 text-xs font-black text-[#f59e0b]">
+                <div className="absolute right-4 top-4 flex items-center gap-1 rounded-full bg-[#fbbf24] px-3 py-1 text-xs font-black text-[#3b2600]">
                   <Star className="h-3 w-3" /> {sc.donation_badge}
                 </div>
               )}
               <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-white"><Gift /></span>
               <p className="mt-4 text-2xl font-black text-white">{sc.donation_title}</p>
-              <p className="mt-1 text-3xl font-black text-white">R$ {donationAmount || "0"}<span className="text-base font-bold text-white/50"> por doação</span></p>
+              <p className="mt-1 text-3xl font-black text-white">R$ {donationAmount || "0"}<span className="text-base font-bold text-white/85"> por doação</span></p>
               <div className="mt-5 flex flex-wrap gap-2">
                 {donationPresets.map((v) => (
                   <button key={v} onClick={() => setDonationAmount(String(v))}
-                    className={`rounded-full border px-4 py-1.5 text-sm font-bold transition-all ${donationAmount === String(v) ? "border-[#f59e0b] bg-[#f59e0b] text-black" : "border-white/20 text-white/70 hover:border-white/40"}`}>
+                    className={`rounded-full border px-4 py-1.5 text-sm font-bold transition-all ${donationAmount === String(v) ? "border-[#f59e0b] bg-[#f59e0b] text-black" : "border-white/40 text-white hover:border-white/60"}`}>
                     R$ {v}
                   </button>
                 ))}
               </div>
               <div className="mt-4">
-                <label htmlFor="valor-livre" className="text-xs font-bold uppercase text-white/50">Valor livre</label>
+                <label htmlFor="valor-livre" className="text-xs font-bold uppercase text-white/85">Valor livre</label>
                 <input id="valor-livre" inputMode="numeric" value={donationAmount}
                   onChange={(e) => setDonationAmount(e.target.value.replace(/\D/g, ""))} placeholder="Digite o valor"
-                  className="mt-2 w-full rounded-2xl border border-white/20 bg-white/10 px-4 py-2 text-base font-bold text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#7eb5f5]" />
+                  className="mt-2 w-full rounded-2xl border border-white/20 bg-white/15 px-4 py-2 text-base font-bold text-white placeholder:text-white/70 focus:outline-none focus:ring-2 focus:ring-[#7eb5f5]" />
               </div>
-              <Button onClick={() => setDonationOpen(true)} className="mt-5 w-full rounded-2xl bg-[#E8392A] text-white shadow-lg shadow-[#E8392A]/30 hover:bg-[#E8392A]/90">
+              <Button onClick={() => setDonationOpen(true)} className="mt-5 w-full rounded-2xl bg-[#d62f21] text-white shadow-lg shadow-[#E8392A]/30 hover:bg-[#d62f21]/90">
                 <Heart /> Doar R$ {donationAmount || "0"} via PIX
               </Button>
-              <p className="mt-3 text-center text-xs text-white/40">{sc.pix_bank} · Ag. {sc.pix_agency} · CC {sc.pix_account}</p>
+              <p className="mt-3 text-center text-xs text-white/85">{sc.pix_bank} · Ag. {sc.pix_agency} · CC {sc.pix_account}</p>
             </div>
 
             {/* Voluntário */}
             <div className="glass neon-border rounded-3xl border border-[#E8392A]/20 p-7">
-              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#E8392A]/15 text-[#E8392A]"><HandHeart /></span>
+              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#E8392A]/15 text-accent-red"><HandHeart /></span>
               <p className="mt-4 text-2xl font-black text-foreground">{sc.volunteer_title}</p>
-              <p className="mt-3 text-sm leading-7 text-foreground/60">{sc.volunteer_desc}</p>
-              <Button onClick={() => setVolunteerOpen(true)} className="mt-6 w-full rounded-2xl bg-[#E8392A]/15 text-[#E8392A] border border-[#E8392A]/30 hover:bg-[#E8392A]/30">
+              <p className="mt-3 text-[15px] leading-7 text-body">{sc.volunteer_desc}</p>
+              <Button onClick={() => setVolunteerOpen(true)} className="mt-6 w-full rounded-2xl bg-[#d62f21] text-white hover:bg-[#d62f21]/90">
                 <MessageCircle /> Quero ser voluntário(a)
               </Button>
-              <Button asChild variant="outline" className="mt-3 w-full rounded-2xl border-[#1B4B8A]/30 text-[#7eb5f5] hover:bg-[#1B4B8A]/10">
+              <Button asChild variant="outline" className="mt-3 w-full rounded-2xl border-accent-blue/50 text-accent-blue hover:bg-[#1B4B8A]/10">
                 <a href={whatsappUrl} target="_blank" rel="noreferrer"><Clock /> Falar no WhatsApp</a>
               </Button>
             </div>
@@ -442,42 +442,42 @@ function AmeasHome() {
           <div className="mx-auto max-w-3xl text-center">
             {sc.vol_kicker && <span className="section-kicker">{sc.vol_kicker}</span>}
             <h2 className="mt-4 text-3xl font-black sm:text-4xl">{sc.vol_title} <span className="gradient-text">{sc.vol_title_hl}</span></h2>
-            {sc.vol_desc && <p className="mt-5 text-lg leading-8 text-foreground/60">{sc.vol_desc}</p>}
+            {sc.vol_desc && <p className="mt-5 text-lg leading-8 text-body">{sc.vol_desc}</p>}
           </div>
 
           <div className="mt-14 grid gap-6 lg:grid-cols-[1.2fr_0.8fr] items-center">
             {/* Cards de formas de contribuir */}
             <div className="grid gap-4 sm:grid-cols-2">
               {[
-                { icon: Activity,      color: "text-[#E8392A]", border: "border-[#E8392A]/20" },
-                { icon: Heart,         color: "text-[#f59e0b]", border: "border-[#f59e0b]/20" },
-                { icon: Users,         color: "text-[#7eb5f5]", border: "border-[#1B4B8A]/20" },
-                { icon: CalendarHeart, color: "text-[#059669]", border: "border-[#059669]/20" },
+                { icon: Activity,      color: "text-accent-red", border: "border-[#E8392A]/20" },
+                { icon: Heart,         color: "text-accent-gold", border: "border-[#f59e0b]/20" },
+                { icon: Users,         color: "text-accent-blue", border: "border-[#1B4B8A]/20" },
+                { icon: CalendarHeart, color: "text-accent-green", border: "border-[#059669]/20" },
               ].map(({ icon: Icon, color, border }, i) => (
                 <div key={i} className={`glass rounded-2xl border p-5 ${border}`}>
                   <span className={`flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 ${color}`}><Icon className="h-5 w-5" /></span>
                   <p className="mt-3 font-black text-foreground">{pick(sc, `vol${i + 1}_title`)}</p>
-                  <p className="mt-2 text-sm leading-6 text-foreground/60">{pick(sc, `vol${i + 1}_desc`)}</p>
+                  <p className="mt-2 text-[15px] leading-6 text-body">{pick(sc, `vol${i + 1}_desc`)}</p>
                 </div>
               ))}
             </div>
 
             {/* CTA */}
-            <div className="relative overflow-hidden rounded-3xl border border-[#1B4B8A]/40 bg-gradient-to-br from-[#1B4B8A]/60 to-[#0d1b2e]/80 p-8 shadow-2xl glow-blue backdrop-blur text-center">
+            <div className="relative overflow-hidden rounded-3xl border border-[#1B4B8A]/40 bg-gradient-to-br from-[#1B4B8A] to-[#0d2a52] p-8 shadow-2xl glow-blue backdrop-blur text-center">
               <div className="pointer-events-none absolute -top-16 -right-16 h-48 w-48 rounded-full bg-[#E8392A]/10 blur-3xl" />
               <span className="flex mx-auto h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-white mb-5">
                 <HandHeart className="h-8 w-8" />
               </span>
               <p className="text-2xl font-black text-white">{sc.vol_cta_title}</p>
-              <p className="mt-3 text-sm leading-7 text-white/60">{sc.vol_cta_text}</p>
+              <p className="mt-3 text-sm leading-7 text-white/85">{sc.vol_cta_text}</p>
               <Button asChild size="lg"
-                className="mt-7 w-full rounded-2xl bg-[#25D366] text-white shadow-lg shadow-[#25D366]/30 hover:bg-[#25D366]/90 hover:shadow-[#25D366]/50">
+                className="mt-7 w-full rounded-2xl bg-[#25D366] font-bold text-[#04291a] shadow-lg shadow-[#25D366]/30 hover:bg-[#25D366]/90 hover:shadow-[#25D366]/50">
                 <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Olá, AMEAS! Tenho interesse em ser voluntário(a). Gostaria de saber como posso contribuir.")}`}
                   target="_blank" rel="noreferrer">
                   <MessageCircle className="h-5 w-5" /> {sc.vol_cta_button}
                 </a>
               </Button>
-              {sc.vol_cta_note && <p className="mt-4 text-xs text-white/40">{sc.vol_cta_note}</p>}
+              {sc.vol_cta_note && <p className="mt-4 text-xs text-white/85">{sc.vol_cta_note}</p>}
             </div>
           </div>
         </div>
@@ -505,7 +505,7 @@ function AmeasHome() {
                     onError={(e) => { (e.currentTarget as HTMLImageElement).src = p.logo; }}
                   />
                 </span>
-                <span className="text-xs font-black uppercase leading-snug text-foreground/70 group-hover:text-[#7eb5f5] transition-colors">{p.name}</span>
+                <span className="text-xs font-black uppercase leading-snug text-body group-hover:text-accent-blue transition-colors">{p.name}</span>
               </a>
             ))}
           </div>
@@ -540,8 +540,8 @@ function AmeasHome() {
                       </span>
                     </span>
                     <span className="flex items-center justify-between gap-3 px-4 py-3">
-                      <span className="text-sm font-black text-foreground/80">{ev.label}</span>
-                      <ArrowRight className="h-4 w-4 text-[#7eb5f5] transition-transform group-hover:translate-x-1" />
+                      <span className="text-sm font-black text-foreground">{ev.label}</span>
+                      <ArrowRight className="h-4 w-4 text-accent-blue transition-transform group-hover:translate-x-1" />
                     </span>
                   </button>
                 );
@@ -556,13 +556,13 @@ function AmeasHome() {
                 <div className="mt-10">
                   <div className="mb-8 flex flex-wrap items-center gap-4">
                     <button onClick={() => setSelectedEventId(null)}
-                      className="flex items-center gap-2 rounded-2xl border border-border/40 px-4 py-2 text-sm font-bold text-foreground/60 transition-all hover:border-[#1B4B8A]/40 hover:text-[#7eb5f5]">
+                      className="flex items-center gap-2 rounded-2xl border border-border/40 px-4 py-2 text-sm font-bold text-body transition-all hover:border-[#1B4B8A]/40 hover:text-accent-blue">
                       <ArrowRight className="h-4 w-4 rotate-180" /> Todos os eventos
                     </button>
                     <span className={`rounded-full px-4 py-1.5 text-sm font-black uppercase tracking-wide shadow ${ev.color}`}>
                       {ev.label}
                     </span>
-                    <span className="text-sm text-foreground/40">{ev.images.length} foto{ev.images.length !== 1 ? "s" : ""}</span>
+                    <span className="text-sm text-soft">{ev.images.length} foto{ev.images.length !== 1 ? "s" : ""}</span>
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {ev.images.map((img) => (
@@ -573,8 +573,8 @@ function AmeasHome() {
                             className="max-h-full w-full object-contain transition-transform duration-300 group-hover:scale-105" loading="lazy" />
                         </span>
                         <span className="flex items-center justify-between gap-3 px-4 py-3">
-                          <span className="text-sm font-black text-foreground/80">{img.title}</span>
-                          <ArrowRight className="h-4 w-4 text-[#7eb5f5] transition-transform group-hover:translate-x-1" />
+                          <span className="text-sm font-black text-foreground">{img.title}</span>
+                          <ArrowRight className="h-4 w-4 text-accent-blue transition-transform group-hover:translate-x-1" />
                         </span>
                       </button>
                     ))}
@@ -600,11 +600,11 @@ function AmeasHome() {
               { quote: sc.test3_quote, author: sc.test3_author, border: "border-[#E8392A]/20" },
             ].map((t, i) => (
               <div key={i} className={`glass neon-border rounded-3xl border p-7 ${t.border}`}>
-                <div className="flex gap-1 text-[#f59e0b] mb-4">
+                <div className="flex gap-1 text-accent-gold mb-4">
                   <Sparkles className="h-5 w-5" /><Sparkles className="h-5 w-5" /><Sparkles className="h-5 w-5" />
                 </div>
-                <blockquote className="text-base font-semibold leading-8 text-foreground/80">"{t.quote}"</blockquote>
-                <p className="mt-4 text-sm font-black text-[#7eb5f5]">{t.author}</p>
+                <blockquote className="text-base font-semibold leading-8 text-foreground">"{t.quote}"</blockquote>
+                <p className="mt-4 text-sm font-black text-accent-blue">{t.author}</p>
               </div>
             ))}
           </div>
@@ -616,45 +616,45 @@ function AmeasHome() {
         <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[1.2fr_0.9fr_0.9fr] lg:px-8">
           <div>
             <div className="flex items-center gap-3">
-              <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[#1B4B8A]/30 bg-[#1B4B8A]/10 p-2 glow-blue">
+              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white p-2 shadow-md">
                 <img src={logoAsset} alt="Logo AMEAS" className="h-full w-full object-contain" loading="lazy" />
               </span>
               <div>
                 <p className="gradient-text-blue text-xl font-black">AMEAS</p>
-                <p className="text-xs text-foreground/40">{sc.footer_org}</p>
+                <p className="text-xs text-soft">{sc.footer_org}</p>
               </div>
             </div>
-            <p className="mt-5 max-w-sm text-sm leading-7 text-foreground/50">{sc.footer_desc}</p>
+            <p className="mt-5 max-w-sm text-[15px] leading-7 text-body">{sc.footer_desc}</p>
           </div>
-          <div className="space-y-3 text-sm text-foreground/60">
+          <div className="space-y-3 text-sm text-body">
             <p className="font-black text-foreground">Contato</p>
-            <a className="flex items-center gap-2 hover:text-[#7eb5f5] transition-colors" href={whatsappUrl} target="_blank" rel="noreferrer">
+            <a className="flex items-center gap-2 hover:text-accent-blue transition-colors" href={whatsappUrl} target="_blank" rel="noreferrer">
               <MessageCircle className="h-4 w-4" /> {sc.contact_whatsapp}
             </a>
             {sc.instagram_url && (
-              <a className="flex items-center gap-2 hover:text-[#7eb5f5] transition-colors" href={sc.instagram_url} target="_blank" rel="noreferrer">
+              <a className="flex items-center gap-2 hover:text-accent-blue transition-colors" href={sc.instagram_url} target="_blank" rel="noreferrer">
                 <InstagramIcon className="h-4 w-4" /> Instagram
               </a>
             )}
             <p className="flex items-center gap-2"><MapPin className="h-4 w-4" /> {sc.footer_location}</p>
           </div>
-          <div className="space-y-3 text-sm text-foreground/60">
+          <div className="space-y-3 text-sm text-body">
             <p className="font-black text-foreground">Doações</p>
             <p>PIX CNPJ {sc.pix_key}</p>
             <p>{sc.pix_bank} · Ag. {sc.pix_agency} · CC {sc.pix_account}</p>
-            <Button onClick={() => setDonationOpen(true)} className="rounded-2xl bg-[#E8392A] text-white shadow-md shadow-[#E8392A]/25 hover:bg-[#E8392A]/90">
+            <Button onClick={() => setDonationOpen(true)} className="rounded-2xl bg-[#d62f21] text-white shadow-md shadow-[#E8392A]/25 hover:bg-[#d62f21]/90">
               <Heart /> Doar Agora
             </Button>
           </div>
         </div>
-        <div className="mx-auto mt-10 max-w-7xl border-t border-border/20 px-4 pt-6 text-xs text-foreground/30 sm:px-6 lg:px-8">
+        <div className="mx-auto mt-10 max-w-7xl border-t border-border/20 px-4 pt-6 text-xs text-soft sm:px-6 lg:px-8">
           © {year} AMEAS. Todos os direitos reservados.
         </div>
       </footer>
 
       {/* Botão flutuante */}
       <Button onClick={() => setDonationOpen(true)}
-        className="fixed bottom-5 right-5 z-40 h-14 rounded-full bg-[#E8392A] px-5 text-white shadow-xl shadow-[#E8392A]/30 donation-pulse hover:bg-[#E8392A]/90 hover:shadow-[#E8392A]/50"
+        className="fixed bottom-5 right-5 z-40 h-14 rounded-full bg-[#d62f21] px-5 text-white shadow-xl shadow-[#E8392A]/30 donation-pulse hover:bg-[#d62f21]/90 hover:shadow-[#E8392A]/50"
         aria-label="Fazer doação">
         <Heart /> Fazer Doação
       </Button>
@@ -667,44 +667,44 @@ function AmeasHome() {
         <DialogContent className="max-h-[90vh] overflow-auto rounded-3xl border border-[#1B4B8A]/20 bg-card/95 backdrop-blur">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xl">
-              <HandHeart className="text-[#E8392A]" /> <span className="gradient-text">Seja Voluntário(a)</span>
+              <HandHeart className="text-accent-red" /> <span className="gradient-text">Seja Voluntário(a)</span>
             </DialogTitle>
-            <DialogDescription className="text-foreground/50">Preencha o formulário e entraremos em contato.</DialogDescription>
+            <DialogDescription className="text-soft">Preencha o formulário e entraremos em contato.</DialogDescription>
           </DialogHeader>
           {volunteerSent ? (
             <div className="py-8 text-center">
-              <CheckCircle2 className="mx-auto h-16 w-16 text-green-400 mb-4" />
+              <CheckCircle2 className="mx-auto h-16 w-16 text-accent-green mb-4" />
               <p className="text-lg font-black text-foreground">Mensagem enviada!</p>
-              <p className="mt-2 text-sm text-foreground/60">Em breve a AMEAS entrará em contato com você.</p>
-              <Button onClick={() => { setVolunteerOpen(false); setVolunteerSent(false); }} className="mt-6 rounded-2xl bg-[#E8392A] text-white">Fechar</Button>
+              <p className="mt-2 text-sm text-body">Em breve a AMEAS entrará em contato com você.</p>
+              <Button onClick={() => { setVolunteerOpen(false); setVolunteerSent(false); }} className="mt-6 rounded-2xl bg-[#d62f21] text-white">Fechar</Button>
             </div>
           ) : (
             <div className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wide text-foreground/50">Nome completo *</label>
+                  <label className="text-xs font-bold uppercase tracking-wide text-soft">Nome completo *</label>
                   <input value={volunteerForm.name} onChange={(e) => setVolunteerForm({ ...volunteerForm, name: e.target.value })}
-                    placeholder="Seu nome" className="w-full rounded-2xl border border-border/40 bg-white/5 px-4 py-2.5 text-sm text-foreground placeholder:text-foreground/30 focus:outline-none focus:ring-2 focus:ring-[#1B4B8A]/50" />
+                    placeholder="Seu nome" className="w-full rounded-2xl border border-border/40 bg-white/5 px-4 py-2.5 text-sm text-foreground placeholder:text-soft focus:outline-none focus:ring-2 focus:ring-[#1B4B8A]/50" />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wide text-foreground/50">E-mail *</label>
+                  <label className="text-xs font-bold uppercase tracking-wide text-soft">E-mail *</label>
                   <input type="email" value={volunteerForm.email} onChange={(e) => setVolunteerForm({ ...volunteerForm, email: e.target.value })}
-                    placeholder="seu@email.com" className="w-full rounded-2xl border border-border/40 bg-white/5 px-4 py-2.5 text-sm text-foreground placeholder:text-foreground/30 focus:outline-none focus:ring-2 focus:ring-[#1B4B8A]/50" />
+                    placeholder="seu@email.com" className="w-full rounded-2xl border border-border/40 bg-white/5 px-4 py-2.5 text-sm text-foreground placeholder:text-soft focus:outline-none focus:ring-2 focus:ring-[#1B4B8A]/50" />
                 </div>
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wide text-foreground/50">Telefone / WhatsApp</label>
+                <label className="text-xs font-bold uppercase tracking-wide text-soft">Telefone / WhatsApp</label>
                 <input value={volunteerForm.phone} onChange={(e) => setVolunteerForm({ ...volunteerForm, phone: e.target.value })}
-                  placeholder="(11) 99999-9999" className="w-full rounded-2xl border border-border/40 bg-white/5 px-4 py-2.5 text-sm text-foreground placeholder:text-foreground/30 focus:outline-none focus:ring-2 focus:ring-[#1B4B8A]/50" />
+                  placeholder="(11) 99999-9999" className="w-full rounded-2xl border border-border/40 bg-white/5 px-4 py-2.5 text-sm text-foreground placeholder:text-soft focus:outline-none focus:ring-2 focus:ring-[#1B4B8A]/50" />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wide text-foreground/50">Como quer ajudar?</label>
+                <label className="text-xs font-bold uppercase tracking-wide text-soft">Como quer ajudar?</label>
                 <textarea rows={3} value={volunteerForm.message} onChange={(e) => setVolunteerForm({ ...volunteerForm, message: e.target.value })}
                   placeholder="Conte um pouco sobre você e sua disponibilidade…"
-                  className="w-full resize-none rounded-2xl border border-border/40 bg-white/5 px-4 py-2.5 text-sm text-foreground placeholder:text-foreground/30 focus:outline-none focus:ring-2 focus:ring-[#1B4B8A]/50" />
+                  className="w-full resize-none rounded-2xl border border-border/40 bg-white/5 px-4 py-2.5 text-sm text-foreground placeholder:text-soft focus:outline-none focus:ring-2 focus:ring-[#1B4B8A]/50" />
               </div>
               <div className="flex gap-3">
-                <Button asChild className="flex-1 rounded-2xl bg-[#E8392A] text-white shadow-lg shadow-[#E8392A]/30 hover:bg-[#E8392A]/90"
+                <Button asChild className="flex-1 rounded-2xl bg-[#d62f21] text-white shadow-lg shadow-[#E8392A]/30 hover:bg-[#d62f21]/90"
                   onClick={() => volunteerForm.name && volunteerForm.email && setVolunteerSent(true)}>
                   <a href={volunteerWhatsapp} target="_blank" rel="noreferrer"><MessageCircle /> Enviar pelo WhatsApp</a>
                 </Button>
@@ -719,7 +719,7 @@ function AmeasHome() {
         <DialogContent className="max-h-[90vh] max-w-5xl overflow-auto rounded-3xl border border-[#1B4B8A]/20 bg-card/95 p-4 backdrop-blur">
           <DialogHeader>
             <DialogTitle className="gradient-text">{selectedImage?.title}</DialogTitle>
-            <DialogDescription className="text-foreground/50">{selectedImage?.alt}</DialogDescription>
+            <DialogDescription className="text-soft">{selectedImage?.alt}</DialogDescription>
           </DialogHeader>
           {selectedImage && (
             <div className="flex min-h-[55vh] items-center justify-center rounded-2xl bg-background/30 p-3">
@@ -762,9 +762,9 @@ function DonationDialog({ open, onOpenChange, copied, onCopyPix, sc, whatsappUrl
       <DialogContent className="max-h-[90vh] overflow-auto rounded-3xl border border-[#1B4B8A]/20 bg-card/95 backdrop-blur">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
-            <Heart className="text-[#E8392A]" /> <span className="gradient-text">Apoie a AMEAS</span>
+            <Heart className="text-accent-red" /> <span className="gradient-text">Apoie a AMEAS</span>
           </DialogTitle>
-          <DialogDescription className="text-foreground/50">Sua doação fortalece esporte adaptado, inclusão e acolhimento.</DialogDescription>
+          <DialogDescription className="text-soft">Sua doação fortalece esporte adaptado, inclusão e acolhimento.</DialogDescription>
         </DialogHeader>
         <div className="grid gap-5 sm:grid-cols-[0.9fr_1.1fr]">
           {/* QR Code real */}
@@ -772,28 +772,28 @@ function DonationDialog({ open, onOpenChange, copied, onCopyPix, sc, whatsappUrl
             <div className="overflow-hidden rounded-2xl border border-[#1B4B8A]/20 bg-white p-2 shadow-lg">
               <img src={resolveImage(sc.pix_qr_image) || DEFAULT_FIELD_IMAGES["pix_qr_image"]} alt="QR Code PIX AMEAS" className="h-full w-full object-contain" />
             </div>
-            <p className="mt-2 text-center text-[0.65rem] font-bold uppercase text-foreground/40">Escaneie para pagar</p>
+            <p className="mt-2 text-center text-xs font-bold uppercase text-soft">Escaneie para pagar</p>
           </div>
 
           <div className="space-y-3">
             {/* Chave PIX */}
             <div className="rounded-2xl border border-[#1B4B8A]/20 bg-[#1B4B8A]/5 p-4">
-              <p className="text-xs font-bold uppercase text-foreground/50">PIX CNPJ</p>
-              <p className="mt-1 break-words text-lg font-black text-[#7eb5f5]">{sc.pix_key}</p>
+              <p className="text-xs font-bold uppercase text-soft">PIX CNPJ</p>
+              <p className="mt-1 break-words text-lg font-black text-accent-blue">{sc.pix_key}</p>
             </div>
 
             {/* Dados bancários */}
-            <div className="rounded-2xl border border-border/20 bg-background/30 p-3 text-xs text-foreground/50">
+            <div className="rounded-2xl border border-border/20 bg-background/30 p-3 text-xs text-soft">
               <p>{sc.pix_bank} · Ag. {sc.pix_agency} · CC {sc.pix_account}</p>
             </div>
 
             {/* Código copia e cola — mostra o trecho do código ativo */}
             {hasSpecificCode && (
               <div className="rounded-2xl border border-[#E8392A]/20 bg-[#E8392A]/5 p-3">
-                <p className="text-xs font-black uppercase text-[#E8392A]/80 mb-1.5">
+                <p className="text-xs font-black uppercase text-accent-red mb-1.5">
                   Código PIX{donationAmount ? ` · R$ ${donationAmount}` : ""}
                 </p>
-                <p className="font-mono text-[10px] break-all text-foreground/60 leading-relaxed">
+                <p className="font-mono text-[11px] break-all text-body leading-relaxed">
                   {pixCode.slice(0, 80)}{pixCode.length > 80 ? "…" : ""}
                 </p>
               </div>
@@ -804,7 +804,7 @@ function DonationDialog({ open, onOpenChange, copied, onCopyPix, sc, whatsappUrl
               <Copy /> {copied ? "Copiado ✓" : hasSpecificCode ? "Copiar Código PIX" : "Copiar Chave PIX"}
             </Button>
 
-            <Button asChild variant="outline" className="w-full rounded-2xl border-[#E8392A]/40 text-[#E8392A] hover:bg-[#E8392A]/10">
+            <Button asChild variant="outline" className="w-full rounded-2xl border-accent-red/50 text-accent-red hover:bg-[#E8392A]/10">
               <a href={whatsappUrl} target="_blank" rel="noreferrer"><MessageCircle /> Chamar no WhatsApp</a>
             </Button>
           </div>
@@ -849,29 +849,29 @@ function HeroCarousel({ slides, intervalSec, badge, whatsappUrl }: {
         {/* Texto do slide */}
         <div className="max-w-2xl" aria-live={paused ? "polite" : "off"}>
           {badge && (
-            <Badge className="border border-[#1B4B8A]/30 bg-[#1B4B8A]/10 px-3 py-1 text-[#7eb5f5] hover:bg-[#1B4B8A]/20">{badge}</Badge>
+            <Badge className="border border-[#1B4B8A]/30 bg-[#1B4B8A]/10 px-3 py-1 text-accent-blue hover:bg-[#1B4B8A]/20">{badge}</Badge>
           )}
           <div key={cur.id} className="animate-in fade-in slide-in-from-bottom-3 duration-700 lg:min-h-[300px]">
             <h1 className="mt-6 text-4xl font-black leading-tight sm:text-5xl lg:text-6xl">
               <span className="gradient-text">{cur.title}</span>
             </h1>
-            {cur.subtitle && <p className="mt-5 text-lg leading-8 text-foreground/60">{cur.subtitle}</p>}
+            {cur.subtitle && <p className="mt-5 text-lg leading-8 text-body">{cur.subtitle}</p>}
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               {cur.cta_label && cur.cta_link && (
-                <Button asChild size="lg" className="rounded-2xl bg-[#E8392A] text-white shadow-lg shadow-[#E8392A]/30 hover:bg-[#E8392A]/90 hover:shadow-[#E8392A]/50">
+                <Button asChild size="lg" className="rounded-2xl bg-[#d62f21] text-white shadow-lg shadow-[#E8392A]/30 hover:bg-[#d62f21]/90 hover:shadow-[#E8392A]/50">
                   <a href={cur.cta_link} {...(external ? { target: "_blank", rel: "noreferrer" } : {})}>
                     <Heart aria-hidden="true" /> {cur.cta_label}
                   </a>
                 </Button>
               )}
-              <Button asChild size="lg" variant="outline" className="rounded-2xl border-[#1B4B8A]/40 text-[#7eb5f5] hover:bg-[#1B4B8A]/10">
+              <Button asChild size="lg" variant="outline" className="rounded-2xl border-accent-blue/50 text-accent-blue hover:bg-[#1B4B8A]/10">
                 <a href={whatsappUrl} target="_blank" rel="noreferrer"><MessageCircle aria-hidden="true" /> WhatsApp</a>
               </Button>
             </div>
           </div>
-          <div className="mt-8 flex flex-wrap gap-4 text-sm font-semibold text-foreground/60">
+          <div className="mt-8 flex flex-wrap gap-4 text-sm font-semibold text-body">
             {["Inclusão", "Acolhimento", "Superação"].map((t) => (
-              <span key={t} className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#E8392A]" /> {t}</span>
+              <span key={t} className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-accent-red" /> {t}</span>
             ))}
           </div>
         </div>
@@ -889,21 +889,21 @@ function HeroCarousel({ slides, intervalSec, badge, whatsappUrl }: {
           {count > 1 && (
             <div className="mt-4 flex items-center justify-center gap-3">
               <button onClick={() => go(idx - 1)} aria-label="Slide anterior"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-[#1B4B8A]/40 text-[#7eb5f5] hover:bg-[#1B4B8A]/20"><ChevronLeft className="h-4 w-4" /></button>
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-accent-blue/50 text-accent-blue hover:bg-[#1B4B8A]/20"><ChevronLeft className="h-4 w-4" /></button>
               <div className="flex items-center gap-2" role="tablist" aria-label="Escolher slide">
                 {slides.map((sl, i) => (
                   <button key={sl.id} role="tab" aria-selected={i === idx} aria-label={`Slide ${i + 1}`} onClick={() => go(i)}
-                    className={`h-2.5 rounded-full transition-all ${i === idx ? "w-8 bg-[#E8392A]" : "w-2.5 bg-foreground/25 hover:bg-foreground/50"}`} />
+                    className={`h-2.5 rounded-full transition-all ${i === idx ? "w-8 bg-[#E8392A]" : "w-2.5 bg-foreground/35 hover:bg-foreground/60"}`} />
                 ))}
               </div>
               <button onClick={() => go(idx + 1)} aria-label="Próximo slide"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-[#1B4B8A]/40 text-[#7eb5f5] hover:bg-[#1B4B8A]/20"><ChevronRight className="h-4 w-4" /></button>
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-accent-blue/50 text-accent-blue hover:bg-[#1B4B8A]/20"><ChevronRight className="h-4 w-4" /></button>
             </div>
           )}
         </div>
       </div>
       <div className="mx-auto flex max-w-7xl justify-center px-4 pb-10 sm:px-6 lg:px-8">
-        <a href="#sobre" className="inline-flex items-center gap-2 text-sm font-semibold text-foreground/40 hover:text-[#7eb5f5] transition-colors">
+        <a href="#sobre" className="inline-flex items-center gap-2 text-sm font-semibold text-soft hover:text-accent-blue transition-colors">
           Conheça a associação <ChevronDown className="h-4 w-4" />
         </a>
       </div>

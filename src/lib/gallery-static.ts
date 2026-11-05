@@ -17,8 +17,8 @@ export type StaticCategory = { id: string; label: string; color: string };
 
 export const STATIC_CATEGORIES: StaticCategory[] = [
   { id: "esporte-adaptado", label: "Esporte Adaptado", color: "bg-[#1B4B8A] text-white" },
-  { id: "comunidade",       label: "Comunidade",       color: "bg-[#E8392A] text-white" },
-  { id: "acolhimento",      label: "Acolhimento",      color: "bg-[#059669] text-white" },
+  { id: "comunidade",       label: "Comunidade",       color: "bg-[#d62f21] text-white" },
+  { id: "acolhimento",      label: "Acolhimento",      color: "bg-[#047857] text-white" },
   { id: "fundadora",        label: "Fundadora",        color: "bg-[#7c3aed] text-white" },
 ];
 

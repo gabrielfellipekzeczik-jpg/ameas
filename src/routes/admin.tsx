@@ -1,13 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
-  AlertCircle, ArrowDown, ArrowUp, Briefcase, CheckCircle2, Eye, EyeOff, Globe, HandHeart,
+  AlertCircle, ArrowDown, ArrowLeft, ArrowUp, Briefcase, CheckCircle2, Eye, EyeOff, HandHeart,
   Handshake, Home, ImagePlus, Images, Info, LogOut, Menu, Pencil, Phone, Plus, QrCode,
   Quote, RotateCcw, Save, Target, Trash2, Upload, UserRound, Users, X,
 } from "lucide-react";
 import logoAsset from "@/assets/ameas-logo.png";
 import {
-  defaultGalleryCategories, defaultSiteContent, getContentRows, mergeContent, supabase,
+  defaultGalleryCategories, defaultSiteContent, getContentRows, mergeContent, readableChipColor, supabase,
   type GalleryCategory, type PartnerLink, type SiteContent,
 } from "@/lib/supabase";
 import {
@@ -43,19 +43,19 @@ const SECTION_ICONS: Record<string, ReactNode> = {
 };
 
 const NAV_GROUPS: { title: string; ids: string[] }[] = [
-  { title: "Página inicial", ids: ["inicio", "sobre", "fundadora", "missao", "servicos", "familias"] },
-  { title: "Apoio", ids: ["doacoes", "voluntariado", "parceiros"] },
-  { title: "Comunidade", ids: ["galeria", "depoimentos", "contato"] },
+  { title: "Aparência", ids: ["inicio", "galeria"] },
+  { title: "Conteúdo", ids: ["sobre", "fundadora", "missao", "servicos", "familias", "voluntariado", "depoimentos"] },
+  { title: "Doações e contato", ids: ["doacoes", "parceiros", "contato"] },
 ];
 
 const COLOR_PALETTE = [
   { label: "Azul",     value: "bg-[#1B4B8A] text-white" },
-  { label: "Vermelho", value: "bg-[#E8392A] text-white" },
-  { label: "Verde",    value: "bg-[#059669] text-white" },
+  { label: "Vermelho", value: "bg-[#d62f21] text-white" },
+  { label: "Verde",    value: "bg-[#047857] text-white" },
   { label: "Roxo",     value: "bg-[#7c3aed] text-white" },
   { label: "Laranja",  value: "bg-[#f59e0b] text-black" },
-  { label: "Rosa",     value: "bg-[#db2777] text-white" },
-  { label: "Ciano",    value: "bg-[#0891b2] text-white" },
+  { label: "Rosa",     value: "bg-[#be185d] text-white" },
+  { label: "Ciano",    value: "bg-[#0e7490] text-white" },
   { label: "Cinza",    value: "bg-[#475569] text-white" },
 ];
 
@@ -183,6 +183,10 @@ export default function AdminPage() {
     try { sessionStorage.removeItem("ameas-admin"); } catch { /* ignora */ }
   }
 
+  function leaveToSite(e: { preventDefault: () => void }) {
+    if (dirty && !window.confirm("Há alterações não salvas. Sair mesmo assim?")) e.preventDefault();
+  }
+
   async function saveContent() {
     if (!supabase) return notify("Supabase não configurado.", false);
     if (!dirty) return notify("Nenhuma alteração para salvar.");
@@ -233,80 +237,54 @@ export default function AdminPage() {
   const current: SectionDef = SECTIONS.find((s) => s.id === section && !s.hidden) ?? SECTIONS[0]!;
 
   return (
-    <div className="adm min-h-screen">
-      {/* fundo escuro do menu no celular */}
-      {navOpen && <div className="fixed inset-0 z-40 bg-black/50 lg:hidden" onClick={() => setNavOpen(false)} aria-hidden="true" />}
-
+    <div className="adm adm-shell">
       {/* ── MENU LATERAL ── */}
-      <aside
-        className={`adm-side fixed inset-y-0 left-0 z-50 flex w-[272px] flex-col transition-transform duration-200 lg:translate-x-0 ${navOpen ? "translate-x-0" : "-translate-x-full"}`}
-        aria-label="Menu do painel"
-      >
-        <div className="flex items-center gap-3 border-b border-white/10 px-5 py-5">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white p-1">
-            <img src={logoAsset} alt="AMEAS" className="h-full w-full object-contain" />
-          </span>
-          <div className="min-w-0">
-            <p className="text-[11px] font-extrabold uppercase tracking-widest text-[#8fb4e8]">AMEAS CMS</p>
-            <p className="truncate text-sm font-extrabold text-white">Painel administrativo</p>
+      <aside className="adm-side" aria-label="Menu do painel">
+        <div className="adm-side-top">
+          <div className="adm-brand">
+            <span className="adm-brand-logo"><img src={logoAsset} alt="" /></span>
+            <b>AMEAS Admin</b>
           </div>
-          <button onClick={() => setNavOpen(false)} aria-label="Fechar menu"
-            className="ml-auto rounded-lg p-1.5 text-[#cfdcf0] hover:bg-white/10 lg:hidden"><X className="h-5 w-5" /></button>
+          <button className="adm-mobile-toggle" onClick={() => setNavOpen((o) => !o)}
+            aria-expanded={navOpen} aria-label={navOpen ? "Fechar menu" : "Abrir menu"}>
+            {navOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
         </div>
 
-        <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-4">
+        <nav className={`adm-nav-list ${navOpen ? "open" : ""}`}>
+          <Link to="/" className="adm-nav-item adm-nav-back" onClick={leaveToSite}>
+            <ArrowLeft className="h-4 w-4" /> Voltar ao site
+          </Link>
           {NAV_GROUPS.map((g) => (
             <div key={g.title}>
-              <p className="mb-1.5 px-3 text-[11px] font-extrabold uppercase tracking-widest text-[#8fb4e8]">{g.title}</p>
-              <div className="space-y-0.5">
-                {g.ids.map((id) => {
-                  const s = SECTIONS.find((x) => x.id === id);
-                  if (!s) return null;
-                  const active = section === id;
-                  return (
-                    <button key={id} className="adm-nav-item" aria-current={active ? "page" : undefined}
-                      onClick={() => { setSection(id); setNavOpen(false); window.scrollTo({ top: 0 }); }}>
-                      {SECTION_ICONS[id]}
-                      <span>{s.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
+              <p className="adm-nav-group">{g.title}</p>
+              {g.ids.map((id) => {
+                const s = SECTIONS.find((x) => x.id === id);
+                if (!s) return null;
+                return (
+                  <button key={id} className="adm-nav-item" aria-current={section === id ? "page" : undefined}
+                    onClick={() => { setSection(id); setNavOpen(false); window.scrollTo({ top: 0 }); }}>
+                    {SECTION_ICONS[id]}
+                    <span>{s.label}</span>
+                  </button>
+                );
+              })}
             </div>
           ))}
+          <div className="adm-side-footer">
+            <button className="adm-nav-item" onClick={logout}><LogOut className="h-4 w-4" /> Sair</button>
+          </div>
         </nav>
-
-        <div className="space-y-1 border-t border-white/10 px-3 py-3">
-          <Link to="/" className="adm-nav-item"><Globe className="h-[18px] w-[18px]" /> Ver o site</Link>
-          <button className="adm-nav-item" onClick={logout}><LogOut className="h-[18px] w-[18px]" /> Sair</button>
-        </div>
       </aside>
 
       {/* ── CONTEÚDO ── */}
-      <div className="lg:pl-[272px]">
-        <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-[color:var(--adm-line)] bg-white/95 px-4 py-3 backdrop-blur sm:px-8">
-          <button onClick={() => setNavOpen(true)} aria-label="Abrir menu"
-            className="adm-btn adm-btn-ghost adm-btn-sm lg:hidden"><Menu className="h-4 w-4" /></button>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-base font-extrabold">{current.title}</p>
-            <p className="adm-mute hidden text-xs sm:block">
-              {dirty ? `${dirtyKeys.length} alteração(ões) ainda não salva(s)` : "Tudo salvo"}
-            </p>
-          </div>
-          <span className={`adm-chip ${dirty ? "bg-[#fff3d6] text-[#8a5a00]" : "adm-ok-chip"}`}>
-            {dirty ? "Não salvo" : <><CheckCircle2 className="h-3.5 w-3.5" /> Salvo</>}
-          </span>
-          <button onClick={saveContent} disabled={busy || !dirty} className="adm-btn adm-btn-primary">
-            <Save className="h-4 w-4" /> {busy ? "Salvando…" : "Salvar alterações"}
-          </button>
+      <main className="adm-main">
+        <header className="adm-header">
+          <h1>{current.title}</h1>
+          <p className="adm-subtitle">{current.desc}</p>
         </header>
 
-        <main className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 sm:px-8 sm:py-8">
-          <div>
-            <h1 className="text-2xl font-extrabold">{current.title}</h1>
-            <p className="adm-mute mt-1 text-sm">{current.desc}</p>
-          </div>
-
+        <div className="space-y-[18px]">
           {current.special === "hero" && (
             <HeroEditor content={content} setField={setField} notify={notify} />
           )}
@@ -325,8 +303,17 @@ export default function AdminPage() {
           {current.special === "gallery" && (
             <GalleryEditor content={content} setField={setField} notify={notify} />
           )}
-        </main>
-      </div>
+        </div>
+
+        <div className="adm-save-bar">
+          <span className={`adm-chip ${dirty ? "bg-[#fff3d6] text-[#7a4f00]" : "adm-ok-chip"}`}>
+            {dirty ? `${dirtyKeys.length} alteração(ões) sem salvar` : <><CheckCircle2 className="h-3.5 w-3.5" /> Tudo salvo</>}
+          </span>
+          <button onClick={saveContent} disabled={busy || !dirty} className="adm-btn adm-btn-primary">
+            <Save className="h-4 w-4" /> {busy ? "Salvando…" : "Salvar e publicar alterações"}
+          </button>
+        </div>
+      </main>
 
       {msg && (
         <div role="status" className={`adm-toast ${msg.ok ? "adm-toast-ok" : "adm-toast-err"}`}>
@@ -337,13 +324,59 @@ export default function AdminPage() {
   );
 }
 
+/* ══════════════════ Listas (miniatura + título + ações) ══════════════════ */
+function CrudRow({ image, title, sub, off, contain, actions }: {
+  image?: string | undefined; title: string; sub?: string | undefined; off?: boolean; contain?: boolean; actions: ReactNode;
+}) {
+  return (
+    <div className={`adm-crud-row ${off ? "is-off" : ""}`}>
+      {image
+        ? <img src={image} alt="" className={`adm-crud-thumb ${contain ? "contain" : ""}`} />
+        : <span className="adm-crud-thumb adm-crud-fallback">{(title || "?").charAt(0).toUpperCase()}</span>}
+      <div className="min-w-0 flex-1">
+        <p className="adm-crud-title">{title || "Sem título"}</p>
+        {sub && <p className="adm-crud-sub">{sub}</p>}
+      </div>
+      <div className="adm-crud-actions">{actions}</div>
+    </div>
+  );
+}
+
+function IconBtn({ label, danger, disabled, onClick, children }: {
+  label: string; danger?: boolean; disabled?: boolean; onClick: () => void; children: ReactNode;
+}) {
+  return (
+    <button type="button" className={`adm-icon-btn ${danger ? "danger" : ""}`} title={label} aria-label={label}
+      disabled={disabled} onClick={onClick}>
+      {children}
+    </button>
+  );
+}
+
+function FormCard({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
+  return (
+    <div className="adm-form-card">
+      <div className="adm-form-head">
+        <h3>{title}</h3>
+        <button type="button" className="adm-form-close" onClick={onClose} aria-label="Fechar"><X className="h-5 w-5" /></button>
+      </div>
+      {children}
+      <div className="mt-4">
+        <button type="button" className="adm-btn adm-btn-primary adm-btn-sm" onClick={onClose}>
+          <CheckCircle2 className="h-3.5 w-3.5" /> Concluir
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /* ══════════════════ Formulários genéricos ══════════════════ */
 function GroupCard({ group, content, setField, notify }: {
   group: Group; content: SiteContent; setField: (k: string, v: string) => void; notify: Notify;
 }) {
   return (
     <section className="adm-card p-5 sm:p-6">
-      <h2 className="text-base font-extrabold">{group.title}</h2>
+      <h2 className="adm-panel-title">{group.title}</h2>
       {group.desc && <p className="adm-mute mt-1 text-sm">{group.desc}</p>}
       <div className={`mt-4 grid gap-4 ${group.cols === 2 ? "md:grid-cols-2" : ""}`}>
         {group.fields.map((fl) => (
@@ -439,6 +472,7 @@ function HeroEditor({ content, setField, notify }: {
 }) {
   const slides = getHeroSlides(content);
   const usingDefault = !content.hero_slides;
+  const [editing, setEditing] = useState<string | null>(null);
 
   function commit(next: HeroSlide[]) { setField("hero_slides", JSON.stringify(next)); }
   function update(i: number, patch: Partial<HeroSlide>) {
@@ -459,7 +493,9 @@ function HeroEditor({ content, setField, notify }: {
   }
   function add() {
     if (slides.length >= MAX_HERO_SLIDES) return notify(`O máximo é ${MAX_HERO_SLIDES} slides.`, false);
-    commit([...slides, { id: uid(), image: "", title: "Novo slide", subtitle: "", cta_label: "", cta_link: "", active: true }]);
+    const id = uid();
+    commit([...slides, { id, image: "", title: "Novo slide", subtitle: "", cta_label: "", cta_link: "", active: true }]);
+    setEditing(id);
   }
   function restore() {
     if (!window.confirm("Voltar aos 3 slides originais? Suas alterações no carrossel serão descartadas (depois de salvar).")) return;
@@ -470,7 +506,7 @@ function HeroEditor({ content, setField, notify }: {
     <section className="adm-card p-5 sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-base font-extrabold">Slides do carrossel</h2>
+          <h2 className="adm-panel-title">Slides do carrossel</h2>
           <p className="adm-mute mt-1 text-sm">
             Cada slide tem uma foto, um título, um texto e, se quiser, um botão. Eles passam na ordem abaixo.
             {usingDefault && " Hoje o site usa os 3 slides originais — editar qualquer um já cria a sua versão."}
@@ -481,7 +517,7 @@ function HeroEditor({ content, setField, notify }: {
             <button className="adm-btn adm-btn-ghost adm-btn-sm" onClick={restore}><RotateCcw className="h-3.5 w-3.5" /> Restaurar originais</button>
           )}
           <button className="adm-btn adm-btn-primary adm-btn-sm" onClick={add} disabled={slides.length >= MAX_HERO_SLIDES}>
-            <Plus className="h-3.5 w-3.5" /> Novo slide
+            <Plus className="h-3.5 w-3.5" /> Adicionar slide
           </button>
         </div>
       </div>
@@ -496,22 +532,39 @@ function HeroEditor({ content, setField, notify }: {
         <option value="#contato">Contato</option>
       </datalist>
 
-      <div className="mt-5 space-y-4">
+      <div className="adm-crud-list mt-4">
         {slides.length === 0 && (
-          <p className="adm-sub adm-mute p-5 text-center text-sm">Nenhum slide. Clique em “Novo slide” para começar.</p>
+          <p className="adm-sub adm-mute p-5 text-center text-sm">Nenhum slide. Clique em “Adicionar slide” para começar.</p>
         )}
         {slides.map((s, i) => (
-          <SlideCard key={s.id} slide={s} index={i} total={slides.length}
-            onChange={(p) => update(i, p)} onMove={(d) => move(i, d)} onRemove={() => remove(i)} notify={notify} />
+          <Fragment key={s.id}>
+            {editing === s.id ? (
+              <SlideForm slide={s} index={i} onChange={(p) => update(i, p)} onClose={() => setEditing(null)} notify={notify} />
+            ) : (
+              <CrudRow
+                image={resolveImage(s.image) || undefined} title={s.title} off={!s.active}
+                sub={s.active ? s.subtitle || "Sem texto" : "Oculto no site"}
+                actions={<>
+                  <IconBtn label="Mover para cima" disabled={i === 0} onClick={() => move(i, -1)}><ArrowUp className="h-4 w-4" /></IconBtn>
+                  <IconBtn label="Mover para baixo" disabled={i === slides.length - 1} onClick={() => move(i, 1)}><ArrowDown className="h-4 w-4" /></IconBtn>
+                  <IconBtn label={s.active ? "Ocultar" : "Mostrar"} onClick={() => update(i, { active: !s.active })}>
+                    {s.active ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                  </IconBtn>
+                  <IconBtn label="Editar" onClick={() => setEditing(s.id)}><Pencil className="h-4 w-4" /></IconBtn>
+                  <IconBtn label="Excluir" danger onClick={() => remove(i)}><Trash2 className="h-4 w-4" /></IconBtn>
+                </>}
+              />
+            )}
+          </Fragment>
         ))}
       </div>
     </section>
   );
 }
 
-function SlideCard({ slide, index, total, onChange, onMove, onRemove, notify }: {
-  slide: HeroSlide; index: number; total: number;
-  onChange: (p: Partial<HeroSlide>) => void; onMove: (d: -1 | 1) => void; onRemove: () => void; notify: Notify;
+function SlideForm({ slide, index, onChange, onClose, notify }: {
+  slide: HeroSlide; index: number;
+  onChange: (p: Partial<HeroSlide>) => void; onClose: () => void; notify: Notify;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -530,20 +583,7 @@ function SlideCard({ slide, index, total, onChange, onMove, onRemove, notify }: 
   }
 
   return (
-    <article className={`adm-sub p-4 ${slide.active ? "" : "opacity-75"}`}>
-      <div className="mb-3 flex flex-wrap items-center gap-2">
-        <span className="adm-chip bg-[color:var(--adm-blue)] text-white">Slide {index + 1}</span>
-        <span className={`adm-chip ${slide.active ? "adm-ok-chip" : "adm-off-chip"}`}>{slide.active ? "Aparece no site" : "Oculto"}</span>
-        <div className="ml-auto flex flex-wrap gap-1.5">
-          <button className="adm-btn adm-btn-ghost adm-btn-sm" onClick={() => onChange({ active: !slide.active })}>
-            {slide.active ? <><EyeOff className="h-3.5 w-3.5" /> Ocultar</> : <><Eye className="h-3.5 w-3.5" /> Mostrar</>}
-          </button>
-          <button className="adm-btn adm-btn-ghost adm-btn-sm" onClick={() => onMove(-1)} disabled={index === 0} aria-label="Mover para cima"><ArrowUp className="h-3.5 w-3.5" /></button>
-          <button className="adm-btn adm-btn-ghost adm-btn-sm" onClick={() => onMove(1)} disabled={index === total - 1} aria-label="Mover para baixo"><ArrowDown className="h-3.5 w-3.5" /></button>
-          <button className="adm-btn adm-btn-danger adm-btn-sm" onClick={onRemove}><Trash2 className="h-3.5 w-3.5" /> Excluir</button>
-        </div>
-      </div>
-
+    <FormCard title={`Editar slide ${index + 1}`} onClose={onClose}>
       <div className="grid gap-4 md:grid-cols-[220px_1fr]">
         <div>
           <div className="adm-img-box aspect-[4/3] w-full bg-white">
@@ -587,7 +627,7 @@ function SlideCard({ slide, index, total, onChange, onMove, onRemove, notify }: 
           <p className="adm-hint mt-0!">Deixe o texto do botão em branco para o slide não ter botão (o botão de WhatsApp continua).</p>
         </div>
       </div>
-    </article>
+    </FormCard>
   );
 }
 
@@ -599,6 +639,7 @@ function PartnersEditor({ partnerLinks, setPartnerLinks, logos, setLogos, notify
 }) {
   const [busy, setBusy] = useState(false);
   const [logoMap, setLogoMap] = useState<Record<string, LogoState>>({});
+  const [editing, setEditing] = useState<string | null>(null);
 
   async function savePartners() {
     if (!supabase) return notify("Supabase não configurado.", false);
@@ -635,37 +676,41 @@ function PartnersEditor({ partnerLinks, setPartnerLinks, logos, setLogos, notify
 
   return (
     <section className="adm-card p-5 sm:p-6">
-      <h2 className="text-base font-extrabold">Apoiadores</h2>
+      <h2 className="adm-panel-title">Apoiadores</h2>
       <p className="adm-mute mt-1 text-sm">
         Link (site ou Instagram), visibilidade e logo de cada parceiro. As logos são salvas na hora; links e visibilidade
         precisam do botão “Salvar parceiros”.
       </p>
-      <div className="mt-4 space-y-3">
+      <div className="adm-crud-list mt-4">
         {partnerLinks.map((p, i) => {
           const ls = logoMap[p.slug];
           const savedLogo = logos[p.slug];
+          if (editing !== p.slug) {
+            return (
+              <CrudRow key={p.slug} image={savedLogo} contain title={p.name} off={!p.published}
+                sub={p.published ? p.website_url || "Sem link" : "Oculto no site"}
+                actions={<>
+                  <IconBtn label={p.published ? "Ocultar" : "Mostrar"}
+                    onClick={() => setPartnerLinks(partnerLinks.map((x, j) => (j === i ? { ...x, published: !x.published } : x)))}>
+                    {p.published ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                  </IconBtn>
+                  <IconBtn label="Editar" onClick={() => setEditing(p.slug)}><Pencil className="h-4 w-4" /></IconBtn>
+                </>}
+              />
+            );
+          }
           return (
-            <div key={p.slug} className="adm-sub p-4">
-              <div className="grid items-center gap-3 md:grid-cols-[200px_1fr_auto]">
-                <p className="text-sm font-extrabold">{p.name}</p>
-                <div>
-                  <label className="sr-only" htmlFor={`pl-${p.slug}`}>Link de {p.name}</label>
-                  <input id={`pl-${p.slug}`} type="url" className="adm-input" placeholder="https://…" value={p.website_url}
-                    onChange={(e) => setPartnerLinks(partnerLinks.map((x, j) => (j === i ? { ...x, website_url: e.target.value } : x)))} />
-                </div>
-                <button type="button"
-                  onClick={() => setPartnerLinks(partnerLinks.map((x, j) => (j === i ? { ...x, published: !x.published } : x)))}
-                  className={`adm-btn adm-btn-sm ${p.published ? "adm-ok-chip" : "adm-off-chip"}`} style={{ border: "1px solid var(--adm-line-2)" }}>
-                  {p.published ? <><Eye className="h-3.5 w-3.5" /> Visível</> : <><EyeOff className="h-3.5 w-3.5" /> Oculto</>}
-                </button>
-              </div>
+            <FormCard key={p.slug} title={`Editar ${p.name}`} onClose={() => setEditing(null)}>
+              <label className="adm-label" htmlFor={`pl-${p.slug}`}>Link (site ou Instagram)</label>
+              <input id={`pl-${p.slug}`} type="url" className="adm-input" placeholder="https://…" value={p.website_url}
+                onChange={(e) => setPartnerLinks(partnerLinks.map((x, j) => (j === i ? { ...x, website_url: e.target.value } : x)))} />
               <LogoRow
                 state={ls ?? null} savedLogo={savedLogo ?? null} busy={busy}
                 onFile={(file) => void handleLogoFile(p.slug, file)}
                 onCancel={() => setLogoMap((m) => { const n = { ...m }; delete n[p.slug]; return n; })}
                 onSave={() => void saveLogo(p.slug)}
               />
-            </div>
+            </FormCard>
           );
         })}
       </div>
@@ -761,7 +806,7 @@ function GalleryEditor({ content, setField, notify }: {
       if (!alive) return;
       setDbGallery((items.data ?? []) as DbGalleryItem[]);
       if (cats.data?.length) {
-        setCategories(cats.data as GalleryCategory[]);
+        setCategories((cats.data as GalleryCategory[]).map((c) => ({ ...c, color: readableChipColor(c.color) })));
         setUploadCategory((cur) => (cats.data!.some((c) => c.id === cur) ? cur : (cats.data![0] as GalleryCategory).id));
       }
       setLoading(false);
@@ -847,12 +892,12 @@ function GalleryEditor({ content, setField, notify }: {
     <>
       {/* Eventos */}
       <section className="adm-card p-5 sm:p-6">
-        <h2 className="text-base font-extrabold">Eventos (categorias)</h2>
+        <h2 className="adm-panel-title">Eventos (categorias)</h2>
         <p className="adm-mute mt-1 text-sm">Cada evento vira um cartão na galeria do site.</p>
-        <div className="mt-4 space-y-2">
+        <div className="adm-crud-list mt-4">
           {loading && <p className="adm-mute py-3 text-sm">Carregando…</p>}
           {categories.map((cat) => (
-            <div key={cat.id} className="adm-sub flex flex-wrap items-center gap-3 p-3">
+            <div key={cat.id} className="adm-crud-row flex-wrap">
               {editingCat?.id === cat.id ? (
                 <>
                   <input aria-label="Nome do evento" className="adm-input w-auto! min-w-[160px] flex-1" value={editingCat.label}
@@ -871,9 +916,9 @@ function GalleryEditor({ content, setField, notify }: {
                 <>
                   {catChip(cat)}
                   <span className="adm-mute text-xs">{dbGallery.filter((g) => g.category === cat.id).length} foto(s) enviadas</span>
-                  <div className="ml-auto flex gap-2">
-                    <button className="adm-btn adm-btn-ghost adm-btn-sm" onClick={() => setEditingCat(cat)}><Pencil className="h-3.5 w-3.5" /> Editar</button>
-                    <button className="adm-btn adm-btn-danger adm-btn-sm" onClick={() => void deleteCategory(cat.id)}><Trash2 className="h-3.5 w-3.5" /> Excluir</button>
+                  <div className="adm-crud-actions ml-auto">
+                    <IconBtn label="Editar" onClick={() => setEditingCat(cat)}><Pencil className="h-4 w-4" /></IconBtn>
+                    <IconBtn label="Excluir" danger onClick={() => void deleteCategory(cat.id)}><Trash2 className="h-4 w-4" /></IconBtn>
                   </div>
                 </>
               )}
@@ -910,7 +955,7 @@ function GalleryEditor({ content, setField, notify }: {
 
       {/* Upload */}
       <section className="adm-card p-5 sm:p-6">
-        <h2 className="text-base font-extrabold">Adicionar fotos</h2>
+        <h2 className="adm-panel-title">Adicionar fotos</h2>
         <p className="adm-mute mt-1 text-sm">Escolha o evento e envie quantas fotos quiser. Elas são reduzidas automaticamente.</p>
         <div className="mt-4 flex flex-wrap gap-2">
           {categories.map((c) => (
@@ -947,7 +992,7 @@ function GalleryEditor({ content, setField, notify }: {
 
       {/* Fotos enviadas */}
       <section className="adm-card p-5 sm:p-6">
-        <h2 className="text-base font-extrabold">Fotos enviadas pelo painel</h2>
+        <h2 className="adm-panel-title">Fotos enviadas pelo painel</h2>
         <p className="adm-mute mt-1 text-sm">Mude o título ou o evento, oculte ou exclua. Essas mudanças valem na hora.</p>
         {dbGallery.length === 0 ? (
           <p className="adm-mute py-6 text-center text-sm">{loading ? "Carregando…" : "Nenhuma foto enviada ainda."}</p>
@@ -980,7 +1025,7 @@ function GalleryEditor({ content, setField, notify }: {
 
       {/* Fotos fixas do site */}
       <section className="adm-card p-5 sm:p-6">
-        <h2 className="text-base font-extrabold">Fotos que já vêm com o site</h2>
+        <h2 className="adm-panel-title">Fotos que já vêm com o site</h2>
         <p className="adm-mute mt-1 text-sm">Você pode ocultar qualquer uma delas. Depois clique em “Salvar alterações”.</p>
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {STATIC_GALLERY.map((p) => {

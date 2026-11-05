@@ -86,8 +86,8 @@ export type GalleryCategory = {
 
 export const defaultGalleryCategories: GalleryCategory[] = [
   { id: "esporte-adaptado", label: "Esporte Adaptado", color: "bg-[#1B4B8A] text-white", sort_order: 1 },
-  { id: "comunidade",       label: "Comunidade",        color: "bg-[#E8392A] text-white", sort_order: 2 },
-  { id: "acolhimento",      label: "Acolhimento",       color: "bg-[#059669] text-white", sort_order: 3 },
+  { id: "comunidade",       label: "Comunidade",        color: "bg-[#d62f21] text-white", sort_order: 2 },
+  { id: "acolhimento",      label: "Acolhimento",       color: "bg-[#047857] text-white", sort_order: 3 },
   { id: "fundadora",        label: "Fundadora",         color: "bg-[#7c3aed] text-white", sort_order: 4 },
 ];
 
@@ -98,7 +98,18 @@ export async function getGalleryCategories(): Promise<GalleryCategory[]> {
     .select("id,label,color,sort_order")
     .order("sort_order");
   if (error || !data || !data.length) return defaultGalleryCategories;
-  return data as GalleryCategory[];
+  return (data as GalleryCategory[]).map((c) => ({ ...c, color: readableChipColor(c.color) }));
+}
+
+/* Eventos antigos guardam no banco cores com pouco contraste para texto branco. */
+const CHIP_COLOR_FIXES: Record<string, string> = {
+  "#E8392A": "#d62f21",
+  "#059669": "#047857",
+  "#db2777": "#be185d",
+  "#0891b2": "#0e7490",
+};
+export function readableChipColor(color: string) {
+  return color.replace(/#[0-9a-fA-F]{6}/, (hex) => CHIP_COLOR_FIXES[hex] ?? hex);
 }
 
 export async function getGalleryItems(): Promise<Array<{

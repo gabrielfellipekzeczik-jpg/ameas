@@ -8,6 +8,7 @@ import {
   Trophy, Users, X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -26,11 +27,12 @@ import {
   defaultSiteContent, getPartnerLinks, getSiteContent, getGalleryCategories, getGalleryItems, getStorageUrl,
   type PartnerLink, type SiteContent, type GalleryCategory,
 } from "@/lib/supabase";
-import { parseStringList, pick, type HeroSlide } from "@/lib/cms-schema";
+import { getTestimonials, parseStringList, pick, type HeroSlide } from "@/lib/cms-schema";
 import {
   BUILTIN_PHOTOS, DEFAULT_FIELD_IMAGES, defaultHeroSlides, getHeroSlides, resolveImage,
 } from "@/lib/builtin-images";
 import { STATIC_GALLERY, mergeEventCategories } from "@/lib/gallery-static";
+import { buildPixCode } from "@/lib/pix";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -138,19 +140,12 @@ function AmeasHome() {
     }).filter((ev) => ev.images.length > 0);
   }, [dynamicCategories, dbGalleryItems, hiddenStatic]);
 
+  const testimonials = useMemo(() => getTestimonials(sc).filter((t) => t.active && t.quote.trim()), [sc]);
+
   const year = useMemo(() => new Date().getFullYear(), []);
 
-  const copyPix = async (amount?: string) => {
-    // Escolhe o código copia-e-cola mais específico para o valor
-    const a = amount ?? donationAmount;
-    const code =
-      a === "25"  ? sc.pix_25 :
-      a === "50"  ? sc.pix_50 :
-      a === "100" ? sc.pix_100 :
-      a === "200" ? sc.pix_200 :
-      sc.pix_copypaste || sc.pix_key;
-    const textToCopy = code || sc.pix_copypaste || sc.pix_key;
-    if (typeof navigator !== "undefined" && navigator.clipboard) await navigator.clipboard.writeText(textToCopy);
+  const copyPix = async (code: string) => {
+    if (typeof navigator !== "undefined" && navigator.clipboard) await navigator.clipboard.writeText(code);
     setCopied(true);
     setTimeout(() => setCopied(false), 1800);
   };
@@ -411,7 +406,7 @@ function AmeasHome() {
               </div>
               <div className="mt-4">
                 <label htmlFor="valor-livre" className="text-xs font-bold uppercase text-white/85">Valor livre</label>
-                <input id="valor-livre" inputMode="numeric" value={donationAmount}
+                <input id="valor-livre" inputMode="numeric" maxLength={7} value={donationAmount}
                   onChange={(e) => setDonationAmount(e.target.value.replace(/\D/g, ""))} placeholder="Digite o valor"
                   className="mt-2 w-full rounded-2xl border border-white/20 bg-white/15 px-4 py-2 text-base font-bold text-white placeholder:text-white/70 focus:outline-none focus:ring-2 focus:ring-[#7eb5f5]" />
               </div>
@@ -585,19 +580,15 @@ function AmeasHome() {
       </section>
 
       {/* ══ DEPOIMENTOS ══ */}
-      <section className="py-20 sm:py-24" aria-labelledby="dep-title">
+      {testimonials.length > 0 && <section className="py-20 sm:py-24" aria-labelledby="dep-title">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
             {sc.test_kicker && <span className="section-kicker">{sc.test_kicker}</span>}
             <h2 id="dep-title" className="mt-4 text-3xl font-black sm:text-4xl">{sc.test_title} <span className="gradient-text">{sc.test_title_hl}</span></h2>
           </div>
           <div className="mt-12 grid gap-5 lg:grid-cols-3">
-            {[
-              { quote: sc.test1_quote, author: sc.test1_author, border: "border-[#1B4B8A]/20" },
-              { quote: sc.test2_quote, author: sc.test2_author, border: "border-[#38bdf8]/20" },
-              { quote: sc.test3_quote, author: sc.test3_author, border: "border-[#E8392A]/20" },
-            ].map((t, i) => (
-              <div key={i} className={`glass neon-border rounded-3xl border p-7 ${t.border}`}>
+            {testimonials.map((t, i) => (
+              <div key={t.id} className={`glass neon-border rounded-3xl border p-7 ${["border-[#1B4B8A]/20", "border-[#38bdf8]/20", "border-[#E8392A]/20"][i % 3]}`}>
                 <div className="flex gap-1 text-accent-gold mb-4">
                   <Sparkles className="h-5 w-5" /><Sparkles className="h-5 w-5" /><Sparkles className="h-5 w-5" />
                 </div>
@@ -607,7 +598,7 @@ function AmeasHome() {
             ))}
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* ══ FOOTER ══ */}
       <footer id="contato" className="border-t border-border/30 py-14" style={{background:"var(--color-card)"}}>
@@ -658,7 +649,7 @@ function AmeasHome() {
       </Button>
 
       {/* ══ MODAL: DOAÇÃO ══ */}
-      <DonationDialog open={donationOpen} onOpenChange={setDonationOpen} copied={copied} onCopyPix={copyPix} sc={sc} whatsappUrl={whatsappUrl} donationAmount={donationAmount} />
+      <DonationDialog open={donationOpen} onOpenChange={setDonationOpen} copied={copied} onCopyPix={copyPix} sc={sc} whatsappUrl={whatsappUrl} donationAmount={donationAmount} onAmountChange={setDonationAmount} />
 
       {/* ══ MODAL: VOLUNTÁRIO ══ */}
       <Dialog open={volunteerOpen} onOpenChange={setVolunteerOpen}>
@@ -732,26 +723,16 @@ function AmeasHome() {
 
 /* ─── Sub-componentes ─── */
 
-function DonationDialog({ open, onOpenChange, copied, onCopyPix, sc, whatsappUrl, donationAmount }: {
+function DonationDialog({ open, onOpenChange, copied, onCopyPix, sc, whatsappUrl, donationAmount, onAmountChange }: {
   open: boolean; onOpenChange: (o: boolean) => void;
-  copied: boolean; onCopyPix: (amount?: string) => void;
-  sc: SiteContent; whatsappUrl: string; donationAmount: string;
+  copied: boolean; onCopyPix: (code: string) => void;
+  sc: SiteContent; whatsappUrl: string; donationAmount: string; onAmountChange: (v: string) => void;
 }) {
-  // Pick the most specific pix code for the current amount
-  const pixCode = (() => {
-    if (donationAmount === "25")  return sc.pix_25  || sc.pix_copypaste || sc.pix_key;
-    if (donationAmount === "50")  return sc.pix_50  || sc.pix_copypaste || sc.pix_key;
-    if (donationAmount === "100") return sc.pix_100 || sc.pix_copypaste || sc.pix_key;
-    if (donationAmount === "200") return sc.pix_200 || sc.pix_copypaste || sc.pix_key;
-    return sc.pix_copypaste || sc.pix_key;
-  })();
-
-  const hasSpecificCode =
-    (donationAmount === "25"  && sc.pix_25)  ||
-    (donationAmount === "50"  && sc.pix_50)  ||
-    (donationAmount === "100" && sc.pix_100) ||
-    (donationAmount === "200" && sc.pix_200) ||
-    sc.pix_copypaste;
+  const amount = Number(donationAmount) || 0;
+  const pixCode = useMemo(
+    () => buildPixCode({ key: sc.pix_key, name: sc.pix_name, city: sc.pix_city, amount }),
+    [sc.pix_key, sc.pix_name, sc.pix_city, amount],
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -763,42 +744,40 @@ function DonationDialog({ open, onOpenChange, copied, onCopyPix, sc, whatsappUrl
           <DialogDescription className="text-soft">Sua doação fortalece esporte adaptado, inclusão e acolhimento.</DialogDescription>
         </DialogHeader>
         <div className="grid gap-5 sm:grid-cols-[0.9fr_1.1fr]">
-          {/* QR Code real */}
+          {/* QR Code gerado com o valor escolhido */}
           <div className="mx-auto w-full max-w-52">
             <div className="overflow-hidden rounded-2xl border border-[#1B4B8A]/20 bg-white p-2 shadow-lg">
-              <img src={resolveImage(sc.pix_qr_image) || DEFAULT_FIELD_IMAGES["pix_qr_image"]} alt="QR Code PIX AMEAS" className="h-full w-full object-contain" />
+              <QRCodeSVG value={pixCode} size={256} level="M" marginSize={2} title={`QR Code PIX de ${amount ? `R$ ${amount}` : "valor livre"} para a AMEAS`} className="h-auto w-full" />
             </div>
-            <p className="mt-2 text-center text-xs font-bold uppercase text-soft">Escaneie para pagar</p>
+            <p className="mt-2 text-center text-xs font-bold uppercase text-soft">
+              {amount ? `Escaneie para doar R$ ${amount}` : "Escaneie e digite o valor no banco"}
+            </p>
           </div>
 
           <div className="space-y-3">
-            {/* Chave PIX */}
-            <div className="rounded-2xl border border-[#1B4B8A]/20 bg-[#1B4B8A]/5 p-4">
-              <p className="text-xs font-bold uppercase text-soft">PIX CNPJ</p>
-              <p className="mt-1 break-words text-lg font-black text-accent-blue">{sc.pix_key}</p>
+            {/* Valor: muda o QR Code e o código na hora */}
+            <div>
+              <label htmlFor="valor-pix" className="text-xs font-bold uppercase text-soft">Valor da doação (R$)</label>
+              <input id="valor-pix" inputMode="numeric" maxLength={7} value={donationAmount} placeholder="Digite o valor"
+                onChange={(e) => onAmountChange(e.target.value.replace(/\D/g, ""))}
+                className="mt-1.5 w-full rounded-2xl border border-[#1B4B8A]/30 bg-background/30 px-4 py-2 text-lg font-black text-foreground placeholder:text-soft focus:outline-none focus:ring-2 focus:ring-[#7eb5f5]" />
             </div>
+
+            {/* Código copia e cola */}
+            <div className="rounded-2xl border border-[#E8392A]/20 bg-[#E8392A]/5 p-3">
+              <p className="mb-1.5 text-xs font-black uppercase text-accent-red">PIX copia e cola</p>
+              <p className="max-h-24 select-all overflow-auto break-all font-mono text-[11px] leading-relaxed text-body">{pixCode}</p>
+            </div>
+
+            <Button onClick={() => onCopyPix(pixCode)} className="w-full rounded-2xl bg-[#1B4B8A] text-white hover:bg-[#1B4B8A]/90">
+              <Copy /> {copied ? "Copiado ✓" : "Copiar código PIX"}
+            </Button>
 
             {/* Dados bancários */}
             <div className="rounded-2xl border border-border/20 bg-background/30 p-3 text-xs text-soft">
-              <p>{sc.pix_bank} · Ag. {sc.pix_agency} · CC {sc.pix_account}</p>
+              <p>PIX CNPJ {sc.pix_key}</p>
+              <p className="mt-1">{sc.pix_bank} · Ag. {sc.pix_agency} · CC {sc.pix_account}</p>
             </div>
-
-            {/* Código copia e cola — mostra o trecho do código ativo */}
-            {hasSpecificCode && (
-              <div className="rounded-2xl border border-[#E8392A]/20 bg-[#E8392A]/5 p-3">
-                <p className="text-xs font-black uppercase text-accent-red mb-1.5">
-                  Código PIX{donationAmount ? ` · R$ ${donationAmount}` : ""}
-                </p>
-                <p className="font-mono text-[11px] break-all text-body leading-relaxed">
-                  {pixCode.slice(0, 80)}{pixCode.length > 80 ? "…" : ""}
-                </p>
-              </div>
-            )}
-
-            {/* Copiar */}
-            <Button onClick={() => onCopyPix(donationAmount)} className="w-full rounded-2xl bg-[#1B4B8A] text-white hover:bg-[#1B4B8A]/90">
-              <Copy /> {copied ? "Copiado ✓" : hasSpecificCode ? "Copiar Código PIX" : "Copiar Chave PIX"}
-            </Button>
 
             <Button asChild variant="outline" className="w-full rounded-2xl border-accent-red/50 text-accent-red hover:bg-[#E8392A]/10">
               <a href={whatsappUrl} target="_blank" rel="noreferrer"><MessageCircle /> Chamar no WhatsApp</a>

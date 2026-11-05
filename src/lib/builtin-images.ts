@@ -10,7 +10,6 @@ import acaoSolidaria from "@/assets/ameas-acao-solidaria.png";
 import acolhimentoCafe from "@/assets/ameas-acolhimento-cafe.png";
 import parceriaTiaLina from "@/assets/ameas-parceria-tia-lina.png";
 import karina from "@/assets/karina-meneguini-retrato.png";
-import pixQr from "@/assets/pix-qrcode.png";
 import sobreComunidade from "@/assets/site/sobre-comunidade.webp";
 import capaAleluia from "@/assets/site/capa-corrida-aleluia.webp";
 import capaTrackField from "@/assets/site/capa-track-field.webp";
@@ -50,7 +49,6 @@ export const BUILTIN_PHOTOS: Record<string, { src: string; label: string }> = {
 export const DEFAULT_FIELD_IMAGES: Record<string, string> = {
   about_image: sobreComunidade,
   founder_image: karina,
-  pix_qr_image: pixQr,
   service1_image: servicoEsporte,
   service2_image: servicoSocial,
   service3_image: servicoPsicologico,

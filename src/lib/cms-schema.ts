@@ -27,7 +27,7 @@ export type SectionDef = {
   readonly label: string;
   readonly title: string;
   readonly desc: string;
-  readonly special?: "hero" | "partners" | "gallery";
+  readonly special?: "hero" | "partners" | "gallery" | "testimonials";
   readonly hidden?: boolean;
   readonly groups: readonly Group[];
 };
@@ -293,7 +293,7 @@ const _SECTIONS = [
     id: "doacoes",
     label: "Doações e PIX",
     title: "Doações e PIX",
-    desc: "Textos da seção “Como ajudar”, dados bancários e códigos PIX.",
+    desc: "Textos da seção “Como ajudar” e dados bancários. O QR Code e o copia e cola são gerados sozinhos com a chave abaixo.",
     groups: [
       {
         title: "Textos da seção “Como ajudar”",
@@ -331,21 +331,8 @@ const _SECTIONS = [
           t("pix_bank", "Banco", "Banco do Brasil"),
           t("pix_agency", "Agência", "0523-1"),
           t("pix_account", "Conta", "48681-7"),
-        ],
-      },
-      {
-        title: "QR Code do PIX",
-        fields: [img("pix_qr_image", "Imagem do QR Code", "Se ficar vazia, usa o QR Code original do site.")],
-      },
-      {
-        title: "Códigos PIX “copia e cola” por valor",
-        desc: "Gere cada código no aplicativo do banco e cole aqui. Se um valor ficar vazio, o site usa o código genérico (ou a chave PIX).",
-        fields: [
-          code("pix_25", "R$ 25"),
-          code("pix_50", "R$ 50"),
-          code("pix_100", "R$ 100"),
-          code("pix_200", "R$ 200"),
-          code("pix_copypaste", "Código genérico / valor livre"),
+          t("pix_name", "Nome no PIX", "AMEAS", "Até 25 letras, sem acento. Aparece no código gerado."),
+          t("pix_city", "Cidade no PIX", "SAO ROQUE", "Até 15 letras, sem acento."),
         ],
       },
     ],
@@ -457,7 +444,8 @@ const _SECTIONS = [
     id: "depoimentos",
     label: "Depoimentos",
     title: "Depoimentos",
-    desc: "Os três depoimentos da seção “Vozes”.",
+    desc: "Adicione, edite, oculte ou reordene os depoimentos da seção “Vozes”.",
+    special: "testimonials",
     groups: [
       {
         title: "Cabeçalho da seção",
@@ -465,27 +453,6 @@ const _SECTIONS = [
           t("test_kicker", "Etiqueta da seção", "Depoimentos"),
           t("test_title", "Título", "Vozes de quem vive a"),
           t("test_title_hl", HL, "inclusão de perto."),
-        ],
-      },
-      {
-        title: "Depoimento 1",
-        fields: [
-          ta("test1_quote", "Citação", "A AMEAS mostra que o esporte também é pertencimento. Cada treino fortalece o corpo, a confiança e os vínculos."),
-          t("test1_author", "Autor", "Família atendida"),
-        ],
-      },
-      {
-        title: "Depoimento 2",
-        fields: [
-          ta("test2_quote", "Citação", "Ver a evolução dos atletas é acompanhar histórias de coragem sendo escritas com apoio, técnica e afeto."),
-          t("test2_author", "Autor", "Parceiro institucional"),
-        ],
-      },
-      {
-        title: "Depoimento 3",
-        fields: [
-          ta("test3_quote", "Citação", "Aqui a superação acontece em equipe. O incentivo certo transforma limites em novas conquistas."),
-          t("test3_author", "Autor", "Atleta AMEAS"),
         ],
       },
     ],
@@ -532,6 +499,13 @@ const _SECTIONS = [
           t("hero_subtitle", "Subtítulo do 1º slide (padrão)", "A AMEAS promove acolhimento, autonomia e superação por meio do esporte adaptado em São Roque e região."),
           t("hero_slides", "Slides do carrossel (JSON)", ""),
           t("gallery_hidden", "Fotos fixas ocultas (JSON)", ""),
+          t("testimonials", "Depoimentos (JSON)", ""),
+          ta("test1_quote", "Citação", "A AMEAS mostra que o esporte também é pertencimento. Cada treino fortalece o corpo, a confiança e os vínculos."),
+          t("test1_author", "Autor", "Família atendida"),
+          ta("test2_quote", "Citação", "Ver a evolução dos atletas é acompanhar histórias de coragem sendo escritas com apoio, técnica e afeto."),
+          t("test2_author", "Autor", "Parceiro institucional"),
+          ta("test3_quote", "Citação", "Aqui a superação acontece em equipe. O incentivo certo transforma limites em novas conquistas."),
+          t("test3_author", "Autor", "Atleta AMEAS"),
           t("org_president_name", "org", "Karina Meneguini"),
           t("org_vp_name", "org", "Diretoria Executiva"),
           t("org_sec1_name", "org", "Secretário(a) Geral"),
@@ -605,6 +579,26 @@ export function parseHeroSlides(raw: string): HeroSlide[] | null {
   } catch {
     return null;
   }
+}
+
+/* ───────────── Depoimentos ───────────── */
+export type Testimonial = { id: string; quote: string; author: string; active: boolean };
+
+/** Lista salva no painel ou, se não houver, os 3 depoimentos originais. */
+export function getTestimonials(sc: SiteContent): Testimonial[] {
+  try {
+    const arr: unknown = sc.testimonials ? JSON.parse(sc.testimonials) : null;
+    if (Array.isArray(arr)) {
+      return arr.filter((x) => x && typeof x === "object").map((x) => {
+        const o = x as Record<string, unknown>;
+        const text = (k: string) => (typeof o[k] === "string" ? (o[k] as string) : "");
+        return { id: text("id") || Math.random().toString(36).slice(2, 10), quote: text("quote"), author: text("author"), active: o["active"] !== false };
+      });
+    }
+  } catch { /* usa os originais */ }
+  return [1, 2, 3].map((n) => ({
+    id: `padrao-${n}`, quote: pick(sc, `test${n}_quote`), author: pick(sc, `test${n}_author`), active: true,
+  }));
 }
 
 export function parseStringList(raw: string): string[] {

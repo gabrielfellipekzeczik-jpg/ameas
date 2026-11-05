@@ -11,8 +11,8 @@ import {
   type GalleryCategory, type PartnerLink, type SiteContent,
 } from "@/lib/supabase";
 import {
-  MAX_HERO_SLIDES, SECTIONS, parseStringList, pick,
-  type Field, type Group, type HeroSlide, type SectionDef,
+  MAX_HERO_SLIDES, SECTIONS, getTestimonials, parseStringList, pick,
+  type Field, type Group, type HeroSlide, type SectionDef, type Testimonial,
 } from "@/lib/cms-schema";
 import {
   BUILTIN_PHOTOS, DEFAULT_FIELD_IMAGES, getHeroSlides, resolveImage,
@@ -292,6 +292,10 @@ export default function AdminPage() {
           {current.groups.map((g) => (
             <GroupCard key={g.title} group={g} content={content} setField={setField} notify={notify} />
           ))}
+
+          {current.special === "testimonials" && (
+            <TestimonialsEditor content={content} setField={setField} />
+          )}
 
           {current.special === "partners" && (
             <PartnersEditor
@@ -632,6 +636,87 @@ function SlideForm({ slide, index, onChange, onClose, notify }: {
 }
 
 /* ══════════════════ Parceiros ══════════════════ */
+/* ══════════════════ Depoimentos ══════════════════ */
+function TestimonialsEditor({ content, setField }: {
+  content: SiteContent; setField: (k: string, v: string) => void;
+}) {
+  const items = getTestimonials(content);
+  const [editing, setEditing] = useState<string | null>(null);
+
+  function commit(next: Testimonial[]) { setField("testimonials", JSON.stringify(next)); }
+  function update(i: number, patch: Partial<Testimonial>) {
+    commit(items.map((t, j) => (j === i ? { ...t, ...patch } : t)));
+  }
+  function move(i: number, dir: -1 | 1) {
+    const a = items[i]; const b = items[i + dir];
+    if (!a || !b) return;
+    const next = [...items];
+    next[i] = b; next[i + dir] = a;
+    commit(next);
+  }
+  function remove(i: number) {
+    if (!window.confirm("Excluir este depoimento?")) return;
+    commit(items.filter((_, j) => j !== i));
+  }
+  function add() {
+    const id = uid();
+    commit([...items, { id, quote: "", author: "", active: true }]);
+    setEditing(id);
+  }
+
+  return (
+    <section className="adm-card p-5 sm:p-6">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="adm-panel-title">Depoimentos</h2>
+          <p className="adm-mute mt-1 text-sm">Eles aparecem no site na ordem abaixo. Depois de mexer, clique em “Salvar e publicar alterações”.</p>
+        </div>
+        <button className="adm-btn adm-btn-primary adm-btn-sm" onClick={add}><Plus className="h-3.5 w-3.5" /> Adicionar depoimento</button>
+      </div>
+
+      <div className="adm-crud-list mt-4">
+        {items.length === 0 && (
+          <p className="adm-sub adm-mute p-5 text-center text-sm">Nenhum depoimento. Clique em “Adicionar depoimento” para começar.</p>
+        )}
+        {items.map((t, i) => (
+          <Fragment key={t.id}>
+            {editing === t.id ? (
+              <FormCard title={`Depoimento ${i + 1}`} onClose={() => setEditing(null)}>
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor={`dep-q-${t.id}`} className="adm-label">Depoimento</label>
+                    <textarea id={`dep-q-${t.id}`} rows={4} className="adm-input" value={t.quote} autoFocus
+                      onChange={(e) => update(i, { quote: e.target.value })} />
+                  </div>
+                  <div>
+                    <label htmlFor={`dep-a-${t.id}`} className="adm-label">Quem disse</label>
+                    <input id={`dep-a-${t.id}`} className="adm-input" placeholder="Ex.: Família atendida" value={t.author}
+                      onChange={(e) => update(i, { author: e.target.value })} />
+                  </div>
+                </div>
+              </FormCard>
+            ) : (
+              <CrudRow
+                title={t.quote || "Depoimento vazio"} off={!t.active}
+                sub={!t.active ? "Oculto no site" : !t.quote.trim() ? "Sem texto: não aparece no site" : t.author || "Sem autor"}
+                actions={<>
+                  <IconBtn label="Mover para cima" disabled={i === 0} onClick={() => move(i, -1)}><ArrowUp className="h-4 w-4" /></IconBtn>
+                  <IconBtn label="Mover para baixo" disabled={i === items.length - 1} onClick={() => move(i, 1)}><ArrowDown className="h-4 w-4" /></IconBtn>
+                  <IconBtn label={t.active ? "Ocultar" : "Mostrar"} onClick={() => update(i, { active: !t.active })}>
+                    {t.active ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                  </IconBtn>
+                  <IconBtn label="Editar" onClick={() => setEditing(t.id)}><Pencil className="h-4 w-4" /></IconBtn>
+                  <IconBtn label="Excluir" danger onClick={() => remove(i)}><Trash2 className="h-4 w-4" /></IconBtn>
+                </>}
+              />
+            )}
+          </Fragment>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function PartnersEditor({ partnerLinks, setPartnerLinks, logos, setLogos, notify }: {
   partnerLinks: PartnerLink[]; setPartnerLinks: (p: PartnerLink[]) => void;
   logos: Record<string, string>; setLogos: (fn: (l: Record<string, string>) => Record<string, string>) => void;

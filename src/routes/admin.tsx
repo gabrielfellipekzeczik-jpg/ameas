@@ -21,7 +21,10 @@ import { uploadSiteImage } from "@/lib/media";
 import { readPixCode } from "@/lib/pix";
 import { STATIC_CATEGORIES, STATIC_GALLERY, mergeEventCategories } from "@/lib/gallery-static";
 
-export const Route = createFileRoute("/admin")({ component: AdminPage });
+export const Route = createFileRoute("/admin")({
+  head: () => ({ meta: [{ name: "robots", content: "noindex, nofollow" }] }),
+  component: AdminPage,
+});
 
 const ADMIN_LOGIN = "ameas";
 const ADMIN_PASSWORD = "123456789";

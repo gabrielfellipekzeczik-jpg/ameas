@@ -34,15 +34,34 @@ import {
 import { STATIC_GALLERY, mergeEventCategories } from "@/lib/gallery-static";
 import { pixCodeFor } from "@/lib/pix";
 
+const SITE_URL = "https://ameas1.org";
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "AMEAS | Esporte Adaptado e Superação" },
       { name: "description", content: "Site institucional da AMEAS, associação que promove inclusão, acolhimento e superação por meio do esporte adaptado." },
       { property: "og:title", content: "AMEAS | Esporte Adaptado e Superação" },
+      { property: "og:description", content: "Site institucional da AMEAS, associação que promove inclusão, acolhimento e superação por meio do esporte adaptado." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: SITE_URL },
+      { property: "og:image", content: `${SITE_URL}/og-ameas.jpg` },
+      { property: "og:locale", content: "pt_BR" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: `${SITE_URL}/og-ameas.jpg` },
     ],
+    links: [{ rel: "canonical", href: `${SITE_URL}/` }],
+    scripts: [{
+      type: "application/ld+json",
+      children: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "NGO",
+        name: "AMEAS",
+        alternateName: "Associação Movimento Esporte Adaptado e Superação",
+        url: `${SITE_URL}/`,
+        logo: `${SITE_URL}/favicon.png`,
+      }),
+    }],
   }),
   component: AmeasHome,
 });

@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
-  AlertCircle, ArrowDown, ArrowLeft, ArrowUp, Briefcase, CheckCircle2, Eye, EyeOff, HandHeart,
+  AlertCircle, ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Briefcase, CheckCircle2, Eye, EyeOff, HandHeart,
   Handshake, Home, ImagePlus, Images, Info, LogOut, Menu, Pencil, Phone, Plus, QrCode,
-  Quote, RotateCcw, Save, Target, Trash2, Upload, UserRound, Users, X,
+  Quote, RotateCcw, Save, Star, Target, Trash2, Upload, UserRound, Users, X,
 } from "lucide-react";
 import logoAsset from "@/assets/ameas-logo.png";
 import {
@@ -19,7 +19,7 @@ import {
 } from "@/lib/builtin-images";
 import { uploadSiteImage } from "@/lib/media";
 import { readPixCode } from "@/lib/pix";
-import { STATIC_CATEGORIES, STATIC_GALLERY, mergeEventCategories } from "@/lib/gallery-static";
+import { STATIC_GALLERY, mergeEventCategories, parseGalleryOrder, sortPhotos } from "@/lib/gallery-static";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ name: "robots", content: "noindex, nofollow" }] }),
@@ -893,11 +893,32 @@ function GalleryEditor({ content, setField, notify }: {
   const [newCatLabel, setNewCatLabel] = useState("");
   const [newCatColor, setNewCatColor] = useState<string>(COLOR_PALETTE[0]?.value ?? "");
   const [editingCat, setEditingCat] = useState<GalleryCategory | null>(null);
+  const [dragging, setDragging] = useState<{ event: string; from: number } | null>(null);
 
   const hidden = parseStringList(content.gallery_hidden);
   const hiddenEvents = parseStringList(content.gallery_hidden_events);
   const liveCategories = categories.filter((c) => !hiddenEvents.includes(c.id));
   const removedCategories = categories.filter((c) => hiddenEvents.includes(c.id));
+  const photoOrder = parseGalleryOrder(content.gallery_order);
+
+  /* Fotos do evento (do site e enviadas pelo painel) na sequência que vai para o site. */
+  function eventPhotos(eventId: string) {
+    return sortPhotos([
+      ...STATIC_GALLERY.filter((p) => p.category === eventId)
+        .map((p) => ({ key: p.title, src: p.src, alt: p.alt, title: p.title, off: hidden.includes(p.title), item: null as DbGalleryItem | null })),
+      ...dbGallery.filter((g) => g.category === eventId)
+        .map((g) => ({ key: `db:${g.id}`, src: g.image_url, alt: g.alt, title: g.title, off: !g.published, item: g as DbGalleryItem | null })),
+    ], photoOrder[eventId]);
+  }
+
+  function movePhoto(eventId: string, keys: string[], from: number, to: number) {
+    if (from === to || to < 0 || to >= keys.length) return;
+    const next = [...keys];
+    const [moved] = next.splice(from, 1);
+    if (moved === undefined) return;
+    next.splice(to, 0, moved);
+    setField("gallery_order", JSON.stringify({ ...photoOrder, [eventId]: next }));
+  }
 
   async function reloadPhotos() {
     if (!supabase) return;
@@ -1164,30 +1185,67 @@ function GalleryEditor({ content, setField, notify }: {
       {/* Fotos fixas do site */}
       <section className="adm-card p-5 sm:p-6">
         <h2 className="adm-panel-title">Fotos de cada evento</h2>
-        <p className="adm-mute mt-1 text-sm">Abra um evento e clique em “Excluir” na foto. Depois clique em “Salvar e publicar alterações”. Se mudar de ideia, use “Restaurar”.</p>
+        <p className="adm-mute mt-1 text-sm">Abra um evento e arraste as fotos, ou use as setas, para mudar a sequência. A primeira foto é a capa do evento no site. Depois clique em “Salvar e publicar alterações”.</p>
         <div className="mt-4 space-y-2">
-          {STATIC_CATEGORIES.map((cat) => {
-            const photos = STATIC_GALLERY.filter((p) => p.category === cat.id);
-            if (!photos.length || hiddenEvents.includes(cat.id)) return null;
-            const offCount = photos.filter((p) => hidden.includes(p.title)).length;
+          {liveCategories.map((cat) => {
+            const photos = eventPhotos(cat.id);
+            if (!photos.length) return null;
+            const keys = photos.map((p) => p.key);
+            const coverKey = photos.find((p) => !p.off)?.key;
+            const offCount = photos.filter((p) => p.off).length;
             return (
               <details key={cat.id} className="adm-sub p-3">
                 <summary className="cursor-pointer text-sm font-extrabold">
-                  {categories.find((c) => c.id === cat.id)?.label ?? cat.label}
-                  <span className="adm-mute ml-2 text-xs font-semibold">{photos.length} foto(s){offCount ? ` · ${offCount} excluída(s)` : ""}</span>
+                  {cat.label}
+                  <span className="adm-mute ml-2 text-xs font-semibold">{photos.length} foto(s){offCount ? ` · ${offCount} fora do site` : ""}</span>
                 </summary>
-                <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-                  {photos.map((p) => {
-                    const off = hidden.includes(p.title);
+                <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-3 2xl:grid-cols-5">
+                  {photos.map((p, i) => {
+                    const isCover = p.key === coverKey;
                     return (
-                      <div key={p.title} className="overflow-hidden rounded-xl border border-[color:var(--adm-line)] bg-white">
-                        <div className={`aspect-[4/3] bg-[#f7f9fd] ${off ? "opacity-40" : ""}`}><img src={p.src} alt={p.alt} className="h-full w-full object-cover" loading="lazy" /></div>
+                      <div key={p.key} draggable
+                        onDragStart={(e) => { e.dataTransfer.setData("text/plain", p.key); setDragging({ event: cat.id, from: i }); }}
+                        onDragEnd={() => setDragging(null)}
+                        onDragOver={(e) => { if (dragging?.event === cat.id) e.preventDefault(); }}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          if (dragging?.event === cat.id) movePhoto(cat.id, keys, dragging.from, i);
+                          setDragging(null);
+                        }}
+                        className={`cursor-move overflow-hidden rounded-xl border bg-white ${isCover ? "border-[color:var(--adm-blue)] ring-2 ring-[color:var(--adm-blue)]" : "border-[color:var(--adm-line)]"} ${dragging?.event === cat.id && dragging.from === i ? "opacity-50" : ""}`}>
+                        <div className="relative aspect-[4/3] bg-[#f7f9fd]">
+                          <img src={p.src} alt={p.alt} className={`h-full w-full object-cover ${p.off ? "opacity-40" : ""}`} loading="lazy" />
+                          <span className={`absolute left-1.5 top-1.5 rounded-full px-2 py-0.5 text-[11px] font-extrabold ${isCover ? "bg-[color:var(--adm-blue)] text-white" : "bg-black/60 text-white"}`}>
+                            {isCover ? "Capa" : i + 1}
+                          </span>
+                        </div>
                         <div className="space-y-2 p-2.5">
                           <p className="truncate text-xs font-bold">{p.title}</p>
-                          <button onClick={() => toggleStatic(p.title)}
-                            className={`adm-btn adm-btn-sm w-full ${off ? "adm-btn-ghost" : "adm-btn-danger"}`}>
-                            {off ? <><RotateCcw className="h-3.5 w-3.5" /> Restaurar</> : <><Trash2 className="h-3.5 w-3.5" /> Excluir</>}
-                          </button>
+                          <div className="flex gap-1.5">
+                            <button type="button" aria-label={`Mover ${p.title} para trás`} disabled={i === 0}
+                              onClick={() => movePhoto(cat.id, keys, i, i - 1)} className="adm-btn adm-btn-ghost adm-btn-sm flex-1">
+                              <ArrowLeft className="h-3.5 w-3.5" />
+                            </button>
+                            <button type="button" aria-label={`Mover ${p.title} para frente`} disabled={i === photos.length - 1}
+                              onClick={() => movePhoto(cat.id, keys, i, i + 1)} className="adm-btn adm-btn-ghost adm-btn-sm flex-1">
+                              <ArrowRight className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                          {!isCover && !p.off && (
+                            <button type="button" onClick={() => movePhoto(cat.id, keys, i, 0)} className="adm-btn adm-btn-ghost adm-btn-sm w-full">
+                              <Star className="h-3.5 w-3.5" /> Usar como capa
+                            </button>
+                          )}
+                          {p.item ? (
+                            <button type="button" onClick={() => p.item && void deletePhoto(p.item)} className="adm-btn adm-btn-danger adm-btn-sm w-full">
+                              <Trash2 className="h-3.5 w-3.5" /> Excluir
+                            </button>
+                          ) : (
+                            <button type="button" onClick={() => toggleStatic(p.title)}
+                              className={`adm-btn adm-btn-sm w-full ${p.off ? "adm-btn-ghost" : "adm-btn-danger"}`}>
+                              {p.off ? <><RotateCcw className="h-3.5 w-3.5" /> Restaurar</> : <><Trash2 className="h-3.5 w-3.5" /> Excluir</>}
+                            </button>
+                          )}
                         </div>
                       </div>
                     );

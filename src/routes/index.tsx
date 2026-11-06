@@ -31,7 +31,7 @@ import { getTestimonials, parseStringList, pick, type HeroSlide } from "@/lib/cm
 import {
   BUILTIN_PHOTOS, DEFAULT_FIELD_IMAGES, defaultHeroSlides, getHeroSlides, resolveImage,
 } from "@/lib/builtin-images";
-import { STATIC_GALLERY, mergeEventCategories } from "@/lib/gallery-static";
+import { STATIC_GALLERY, mergeEventCategories, parseGalleryOrder, sortPhotos } from "@/lib/gallery-static";
 import { pixCodeFor } from "@/lib/pix";
 
 const SITE_URL = "https://ameas1.org";
@@ -148,21 +148,23 @@ function AmeasHome() {
   // Junta fotos fixas do site + categorias/fotos do banco (respeitando as fotos ocultadas no painel)
   const hiddenStatic = sc.gallery_hidden;
   const hiddenEventsRaw = sc.gallery_hidden_events;
+  const galleryOrderRaw = sc.gallery_order;
   const activeEvents = useMemo(() => {
     const hidden = parseStringList(hiddenStatic);
     const hiddenEvents = parseStringList(hiddenEventsRaw);
+    const order = parseGalleryOrder(galleryOrderRaw);
     const cats = mergeEventCategories(dynamicCategories).filter((c) => !hiddenEvents.includes(c.id));
 
     return cats.map((cat) => {
       const staticImgs = STATIC_GALLERY
         .filter((img) => img.category === cat.id && !hidden.includes(img.title))
-        .map((img) => ({ src: img.src, alt: img.alt, title: img.title, isDb: false }));
+        .map((img) => ({ key: img.title, src: img.src, alt: img.alt, title: img.title, isDb: false }));
       const dbImgs = dbGalleryItems
         .filter((item) => item.category === cat.id)
-        .map((item) => ({ src: item.image_url, alt: item.alt, title: item.title, isDb: true }));
-      return { ...cat, images: [...staticImgs, ...dbImgs] };
+        .map((item) => ({ key: `db:${item.id}`, src: item.image_url, alt: item.alt, title: item.title, isDb: true }));
+      return { ...cat, images: sortPhotos([...staticImgs, ...dbImgs], order[cat.id]) };
     }).filter((ev) => ev.images.length > 0);
-  }, [dynamicCategories, dbGalleryItems, hiddenStatic, hiddenEventsRaw]);
+  }, [dynamicCategories, dbGalleryItems, hiddenStatic, hiddenEventsRaw, galleryOrderRaw]);
 
   const testimonials = useMemo(() => getTestimonials(sc).filter((t) => t.active && t.quote.trim()), [sc]);
 
@@ -893,12 +895,20 @@ function HeroCarousel({ slides, intervalSec, badge, whatsappUrl, ready }: {
           <div className="glass neon-border relative h-[320px] overflow-hidden rounded-3xl shadow-2xl sm:h-[440px] lg:h-[520px]">
             {ready ? (
               <div className="absolute inset-0 animate-in fade-in duration-500">
-                {slides.map((sl, i) => (
-                  <img key={sl.id} src={resolveImage(sl.image) || fallbackPhoto}
-                    alt={i === idx ? sl.title : ""} aria-hidden={i !== idx}
-                    loading={i === 0 ? "eager" : "lazy"}
-                    className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${i === idx ? "opacity-100" : "opacity-0"}`} />
-                ))}
+                {/* A foto aparece inteira; o fundo desfocado preenche o que sobrar no quadro */}
+                {slides.map((sl, i) => {
+                  const photo = resolveImage(sl.image) || fallbackPhoto;
+                  const loading = i === 0 ? "eager" : "lazy";
+                  return (
+                    <div key={sl.id} aria-hidden={i !== idx}
+                      className={`absolute inset-0 transition-opacity duration-700 ${i === idx ? "opacity-100" : "opacity-0"}`}>
+                      <img src={photo} alt="" aria-hidden="true" loading={loading}
+                        className="absolute inset-0 h-full w-full scale-110 object-cover blur-2xl brightness-90" />
+                      <img src={photo} alt={i === idx ? sl.title : ""} loading={loading}
+                        className="absolute inset-0 h-full w-full object-contain" />
+                    </div>
+                  );
+                })}
               </div>
             ) : (
               <div className="absolute inset-0 animate-pulse bg-foreground/10" aria-hidden="true" />

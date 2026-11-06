@@ -15,7 +15,7 @@ import karina from "@/assets/karina-meneguini-retrato.png";
 export type StaticPhoto = { src: string; alt: string; title: string; category: string };
 export type StaticCategory = { id: string; label: string; color: string };
 
-/** Eventos com fotos em src/assets/eventos/<id>. A foto 01 é a capa do cartão. */
+/** Eventos com fotos em src/assets/eventos/<id>. A foto 01 é a capa, até o painel definir outra sequência. */
 const EVENTS: Array<StaticCategory & { short: string }> = [
   { id: "corrida-aleluia",        short: "Corrida de Aleluia",      label: "Corrida de Aleluia",                                                         color: "bg-[#1B4B8A] text-white" },
   { id: "carnaval-inclusivo",     short: "Carnaval inclusivo",      label: "Carnaval inclusivo com a Escola de Samba Santa Quitéria",                    color: "bg-[#d62f21] text-white" },
@@ -45,6 +45,25 @@ export function mergeEventCategories<T extends StaticCategory>(db: T[]) {
     ...STATIC_CATEGORIES.map((c) => saved.get(c.id) ?? { ...c, sort_order: 0 }),
     ...db.filter((c) => !known.has(c.id)),
   ];
+}
+
+/** Sequência escolhida no painel: { id do evento: [chave da foto, ...] }. */
+export type GalleryOrder = Record<string, string[]>;
+
+export function parseGalleryOrder(raw: string): GalleryOrder {
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? (parsed as GalleryOrder) : {};
+  } catch {
+    return {};
+  }
+}
+
+/** Aplica a sequência salva. Fotos que ainda não estão nela, como as recém-enviadas, ficam no fim. */
+export function sortPhotos<T extends { key: string }>(photos: T[], keys: string[] = []) {
+  const position = new Map(keys.map((key, i) => [key, i]));
+  const rank = (p: T) => position.get(p.key) ?? keys.length;
+  return [...photos].sort((a, b) => rank(a) - rank(b));
 }
 
 const eventFiles = import.meta.glob<string>("../assets/eventos/*/*.webp", { eager: true, import: "default" });

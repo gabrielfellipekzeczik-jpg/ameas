@@ -10,6 +10,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { getSiteTheme } from "../lib/supabase";
 
 function NotFoundComponent() {
   return (
@@ -72,6 +73,8 @@ function ErrorComponent({ error, reset }: { error: unknown; reset: () => void })
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  loader: async () => ({ theme: await getSiteTheme() }),
+  staleTime: Infinity,
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -105,16 +108,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  // O tema escolhido no painel vem do servidor, então a página já chega na versão certa
+  const theme = Route.useLoaderData({ select: (d) => d?.theme });
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" className={theme === "light" ? "light-mode" : undefined} suppressHydrationWarning>
       <head>
         <HeadContent />
-        {/* Aplica o tema salvo ANTES de renderizar — evita flash */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{if(localStorage.getItem('ameas-theme')==='light'){document.documentElement.classList.add('light-mode');}}catch(e){}})();`,
-          }}
-        />
       </head>
       <body>
         {children}

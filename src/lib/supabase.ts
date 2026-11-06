@@ -66,6 +66,18 @@ export async function getSiteContent(): Promise<SiteContent> {
   return mergeContent(await getContentRows());
 }
 
+/** Só o tema, para o servidor já entregar a página na versão certa. Se o banco demorar, usa o padrão. */
+export async function getSiteTheme(): Promise<string> {
+  if (!supabase) return defaultSiteContent.site_theme;
+  try {
+    const { data } = await supabase.from("ameas_site_content").select("value")
+      .eq("key", "site_theme").abortSignal(AbortSignal.timeout(1500)).maybeSingle();
+    return data?.value ?? defaultSiteContent.site_theme;
+  } catch {
+    return defaultSiteContent.site_theme;
+  }
+}
+
 export async function getPartnerLinks(): Promise<PartnerLink[]> {
   if (!supabase) return [];
   const { data, error } = await supabase

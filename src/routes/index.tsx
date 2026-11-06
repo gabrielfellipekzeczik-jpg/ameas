@@ -115,7 +115,10 @@ function AmeasHome() {
   useEffect(() => {
     // Se o banco demorar demais, a capa mostra as fotos padrão em vez de ficar vazia
     const giveUp = window.setTimeout(() => setContentReady(true), 6000);
-    getSiteContent().then(setSc).finally(() => { window.clearTimeout(giveUp); setContentReady(true); });
+    getSiteContent().then((content) => {
+      setSc(content);
+      document.documentElement.classList.toggle("light-mode", content.site_theme === "light");
+    }).finally(() => { window.clearTimeout(giveUp); setContentReady(true); });
     getPartnerLinks().then(setPartnerLinks);
     getGalleryCategories().then(setDynamicCategories);
     getGalleryItems().then(setDbGalleryItems);

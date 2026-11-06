@@ -2,8 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   AlertCircle, ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Briefcase, CheckCircle2, Eye, EyeOff, HandHeart,
-  Handshake, Home, ImagePlus, Images, Info, LogOut, Menu, Pencil, Phone, Plus, QrCode,
-  Quote, RotateCcw, Save, Star, Target, Trash2, Upload, UserRound, Users, X,
+  Handshake, Home, ImagePlus, Images, Info, LogOut, Menu, Moon, Pencil, Phone, Plus, QrCode,
+  Quote, RotateCcw, Save, Star, Sun, Target, Trash2, Upload, UserRound, Users, X,
 } from "lucide-react";
 import logoAsset from "@/assets/ameas-logo.png";
 import {
@@ -171,6 +171,8 @@ export default function AdminPage() {
     return () => window.removeEventListener("beforeunload", h);
   }, [dirty]);
 
+  const isLight = content.site_theme === "light";
+
   function setField(key: string, value: string) {
     setContent((c) => ({ ...c, [key]: value }));
   }
@@ -276,6 +278,13 @@ export default function AdminPage() {
             </div>
           ))}
           <div className="adm-side-footer">
+            <button className="adm-nav-item" onClick={() => {
+              const next = isLight ? "dark" : "light";
+              setField("site_theme", next);
+              notify(`Versão ${next === "light" ? "clara" : "escura"} escolhida. Clique em “Salvar e publicar alterações” para aplicar no site.`);
+            }}>
+              {isLight ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />} {isLight ? "Site na versão escura" : "Site na versão clara"}
+            </button>
             <button className="adm-nav-item" onClick={logout}><LogOut className="h-4 w-4" /> Sair</button>
           </div>
         </nav>
